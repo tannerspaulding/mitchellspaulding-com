@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quackers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@500;700;800&display=swap">
+<style>
+/* Layout: one toy-box screen. Header with duck count, the play scene with edge arrows, the Duck Log underneath. Single bright look on a deep night-blue frame. */
+:root{
+  --frame:#17224a; --panel:#22306a; --line:#34448a;
+  --ink:#f4f6ff; --muted:#aab4e6;
+  --duck:#ffd43b; --beak:#ff8a1f; --go:#4cd2a0;
+  --display:"Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Nunito", system-ui, -apple-system, sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--frame);color:var(--ink)}
+body{font-family:var(--body);font-size:16px;line-height:1.45;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+  padding-block:16px 32px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h1{font-family:var(--display);font-weight:800;font-size:2.2rem;line-height:1;margin:0;color:var(--duck);letter-spacing:.5px}
+h1 span{color:var(--ink);font-size:1rem;font-weight:600;font-family:var(--body);margin-left:8px;opacity:.75}
+.count{font-weight:800;background:var(--panel);border:2px solid var(--line);border-radius:999px;padding:6px 14px;font-variant-numeric:tabular-nums}
+.where{font-family:var(--display);font-weight:600;font-size:1.25rem;margin:0}
+.stage{position:relative;width:100%;aspect-ratio:4/3;max-width:100%;border-radius:18px;overflow:hidden;border:3px solid var(--line);background:#8fd3ff;touch-action:manipulation}
+.stage svg{display:block;width:100%;height:100%;transition:opacity .18s ease}
+.stage.fading svg{opacity:0}
+.duck{cursor:pointer}
+.duck.caught{animation:catch .45s ease forwards;transform-box:fill-box;transform-origin:center}
+@keyframes catch{0%{transform:scale(1)}40%{transform:scale(1.5) rotate(-8deg)}100%{transform:scale(0);opacity:0}}
+.door{cursor:pointer}
+.door:hover rect.dr, .door:focus rect.dr{filter:brightness(1.2)}
+.arrow{position:absolute;width:52px;height:52px;border-radius:50%;border:3px solid #fff;background:rgba(23,34,74,.72);color:#fff;
+  font-size:26px;font-weight:800;display:grid;place-items:center;cursor:pointer;padding:0;line-height:1}
+.arrow:hover{background:rgba(23,34,74,.92)}
+.arrow:focus-visible,.door:focus-visible,button:focus-visible{outline:3px solid var(--duck);outline-offset:3px}
+.a-up{top:10px;left:50%;transform:translateX(-50%)}
+.a-down{bottom:10px;left:50%;transform:translateX(-50%)}
+.a-left{left:10px;top:50%;transform:translateY(-50%)}
+.a-right{right:10px;top:50%;transform:translateY(-50%)}
+.toast{position:absolute;left:50%;bottom:72px;transform:translateX(-50%);background:var(--duck);color:#2a1d00;font-weight:800;
+  padding:8px 16px;border-radius:999px;white-space:nowrap;box-shadow:0 4px 0 #b8860b;transition:opacity .2s;opacity:0;pointer-events:none}
+.toast.show{opacity:1}
+.log h2{font-family:var(--display);font-weight:800;font-size:1.4rem;margin:0 0 8px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.card{background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:10px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;min-width:0}
+.card.got{border-color:var(--duck)}
+.card svg{width:64px;height:48px}
+.card b{font-size:.95rem}
+.card small{color:var(--muted);font-size:.8rem}
+.tier{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:800}
+.note{color:var(--muted);font-size:.85rem;margin:4px 0 0}
+.overlay{position:absolute;inset:0;background:rgba(23,34,74,.88);display:grid;place-items:center;text-align:center;padding:20px}
+.overlay h3{font-family:var(--display);font-size:2rem;margin:0;color:var(--duck);line-height:1.1}
+.overlay p{margin:6px 0 14px}
+.btn{font:inherit;font-weight:800;border:none;border-radius:999px;padding:10px 20px;background:var(--go);color:#062b1d;cursor:pointer}
+.sound{font:inherit;font-weight:700;background:transparent;color:var(--muted);border:2px solid var(--line);border-radius:999px;padding:5px 12px;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.duck.caught{animation:none;opacity:0}.stage svg{transition:none}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>Quackers <span>World 1</span></h1>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="sound" id="soundBtn" type="button" aria-pressed="true">Quack sound: on</button>
+      <div class="count" id="count">0 / 5 ducks</div>
+    </div>
+  </header>
+  <p class="where" id="where">Front Yard</p>
+  <div class="stage" id="stage">
+    <div id="scene"></div>
+    <button class="arrow a-up" id="up" type="button" aria-label="Go up">&#9650;</button>
+    <button class="arrow a-down" id="down" type="button" aria-label="Go down">&#9660;</button>
+    <button class="arrow a-left" id="left" type="button" aria-label="Go left">&#9664;</button>
+    <button class="arrow a-right" id="right" type="button" aria-label="Go right">&#9654;</button>
+    <div class="toast" id="toast"></div>
+    <div class="overlay" id="done" hidden>
+      <div>
+        <h3>Duck Log complete!</h3>
+        <p>You found every duck in World 1.<br>The next world is still up to Mitchell.</p>
+        <button class="btn" id="again" type="button">Play again</button>
+      </div>
+    </div>
+  </div>
+  <section class="log">
+    <h2>Duck Log</h2>
+    <div class="cards" id="cards"></div>
+    <p class="note">A very basic test version to show the idea. The areas, duck names and hiding spots are placeholders for Mitchell to change.</p>
+  </section>
+</div>
+
+<script>
+const DUCKS = [
+  {id:"normal", name:"Normal Duck", tier:"Easy", hint:"Out in the open", body:"#FFD43B", wing:"#F5B800", beak:"#FF8A1F"},
+  {id:"leaf",   name:"Leaf Duck",   tier:"Sneaky", hint:"Likes bushes", body:"#7FB743", wing:"#5E9330", beak:"#C9A23A"},
+  {id:"rock",   name:"Rock Duck",   tier:"Sneaky", hint:"Hides by the water", body:"#A6A196", wing:"#8A857B", beak:"#E07B2F"},
+  {id:"tiny",   name:"Tiny Duck",   tier:"Tricky", hint:"Way up high", body:"#FFD43B", wing:"#F5B800", beak:"#FF8A1F"},
+  {id:"bubble", name:"Bubble Duck", tier:"Tricky", hint:"Loves bath time", body:"#FF9EC7", wing:"#F57AB0", beak:"#FF8A1F"}
+];
+const byId = Object.fromEntries(DUCKS.map(d=>[d.id,d]));
+
+function duckShape(c){
+  return `<path d="M-20 -4 L-31 -15 L-25 3 Z" fill="${c.body}"/>
+  <ellipse cx="0" cy="0" rx="22" ry="15" fill="${c.body}"/>
+  <ellipse cx="-3" cy="-2" rx="11" ry="7" fill="${c.wing}"/>
+  <circle cx="14" cy="-16" r="11" fill="${c.body}"/>
+  <path d="M23 -18 L35 -14 L23 -10 Z" fill="${c.beak}"/>
+  <circle cx="17" cy="-19" r="2.3" fill="#1a1a1a"/>`;
+}
+function duck(id,x,y,s,flip){
+  if(found.has(id)) return "";
+  const c = byId[id];
+  return `<g class="duck" data-duck="${id}" tabindex="0" role="button" aria-label="A duck" transform="translate(${x} ${y}) scale(${flip?-s:s} ${s})">
+    <circle cx="4" cy="-6" r="30" fill="transparent"/>${duckShape(c)}</g>`;
+}
+const deco = 'pointer-events="none"';
+const sky = c => `<rect width="400" height="300" fill="${c||'#8fd3ff'}"/>`;
+
+const SCENES = {
+  yard:{name:"Front Yard", exits:{left:"garden", right:"pond", up:"treetop"}, draw:()=>`
+    ${sky()}<circle cx="345" cy="40" r="22" fill="#ffe66d"/>
+    <rect y="190" width="400" height="110" fill="#6cc24a"/>
+    <path d="M180 300 Q200 240 300 200 L320 200 Q230 245 225 300 Z" fill="#d8b47a"/>
+    <rect x="40" y="105" width="28" height="95" fill="#8b5a2b"/>
+    <circle cx="54" cy="92" r="48" fill="#3f9d3a"/><circle cx="24" cy="110" r="26" fill="#3f9d3a"/><circle cx="86" cy="112" r="26" fill="#3f9d3a"/>
+    <polygon points="220,102 300,48 380,102" fill="#7a3b2e"/>
+    <rect x="230" y="100" width="140" height="100" fill="#f06b5b"/>
+    <rect x="245" y="120" width="30" height="28" fill="#bfe8ff" stroke="#fff" stroke-width="4"/>
+    <rect x="330" y="120" width="30" height="28" fill="#bfe8ff" stroke="#fff" stroke-width="4"/>
+    <g class="door" data-go="house" tabindex="0" role="button" aria-label="Go in the house door">
+      <rect class="dr" x="285" y="138" width="34" height="62" rx="3" fill="#5a3a8a"/><circle cx="312" cy="172" r="3" fill="#ffd43b"/></g>
+    <text x="302" y="130" text-anchor="middle" font-size="11" font-weight="800" fill="#fff" ${deco}>DOOR</text>
+    ${duck("normal",145,240,1)}`},
+  garden:{name:"Garden", exits:{right:"yard"}, draw:()=>`
+    ${sky()}<rect y="170" width="400" height="130" fill="#5fb546"/>
+    ${[40,110,180].map(x=>`<g ${deco}><rect x="${x}" y="200" width="4" height="30" fill="#2e7d32"/><circle cx="${x+2}" cy="196" r="9" fill="#ff6fa8"/><circle cx="${x+2}" cy="196" r="3" fill="#ffd43b"/></g>`).join("")}
+    <ellipse cx="80" cy="260" rx="60" ry="30" fill="#3f8f34" ${deco}/>
+    ${duck("leaf",262,222,.9,true)}
+    <ellipse cx="285" cy="238" rx="52" ry="30" fill="#4a9c3a" ${deco}/>
+    <ellipse cx="340" cy="250" rx="44" ry="26" fill="#3f8f34" ${deco}/>
+    <ellipse cx="190" cy="262" rx="40" ry="22" fill="#4a9c3a" ${deco}/>`},
+  pond:{name:"Pond", exits:{left:"yard"}, draw:()=>`
+    ${sky()}<rect y="160" width="400" height="140" fill="#6cc24a"/>
+    <ellipse cx="190" cy="235" rx="170" ry="52" fill="#3c8fd8"/>
+    <ellipse cx="130" cy="230" rx="22" ry="8" fill="#4caf50" ${deco}/><ellipse cx="220" cy="250" rx="18" ry="6" fill="#4caf50" ${deco}/>
+    ${[40,52,64].map(x=>`<g ${deco}><rect x="${x}" y="170" width="3" height="50" fill="#2e7d32"/><rect x="${x-3}" y="165" width="9" height="20" rx="4" fill="#7b4a1e"/></g>`).join("")}
+    ${duck("rock",322,180,.7)}
+    <ellipse cx="335" cy="200" rx="42" ry="26" fill="#a39e93" ${deco}/>
+    <ellipse cx="325" cy="192" rx="16" ry="6" fill="#bdb8ad" ${deco}/>`},
+  treetop:{name:"Top of the Tree", exits:{down:"yard"}, draw:()=>`
+    ${sky("#a9ddff")}
+    <path d="M0 230 Q150 200 400 215 L400 240 Q160 228 0 255 Z" fill="#8b5a2b"/>
+    ${[[30,40,60],[370,50,70],[0,290,80],[400,290,80],[200,-20,70]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="#3f9d3a" ${deco}/>`).join("")}
+    <ellipse cx="240" cy="205" rx="34" ry="14" fill="#6b4220"/>
+    ${duck("tiny",238,198,.36)}
+    <path d="M206 205 Q240 228 274 205 Q270 220 240 222 Q210 220 206 205 Z" fill="#8a5a2c" ${deco}/>
+    <circle cx="110" cy="214" r="5" fill="#ff5252" ${deco}/><circle cx="118" cy="210" r="5" fill="#ff5252" ${deco}/>`},
+  house:{name:"Inside the House", exits:{}, draw:()=>`
+    <rect width="400" height="300" fill="#ffe2a8"/><rect y="230" width="400" height="70" fill="#c98d5a"/>
+    <rect x="150" y="60" width="60" height="44" fill="#7ec8e3" stroke="#8b5a2b" stroke-width="6"/>
+    <g class="door" data-go="yard" tabindex="0" role="button" aria-label="Go back outside">
+      <rect class="dr" x="28" y="118" width="54" height="112" rx="3" fill="#5a3a8a"/><circle cx="72" cy="178" r="4" fill="#ffd43b"/></g>
+    <text x="55" y="110" text-anchor="middle" font-size="12" font-weight="800" fill="#5a3a8a" ${deco}>EXIT</text>
+    <ellipse cx="290" cy="196" rx="78" ry="12" fill="#9be0ff"/>
+    ${duck("bubble",286,192,.75)}
+    ${[[240,196,14],[262,202,12],[318,200,15],[338,194,11],[300,205,10]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="#ffffff" opacity=".95" ${deco}/>`).join("")}
+    <rect x="210" y="198" width="160" height="50" rx="22" fill="#ffffff" ${deco}/>
+    <rect x="225" y="246" width="10" height="12" fill="#bbb" ${deco}/><rect x="345" y="246" width="10" height="12" fill="#bbb" ${deco}/>`}
+};
+
+let found = new Set(), current = "yard", soundOn = true, actx = null, toastTimer;
+const $ = id => document.getElementById(id);
+
+function render(){
+  const s = SCENES[current];
+  $("scene").innerHTML = `<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">${s.draw()}</svg>`;
+  $("where").textContent = s.name;
+  ["up","down","left","right"].forEach(d => $(d).hidden = !s.exits[d]);
+}
+function go(to){
+  const st = $("stage"); st.classList.add("fading");
+  setTimeout(()=>{ current = to; render(); st.classList.remove("fading"); }, 180);
+}
+["up","down","left","right"].forEach(d => $(d).addEventListener("click", ()=>go(SCENES[current].exits[d])));
+
+function renderLog(){
+  $("cards").innerHTML = DUCKS.map(d=>{
+    const got = found.has(d.id);
+    const shape = got ? duckShape(d) : duckShape({body:"#3a4a85",wing:"#3a4a85",beak:"#3a4a85"});
+    return `<div class="card ${got?"got":""}">
+      <svg viewBox="-34 -30 72 48" aria-hidden="true">${shape}</svg>
+      <span class="tier">${d.tier}</span><b>${got?d.name:"???"}</b><small>${got?"Found!":"Hint: "+d.hint}</small></div>`;
+  }).join("");
+  $("count").textContent = `${found.size} / ${DUCKS.length} ducks`;
+}
+function quack(){
+  if(!soundOn) return;
+  try{
+    actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+    const t = actx.currentTime, o = actx.createOscillator(), g = actx.createGain(), f = actx.createBiquadFilter();
+    o.type="sawtooth"; o.frequency.setValueAtTime(520,t); o.frequency.exponentialRampToValueAtTime(260,t+.18);
+    f.type="lowpass"; f.frequency.value=1400; g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.25,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+.22);
+    o.connect(f); f.connect(g); g.connect(actx.destination); o.start(t); o.stop(t+.25);
+  }catch(e){}
+}
+function toast(msg){
+  const t=$("toast"); t.textContent=msg; t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),1600);
+}
+function catchDuck(el){
+  const id = el.dataset.duck; if(found.has(id)) return;
+  found.add(id); quack(); el.classList.add("caught");
+  toast(`You found the ${byId[id].name}!`); renderLog();
+  setTimeout(()=>{ render(); if(found.size===DUCKS.length) $("done").hidden=false; }, 450);
+}
+function handle(e){
+  const d = e.target.closest(".duck"); if(d){ catchDuck(d); return; }
+  const door = e.target.closest(".door"); if(door) go(door.dataset.go);
+}
+$("scene").addEventListener("click", handle);
+$("scene").addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); handle(e); } });
+$("again").addEventListener("click", ()=>{ found.clear(); current="yard"; $("done").hidden=true; render(); renderLog(); });
+$("soundBtn").addEventListener("click", ()=>{ soundOn=!soundOn; $("soundBtn").textContent=`Quack sound: ${soundOn?"on":"off"}`; $("soundBtn").setAttribute("aria-pressed",soundOn); });
+
+render(); renderLog();
+</script>
+</body>
+</html>
