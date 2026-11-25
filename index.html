@@ -114,6 +114,11 @@ button{font:inherit;color:inherit}
 .card b{font-size:.88rem;line-height:1.2}
 .card small{color:var(--muted);font-size:.75rem;line-height:1.25}
 .tier{font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;font-weight:800;border-radius:99px;padding:0 7px;margin:2px 0}
+.card.holiday{border-style:dashed;border-color:#d9822b}
+.card.holiday.got{border-style:solid}
+.t-Holiday{background:#a4511c;color:#ffe3c9}
+.token{cursor:pointer;outline:none}
+.wcard .visit{color:#ffb36b;font-weight:800}
 .t-Easy{background:#2f6b4f;color:#c9f7e2}.t-Sneaky{background:#2d4f8a;color:#d3e4ff}.t-Tricky{background:#6b3f8a;color:#f0dbff}.t-Legendary{background:#8a6a10;color:#fff1b8}
 .note{color:var(--muted);font-size:.82rem;margin:2px 0 0}
 :focus-visible{outline:3px solid var(--duck);outline-offset:3px}
@@ -194,6 +199,22 @@ function duckShape(c, acc){
   <circle cx="17" cy="-19" r="2.3" fill="#1a1a1a"/><circle cx="17.8" cy="-19.8" r=".8" fill="#fff"/>${post}`;
 }
 const YELLOW = {body:"#FFD43B", wing:"#F5B800", beak:"#FF8A1F"};
+/* Turkey Duck: "literally just a turkey" (Mitchell). Same frame as duckShape. */
+function turkeyShape(){
+  const fan = ["#b5412b","#e07b2f","#f2b134","#8b5a2b","#e07b2f","#b5412b","#f2b134"]
+    .map((c,i)=>{ const a = (-150 + i*20) * Math.PI/180; return `<ellipse cx="${(-6+Math.cos(a)*20).toFixed(1)}" cy="${(-8+Math.sin(a)*20).toFixed(1)}" rx="8" ry="17" fill="${c}" transform="rotate(${(-150+i*20)+90} ${(-6+Math.cos(a)*20).toFixed(1)} ${(-8+Math.sin(a)*20).toFixed(1)})"/>`; }).join("");
+  return `${fan}
+  <ellipse cx="0" cy="2" rx="20" ry="14" fill="#7a4a24"/>
+  <ellipse cx="-4" cy="2" rx="10" ry="7" fill="#5e3818"/>
+  <path d="M-6 14 l-3 8 M-6 22 l-4 2 M-6 22 l3 2 M6 14 l-1 8 M5 22 l-4 2 M5 22 l3 2" stroke="#e0a030" stroke-width="2" fill="none"/>
+  <path d="M12 -2 Q18 -14 15 -22" stroke="#7a4a24" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <circle cx="16" cy="-24" r="7" fill="#c9a07a"/>
+  <path d="M22 -25 L29 -22 L22 -20 Z" fill="#f2b134"/>
+  <path d="M21 -20 Q24 -12 20 -9 Q18 -14 19 -20 Z" fill="#d3302f"/>
+  <circle cx="18" cy="-26" r="1.8" fill="#1a1a1a"/><circle cx="18.6" cy="-26.6" r=".6" fill="#fff"/>`;
+}
+const art = d => d.shape==="turkey" ? turkeyShape() : duckShape(d.c, d.acc);
+const acorn = `<ellipse cx="0" cy="2" rx="6" ry="7.5" fill="#a0642c"/><path d="M-7 -2 Q0 -9 7 -2 Q0 1 -7 -2 Z" fill="#6b4220"/><rect x="-1" y="-10" width="2" height="4" fill="#4a2c14"/>`;
 
 /* ---------- Worlds ----------
    Every area: name, map position [col,row], exits {up,down,left,right}, doors [areaIds], draw(F,D).
@@ -238,16 +259,17 @@ const WORLDS = [
       ${act("mailbox","Open the mailbox", F.mailbox
         ? `<rect x="160" y="150" width="38" height="22" rx="10" fill="#4a6fd1"/><rect x="146" y="164" width="16" height="9" rx="2" fill="#3a5bb5"/><rect x="198" y="140" width="4" height="14" fill="#e53935"/>`
         : `<rect x="160" y="150" width="38" height="22" rx="10" fill="#4a6fd1"/><rect x="198" y="152" width="4" height="14" fill="#e53935"/><circle cx="162" cy="161" r="2" fill="#2a3f8f"/>`)}
-      ${D("normal",128,242,1)}`},
+      ${D("normal",128,242,1)}${T("a1",90,214)}${T("a2",356,206)}`},
     garden:{name:"Garden", pos:[0,1], exits:{right:"yard"}, doors:[], draw:(F,D)=>`
       ${sky("#8fd3ff")}<rect y="170" width="400" height="130" fill="#5fb546"/>
       <rect x="0" y="150" width="400" height="22" fill="#b5835a" ${N}/>${Array.from({length:14},(_,i)=>`<rect x="${i*30+4}" y="138" width="14" height="34" fill="#c9966a" ${N}/>`).join("")}
       ${[40,110,180].map(x=>`<g ${N}><rect x="${x}" y="200" width="4" height="30" fill="#2e7d32"/><circle cx="${x+2}" cy="196" r="9" fill="#ff6fa8"/><circle cx="${x+2}" cy="196" r="3" fill="#ffd43b"/></g>`).join("")}
+      ${H("turkey",72,240,.92)}
       <ellipse cx="80" cy="262" rx="60" ry="30" fill="#3f8f34" ${N}/>
       ${D("leaf",262,222,.9,{flip:1})}
       <ellipse cx="285" cy="240" rx="52" ry="30" fill="#4a9c3a" ${N}/>
       <ellipse cx="340" cy="252" rx="44" ry="26" fill="#3f8f34" ${N}/>
-      <ellipse cx="190" cy="264" rx="40" ry="22" fill="#4a9c3a" ${N}/>`},
+      <ellipse cx="190" cy="264" rx="40" ry="22" fill="#4a9c3a" ${N}/>${T("a3",372,206)}`},
     pond:{name:"Pond", pos:[2,1], exits:{left:"yard"}, doors:[], draw:(F,D)=>`
       ${sky("#8fd3ff")}<rect y="160" width="400" height="140" fill="#6cc24a"/>
       <ellipse cx="190" cy="235" rx="170" ry="52" fill="#3c8fd8"/>
@@ -256,7 +278,7 @@ const WORLDS = [
       ${[40,52,64].map(x=>`<rect x="${x}" y="170" width="3" height="50" fill="#2e7d32"/><rect x="${x-3}" y="165" width="9" height="20" rx="4" fill="#7b4a1e"/>`).join("")}</g>
       ${D("rock",322,180,.7)}
       <ellipse cx="335" cy="200" rx="42" ry="26" fill="#a39e93" ${N}/>
-      <ellipse cx="325" cy="192" rx="16" ry="6" fill="#bdb8ad" ${N}/>`},
+      <ellipse cx="325" cy="192" rx="16" ry="6" fill="#bdb8ad" ${N}/>${T("a4",78,214)}`},
     treetop:{name:"Top of the Tree", pos:[1,0], exits:{down:"yard"}, doors:[], draw:(F,D)=>`
       ${sky("#a9ddff")}
       <path d="M0 230 Q150 200 400 215 L400 240 Q160 228 0 255 Z" fill="#8b5a2b" ${N}/>
@@ -264,7 +286,7 @@ const WORLDS = [
       <ellipse cx="240" cy="205" rx="34" ry="14" fill="#6b4220" ${N}/>
       ${D("tiny",238,198,.36)}
       <path d="M206 205 Q240 228 274 205 Q270 220 240 222 Q210 220 206 205 Z" fill="#8a5a2c" ${N}/>
-      <circle cx="110" cy="214" r="5" fill="#ff5252" ${N}/><circle cx="118" cy="210" r="5" fill="#ff5252" ${N}/>`},
+      <circle cx="110" cy="214" r="5" fill="#ff5252" ${N}/><circle cx="118" cy="210" r="5" fill="#ff5252" ${N}/>${T("a5",330,211)}`},
     house:{name:"Inside the House", pos:[1,2], exits:{}, doors:["yard"], draw:(F,D)=>`
       <rect width="400" height="300" fill="#ffe2a8"/><rect y="230" width="400" height="70" fill="#c98d5a" ${N}/>
       <rect x="150" y="60" width="60" height="44" fill="#7ec8e3" stroke="#8b5a2b" stroke-width="6" ${N}/>
@@ -274,7 +296,7 @@ const WORLDS = [
       ${D("bubble",286,192,.75)}
       ${[[240,196,14],[262,202,12],[318,200,15],[338,194,11],[300,205,10]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="#ffffff" opacity=".95" ${N}/>`).join("")}
       <rect x="210" y="198" width="160" height="50" rx="22" fill="#ffffff" ${N}/>
-      <rect x="225" y="246" width="10" height="12" fill="#bbb" ${N}/><rect x="345" y="246" width="10" height="12" fill="#bbb" ${N}/>`}
+      <rect x="225" y="246" width="10" height="12" fill="#bbb" ${N}/><rect x="345" y="246" width="10" height="12" fill="#bbb" ${N}/>${T("a6",182,114)}`}
   }},
 
 { id:"w2", name:"Spooky Manor", start:"gate", art:"#6b4fa0", sky:"#2b2350",
@@ -442,7 +464,30 @@ const ACTS = {
 const SAVE = "quackers-v2";
 const allDucks = WORLDS.flatMap((w,wi)=>w.ducks.map(d=>({...d, world:wi})));
 const DUCK = Object.fromEntries(allDucks.map(d=>[d.id,d]));
-function fresh(){ return {found:[], flags:{w1:{},w2:{},w3:{}}, visited:{w1:[],w2:[],w3:[]}, unlocked:1, sound:true, world:0, area:{}}; }
+
+/* ---------- Holiday ducks ----------
+   Each one lives in a world, shows up only in its month (the player's own date), and needs a task first.
+   Thanksgiving test: find 6 acorns around The Backyard, then search for the Turkey Duck.
+   Later rule (not built yet): holiday ducks also need the pigeon's device from the City world. */
+const HOLIDAYS = [
+  {id:"turkey", name:"Turkey Duck", holiday:"Thanksgiving", month:10, monthName:"November", world:"w1", area:"garden",
+   tier:"Holiday", shape:"turkey", c:{body:"#7a4a24",wing:"#5e3818",beak:"#f2b134"},
+   tokenName:"acorn", tokens:{a1:"yard",a2:"yard",a3:"garden",a4:"pond",a5:"treetop",a6:"house"}}
+];
+HOLIDAYS.forEach(h=>{ DUCK[h.id] = {...h, worldIndex:WORLDS.findIndex(w=>w.id===h.world)}; });
+const NOW_MONTH = (()=>{ try{ const m = +new URLSearchParams(location.search).get("month"); if(m>=1 && m<=12) return m-1; }catch(e){} return new Date().getMonth(); })();
+const holidayHere = () => HOLIDAYS.find(h=>h.world===W().id);
+const holidayOn = h => !!h && h.month===NOW_MONTH;
+const tokensAll = h => Object.keys(h.tokens).length;
+const tokensGot = h => S.holiday.tokens.filter(t=>t in h.tokens).length;
+const holidayLive = h => holidayOn(h) && !found.has(h.id);
+function T(id,x,y){
+  const h = holidayHere(); if(!holidayLive(h) || !(id in h.tokens) || S.holiday.tokens.includes(id)) return "";
+  return `<g class="token" data-token="${id}" tabindex="0" role="button" aria-label="Something small" transform="translate(${x} ${y})"><circle r="16" fill="transparent"/>${acorn}</g>`;
+}
+function H(id,x,y,s){ const h = HOLIDAYS.find(k=>k.id===id); if(!holidayOn(h) || tokensGot(h) < tokensAll(h)) return ""; return D(id,x,y,s); }
+const silhouette = svg => svg.replace(/fill="#[0-9a-fA-F]{3,6}"/g,'fill="#34447f"').replace(/stroke="#[0-9a-fA-F]{3,6}"/g,'stroke="#34447f"');
+function fresh(){ return {found:[], flags:{w1:{},w2:{},w3:{}}, visited:{w1:[],w2:[],w3:[]}, unlocked:1, sound:true, world:0, area:{}, holiday:{tokens:[]}}; }
 let S = fresh();
 function load(){ try{ const s = JSON.parse(localStorage.getItem(SAVE)||"null"); if(s && s.flags) S = Object.assign(fresh(), s); }catch(e){} }
 function save(){ try{ localStorage.setItem(SAVE, JSON.stringify(S)); }catch(e){} }
@@ -461,7 +506,7 @@ function D(id,x,y,s,o={}){
   const d = DUCK[id]; const sx = o.flip ? -s : s, sy = o.upside ? -s : s;
   const op = d.opacity ? ` opacity="${d.opacity}"` : "";
   return `<g class="duck" data-duck="${id}" tabindex="0" role="button" aria-label="Something hiding" transform="translate(${x} ${y}) scale(${sx} ${sy})"${op}>
-    <circle cx="4" cy="-6" r="30" fill="transparent"/>${duckShape(d.c,d.acc)}</g>`;
+    <circle cx="4" cy="-6" r="30" fill="transparent"/>${art(d)}</g>`;
 }
 function sceneSVG(){ return `<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">${W().areas[curArea()].draw(F(), D)}</svg>`; }
 
@@ -496,7 +541,9 @@ function renderTop(){
   $("count").textContent = `${n} / ${t}`;
   $("count").setAttribute("aria-label", `${n} of ${t} ducks found`);
   $("logCount").textContent = `${n} of ${t} found`;
-  const f = F(); $("inv").innerHTML = (f.key && !f.chest) ? `<span class="chip"><svg width="16" height="12" viewBox="-10 -8 44 18"><circle r="7" fill="none" stroke="#ffd43b" stroke-width="4"/><rect x="6" y="-2" width="24" height="4" fill="#ffd43b"/></svg>Key</span>` : "";
+  const f = F(); let inv = (f.key && !f.chest) ? `<span class="chip"><svg width="16" height="12" viewBox="-10 -8 44 18"><circle r="7" fill="none" stroke="#ffd43b" stroke-width="4"/><rect x="6" y="-2" width="24" height="4" fill="#ffd43b"/></svg>Key</span>` : "";
+  const h = holidayHere(); if(holidayLive(h)) inv += `<span class="chip" aria-label="${tokensGot(h)} of ${tokensAll(h)} acorns"><svg width="14" height="16" viewBox="-8 -11 16 20">${acorn}</svg>${tokensGot(h)} / ${tokensAll(h)}</span>`;
+  $("inv").innerHTML = inv;
 }
 function renderLog(newId){
   $("cards").innerHTML = W().ducks.map(d=>{
@@ -505,7 +552,15 @@ function renderLog(newId){
     return `<div class="card ${got?"got":""} ${d.id===newId?"new":""}">
       <svg viewBox="-34 -42 72 60" aria-hidden="true">${shape}</svg>
       <span class="tier t-${d.tier}">${d.tier}</span><b>${got?d.name:"???"}</b><small>${got?"Found!":d.hint}</small></div>`;
-  }).join("");
+  }).join("") + holidayCard(newId);
+}
+function holidayCard(newId){
+  const h = holidayHere(); if(!h) return "";
+  const got = found.has(h.id), on = holidayOn(h), n = tokensGot(h), t = tokensAll(h);
+  const note = got ? "Found!" : !on ? `Comes back in ${h.monthName}` : n<t ? `Find ${t} acorns: ${n} of ${t}` : "All acorns found. Search the world!";
+  return `<div class="card holiday ${got?"got":""} ${h.id===newId?"new":""}">
+    <svg viewBox="-38 -48 80 72" aria-hidden="true">${got ? turkeyShape() : silhouette(turkeyShape())}</svg>
+    <span class="tier t-Holiday">${h.holiday}</span><b>${got?h.name:"???"}</b><small>${note}</small></div>`;
 }
 function renderHome(){
   $("heroDuck").innerHTML = duckShape(YELLOW);
@@ -518,7 +573,8 @@ function renderHome(){
         <g transform="translate(100 52) scale(.8)">${open?duckShape(w.ducks[0].c, w.ducks[0].acc):`<rect x="-14" y="-12" width="28" height="22" rx="4" fill="#1b2450"/><path d="M-8 -12 v-8 a8 8 0 0 1 16 0 v8" stroke="#1b2450" stroke-width="5" fill="none"/>`}</g></svg>
       <span class="info"><small>World ${i+1}</small><b>${w.name}</b>
         <span class="bar"><i style="width:${Math.round(n/t*100)}%"></i></span>
-        <span class="status">${open ? (done ? `All ${t} ducks found` : `${n} of ${t} ducks found`) : `Finish World ${i} to unlock`}</span></span></button>`;
+        <span class="status">${open ? (done ? `All ${t} ducks found` : `${n} of ${t} ducks found`) : `Finish World ${i} to unlock`}</span>
+        ${HOLIDAYS.filter(h=>h.world===w.id && holidayOn(h) && !found.has(h.id)).map(h=>`<span class="status visit">A ${h.holiday} visitor is here!</span>`).join("")}</span></button>`;
   }).join("");
 }
 
@@ -550,7 +606,7 @@ function enterDoor(to){ if(busy) return; S.area[W().id]=to; blip("door"); showAr
 addEventListener("keydown", e=>{
   if($("play").hidden) return;
   const k = {ArrowUp:"up",ArrowDown:"down",ArrowLeft:"left",ArrowRight:"right"}[e.key];
-  if(k && !e.target.closest(".duck,.act,.door")){ e.preventDefault(); move(k); }
+  if(k && !e.target.closest(".duck,.act,.door,.token")){ e.preventDefault(); move(k); }
 });
 
 /* ---------- Sound ---------- */
@@ -591,10 +647,10 @@ function catchDuck(el){
   el.style.pointerEvents="none";
   if(el.animate && !reduce){ const tf = el.getAttribute("transform"); el.removeAttribute("transform"); el.style.transformBox="view-box";
     el.animate([{transform:css(tf)+" scale(1)"},{transform:css(tf)+" scale(1.5)",opacity:1},{transform:css(tf)+" scale(0)",opacity:0}],{duration:380,fill:"forwards"}); }
-  toast(`You found the ${DUCK[id].name}!`);
+  toast(DUCK[id].holiday ? `You found the ${DUCK[id].name}! Happy ${DUCK[id].holiday}!` : `You found the ${DUCK[id].name}!`, DUCK[id].holiday ? 3000 : 1800);
   $("count").classList.remove("bump"); void $("count").offsetWidth; $("count").classList.add("bump");
   renderLog(id); renderTop();
-  setTimeout(()=>{ const l=layerEl(); if(l) l.innerHTML=sceneSVG(); if(worldDone(S.world) && $("done").hidden) worldComplete(); }, 420);
+  setTimeout(()=>{ const l=layerEl(); if(l) l.innerHTML=sceneSVG(); if(!DUCK[id].holiday && worldDone(S.world) && $("done").hidden) worldComplete(); }, 420);
 }
 const css = tf => tf.replace(/translate\(([-\d.]+) ([-\d.]+)\)/,"translate($1px,$2px)").replace(/scale\(([-\d.]+) ([-\d.]+)\)/,"scale($1,$2)");
 function worldComplete(){
@@ -616,15 +672,29 @@ function worldComplete(){
 function onStageTap(e){
   if(busy || !$("done").hidden) return;
   const d = e.target.closest(".duck"); if(d){ catchDuck(d); return; }
+  const tk = e.target.closest(".token");
+  if(tk){ const h = holidayHere(); if(!h || S.holiday.tokens.includes(tk.dataset.token)) return;
+    const sr=$("stage").getBoundingClientRect(), r=tk.getBoundingClientRect();
+    burst(r.left+r.width/2-sr.left, r.top+r.height/2-sr.top, ["#a0642c","#f2b134","#fff"]);
+    S.holiday.tokens.push(tk.dataset.token); save(); pop();
+    const n = tokensGot(h), t = tokensAll(h);
+    toast(n<t ? `Acorn ${n} of ${t}!` : `All ${t} acorns! The ${h.name} is hiding somewhere in ${W().name}. Go find it!`, n<t ? 1800 : 3400);
+    layerEl().innerHTML = sceneSVG(); renderTop(); renderLog(); return; }
   const a = e.target.closest(".act");
   if(a){ const msg = ACTS[a.dataset.act](F()); pop(); toast(msg); save(); layerEl().innerHTML = sceneSVG(); renderTop(); return; }
   const g = e.target.closest(".door"); if(g) enterDoor(g.dataset.go);
 }
 $("stage").addEventListener("click", onStageTap);
-$("stage").addEventListener("keydown", e=>{ if((e.key==="Enter"||e.key===" ") && e.target.closest(".duck,.act,.door")){ e.preventDefault(); onStageTap(e); } });
+$("stage").addEventListener("keydown", e=>{ if((e.key==="Enter"||e.key===" ") && e.target.closest(".duck,.act,.door,.token")){ e.preventDefault(); onStageTap(e); } });
 
 $("hintBtn").addEventListener("click", ()=>{
-  const left = W().ducks.filter(d=>!found.has(d.id));
+  const left = W().ducks.filter(d=>!found.has(d.id)), h = holidayHere();
+  if(!left.length && holidayLive(h)){
+    const miss = Object.entries(h.tokens).find(([id])=>!S.holiday.tokens.includes(id));
+    const a = miss ? miss[1] : h.area;
+    toast(miss ? (a===curArea() ? "An acorn is somewhere right here!" : `Psst... an acorn is in the ${W().areas[a].name}.`) : (a===curArea() ? `The ${h.name} is right here somewhere!` : `The ${h.name} is hiding in the ${W().areas[a].name}.`), 2600);
+    $("map").dataset.hint = a; renderMap(); return;
+  }
   if(!left.length){ toast("You've found every duck here!"); return; }
   const d = left.find(x=>x.area===curArea()) || left[0]; const where = W().areas[d.area].name;
   toast(d.area===curArea() ? `A duck is hiding right here! Hint: ${d.hint.toLowerCase()}.` : `Psst... try the ${where}.`, 2600);
@@ -638,7 +708,9 @@ function openWorld(i){
   $("stage").querySelectorAll(".layer").forEach(l=>l.remove());
   busy = false;
   renderLog(); showArea(null);
-  if(worldDone(i)) toast("This world is complete. Explore all you like!");
+  const h = holidayHere();
+  if(holidayLive(h) && tokensGot(h)===0) toast(`A ${h.holiday} visitor is in ${W().name}! Find ${tokensAll(h)} hidden acorns.`, 3400);
+  else if(worldDone(i)) toast("This world is complete. Explore all you like!");
 }
 function goHome(){ renderHome(); $("play").hidden = true; $("home").hidden = false; scrollTo(0,0); }
 $("homeBtn").addEventListener("click", goHome);
@@ -650,7 +722,7 @@ $("reset").addEventListener("click", ()=>{
 });
 
 /* Test hook (used only by automated checks) */
-window.QUACKERS = { WORLDS, get state(){ return S; }, openWorld, go:(a)=>{ S.area[W().id]=a; showArea(null); } };
+window.QUACKERS = { WORLDS, HOLIDAYS, month:NOW_MONTH, get state(){ return S; }, openWorld, go:(a)=>{ S.area[W().id]=a; showArea(null); } };
 
 load(); syncFound(); setSoundBtn(); renderHome();
 </script>
