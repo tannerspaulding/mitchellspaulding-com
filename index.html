@@ -144,6 +144,7 @@ p{margin:0}
 .next ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
 .next li{display:grid;grid-template-columns:22px minmax(0,1fr);gap:8px;align-items:start;font-size:.95rem}
 .next li::before{content:"";width:14px;height:14px;margin-top:4px;border:2px solid var(--card-edge)}
+.next ul.done li::before{background:var(--lime) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M2.5 7.5l3 3 6-7' fill='none' stroke='%2314233F' stroke-width='2.4'/%3E%3C/svg%3E") center/100% no-repeat}
 
 .d-window{height:180px;background:var(--paper);
   background-image:linear-gradient(var(--grid) 1px, transparent 1px),linear-gradient(90deg, var(--grid) 1px, transparent 1px);background-size:18px 18px}
@@ -295,8 +296,8 @@ p{margin:0}
         <a class="go" href="https://quackersgame.com" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 1.5 L14 8 L3 14.5 Z" fill="#fff"/></svg>PLAY QUACKERS</a>
         <span class="dom">quackersgame.com</span>
         <div class="next">
-          <span class="label">Mini games</span>
-          <ul>
+          <span class="label">Mini games, playable now</span>
+          <ul class="done">
             <li>Egg Guard</li>
             <li>Scrap Hunt</li>
             <li>Sandwich Snatch</li>
