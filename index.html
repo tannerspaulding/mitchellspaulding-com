@@ -3,838 +3,409 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Quackers</title>
-<meta name="description" content="Quackers: explore the worlds, find the hidden ducks and fill your Duck Log.">
-<meta name="theme-color" content="#BFE6FF" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#14314F" media="(prefers-color-scheme: dark)">
-<link rel="icon" href="brand/quackers-icon.svg" type="image/svg+xml">
-<link rel="icon" href="icons/favicon-32.png" type="image/png" sizes="32x32">
-<link rel="icon" href="icons/favicon-16.png" type="image/png" sizes="16x16">
-<link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
-<link rel="manifest" href="manifest.webmanifest">
-<meta name="apple-mobile-web-app-title" content="Quackers">
-<meta name="application-name" content="Quackers">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
+<meta name="description" content="Mitchell's Game Room: the games Mitchell is making, like Quackers and Digi Friend, and the stuff he likes.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Crect width='36' height='36' fill='%2314233F'/%3E%3Cg fill='%23B8F02E'%3E%3Crect x='7' y='9' width='5' height='18'/%3E%3Crect x='24' y='9' width='5' height='18'/%3E%3Crect x='12' y='12' width='4' height='5'/%3E%3Crect x='20' y='12' width='4' height='5'/%3E%3Crect x='16' y='15' width='4' height='5'/%3E%3C/g%3E%3C/svg%3E">
+<title>Mitchell's Game Room</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Grandstander:wght@700;800;900&family=Patrick+Hand&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Lexend:wght@400;600;700&family=Space+Mono:wght@400;700&family=Gochi+Hand&family=Grandstander:wght@900&display=swap">
 <style>
-/* Quackers, Pond Morning look (see brand/brand-guide.html).
-   Layout: two screens. Home: logo, keep-exploring button, world cards. Play: top bar, the scene with edge arrows and a corner map, a tool row, then the Duck Log sticker book.
-   Every tappable thing is white or yellow, has a 3px ink outline and sits on a ledge that squishes when pressed. */
+/* Layout: a game designer's notebook. Light theme is graph paper, dark theme is a blueprint. One phone-width column: a player card up top, then index cards taped to the page (likes, games, how I make games). Arcade-sign display type, marker highlights, mono labels. */
 :root{
-  --ink:#173A5E; --duck:#FFCB2F; --duck-deep:#F0A500; --beak:#FF8A3D; --pond:#2387D9; --puddle:#8FD0FF;
-  --lily:#3FB86A; --bubble:#FF6FA6; --cloud:#FFFFFF; --mist:#DCEBF7; --soft:#9DB7D2; --dim:#4F6E8C;
-  --sky-top:#BFE6FF; --sky-bot:#EAF6FF; --text:#173A5E; --muted:#4F6E8C; --cloud-o:.8;
-  --display:"Grandstander","Baloo 2","Arial Rounded MT Bold",system-ui,sans-serif;
-  --body:"Andika","Trebuchet MS",system-ui,-apple-system,sans-serif;
-  --note:"Patrick Hand","Comic Neue","Chalkboard SE",cursive;
-  --squish:cubic-bezier(.34,1.56,.64,1);
-  color-scheme:light;
+  --paper:#F4F7FB; --grid:#D3E1EF; --grid-major:#B9CDE2; --ink:#14233F; --ink-soft:#4A5D7A;
+  --card:#FFFFFF; --card-edge:#14233F; --tape:rgba(255,233,74,.75);
+  --red:#FF5A36; --blue:#2F5BFF; --lime:#B8F02E; --hi:#FFE94A; --violet:#7A4DFF;
+  --shadow:#14233F; --dash:#9FB3CB;
+  --display:"Bungee","Arial Black",Impact,system-ui,sans-serif;
+  --body:"Lexend","Segoe UI",system-ui,-apple-system,sans-serif;
+  --mono:"Space Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --hand:"Gochi Hand","Bradley Hand","Segoe Print",cursive;
 }
-@media (prefers-color-scheme: dark){:root{--sky-top:#14314F; --sky-bot:#0D1F33; --text:#EAF4FF; --muted:#9DB7D2; --cloud-o:.08; color-scheme:dark}}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0E2654; --grid:#1B3A72; --grid-major:#28508F; --ink:#EAF2FF; --ink-soft:#A9BEDF;
+  --card:#12306A; --card-edge:#CFE0FF; --tape:rgba(255,233,74,.5); --shadow:#06142F; --dash:#4D6FA8; --blue:#7C9BFF; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0E2654; --grid:#1B3A72; --grid-major:#28508F; --ink:#EAF2FF; --ink-soft:#A9BEDF;
+  --card:#12306A; --card-edge:#CFE0FF; --tape:rgba(255,233,74,.5); --shadow:#06142F; --dash:#4D6FA8; --blue:#7C9BFF; color-scheme:dark}
 *{box-sizing:border-box}
-[hidden]{display:none!important}
-html{background:var(--sky-bot)}
-body{margin:0;min-height:100vh;color:var(--text);font-family:var(--body);font-size:17px;line-height:1.45;
-  background:linear-gradient(var(--sky-top) 0, var(--sky-bot) 520px) no-repeat, var(--sky-bot);
-  padding-left:max(14px, env(safe-area-inset-left, 0px));
-  padding-right:max(14px, env(safe-area-inset-right, 0px));
-  padding-block:max(12px, env(safe-area-inset-top, 0px)) max(28px, env(safe-area-inset-bottom, 0px));
-  -webkit-tap-highlight-color:transparent;overflow-x:hidden}
-button{font:inherit;color:inherit}
-.wrap{max-width:780px;margin:0 auto;display:flex;flex-direction:column;gap:14px;position:relative}
-.screen-in{animation:screenIn .42s var(--squish)}
-@keyframes screenIn{from{opacity:0;transform:translateY(14px) scale(.98)}}
+html{background:var(--paper)}
+body{margin:0;color:var(--ink);font-family:var(--body);font-size:16.5px;line-height:1.55;
+  background-color:var(--paper);
+  background-image:
+    linear-gradient(var(--grid-major) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-major) 1px, transparent 1px),
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:120px 120px,120px 120px,24px 24px,24px 24px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+  padding-block:14px 0;-webkit-tap-highlight-color:transparent;overflow-x:hidden}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--red);outline-offset:3px}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:40px}
+h1,h2,h3{margin:0;line-height:1.05;text-wrap:balance}
+h2{font-family:var(--display);font-weight:400;font-size:1.55rem;letter-spacing:.01em}
+h3{font-family:var(--body);font-weight:700;font-size:1.1rem}
+p{margin:0}
+.label{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
+.hand{font-family:var(--hand);font-size:1.25rem;line-height:1.15;color:var(--red)}
+.hl{background:linear-gradient(transparent 55%, var(--hi) 55% 90%, transparent 90%);color:var(--ink)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .hl{background:linear-gradient(transparent 55%, rgba(255,233,74,.35) 55% 90%, transparent 90%)}}
+:root[data-theme="dark"] .hl{background:linear-gradient(transparent 55%, rgba(255,233,74,.35) 55% 90%, transparent 90%)}
 
-/* Clouds drifting behind everything */
-.sky{position:fixed;inset:0;pointer-events:none;z-index:-1;overflow:hidden}
-.cloud{position:absolute;height:28px;background:#fff;border-radius:99px;opacity:var(--cloud-o)}
-.cloud::before,.cloud::after{content:"";position:absolute;background:#fff;border-radius:50%}
-.cloud::before{width:38px;height:38px;left:16px;top:-18px}.cloud::after{width:28px;height:28px;left:44px;top:-11px}
-.c1{width:104px;top:9%;left:-120px;animation:drift 70s linear infinite}
-.c2{width:84px;top:22%;left:-120px;animation:drift 95s linear -40s infinite}
-.c3{width:120px;top:48%;left:-140px;animation:drift 120s linear -80s infinite}
-@keyframes drift{to{transform:translateX(calc(100vw + 280px))}}
+/* top bar */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.mark{display:flex;align-items:center;gap:10px;text-decoration:none}
+.mark svg{width:36px;height:36px}
+.mark span{font-family:var(--mono);font-weight:700;font-size:.85rem;letter-spacing:.08em}
+.jump{font-family:var(--mono);font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;
+  border:2px solid var(--card-edge);padding:6px 10px;background:var(--card);box-shadow:3px 3px 0 var(--shadow)}
 
-/* Chunky press-able things */
-.btn{font-family:var(--display);font-weight:900;font-size:1.12rem;letter-spacing:.01em;border:3px solid var(--ink);border-radius:18px;padding:10px 20px;
-  background:var(--duck);color:var(--ink);cursor:pointer;box-shadow:0 5px 0 var(--ink);transition:transform .09s, box-shadow .09s, filter .15s;display:inline-flex;align-items:center;justify-content:center;gap:8px}
-.btn:hover{filter:brightness(1.04)}
-.btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
-.btn.alt{background:var(--cloud)}
-.btn.go{background:var(--lily);color:#fff;text-shadow:0 2px 0 rgba(23,58,94,.35)}
-.btn svg{width:22px;height:22px;flex:none}
-.round{width:46px;height:46px;border-radius:50%;border:3px solid var(--ink);background:var(--cloud);cursor:pointer;display:grid;place-items:center;padding:0;flex:none;
-  box-shadow:0 4px 0 var(--ink);transition:transform .09s, box-shadow .09s}
-.round:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
-.round svg{width:22px;height:22px}
+/* hero */
+.hero{display:flex;flex-direction:column;gap:16px}
+.p1{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-weight:700;font-size:.8rem;letter-spacing:.12em;
+  background:var(--ink);color:var(--paper);padding:5px 10px}
+.p1 i{width:8px;height:8px;border-radius:50%;background:var(--lime);box-shadow:0 0 0 3px rgba(184,240,46,.3);animation:blink 1.4s steps(2) infinite}
+@keyframes blink{50%{opacity:.25}}
+.hero h1{font-family:var(--display);font-weight:400;font-size:clamp(3rem,15.5vw,5.4rem);line-height:.92;letter-spacing:-.01em;
+  color:var(--ink);text-shadow:4px 4px 0 var(--red)}
+.hero h1 small{display:block;font-family:var(--hand);font-size:clamp(1.5rem,6.5vw,2rem);color:var(--blue);text-shadow:none;letter-spacing:0;margin-bottom:6px;transform:rotate(-2deg);transform-origin:left}
+.hero .lede{font-size:1.12rem;max-width:34ch}
 
-/* Home */
-.hero{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding-top:10px}
-.hero .logo{width:min(100%,540px);height:auto;display:block;overflow:visible}
-.hero .logo .logo-duck{animation:float 3.2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
-.hero .logo .ripple{animation:ripple 3.2s ease-in-out infinite}
-@keyframes float{50%{transform:translateY(-4px) rotate(-3deg)}}
-@keyframes ripple{50%{transform:translateX(6px)}}
-.tagline{font-family:var(--display);font-weight:800;font-size:clamp(1.15rem,4.6vw,1.45rem);margin:0}
-.lead{color:var(--muted);margin:0 auto;max-width:34ch;font-size:1rem}
-.start{margin-top:10px;width:min(100%,380px);font-size:1.2rem;padding:13px 20px}
-.section-title{font-family:var(--display);font-weight:900;font-size:1.45rem;margin:12px 2px 0;display:flex;align-items:baseline;justify-content:space-between;gap:8px}
-.section-title span{font-family:var(--body);font-weight:700;font-size:.92rem;color:var(--muted)}
-.worlds{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,158px),1fr));gap:14px}
-.wcard{position:relative;text-align:left;border:3px solid var(--ink);border-radius:24px;background:var(--cloud);color:var(--ink);padding:0;overflow:hidden;cursor:pointer;
-  display:flex;flex-direction:column;box-shadow:0 5px 0 var(--ink);transition:transform .15s var(--squish), box-shadow .1s}
-.wcard:not(:disabled):hover{transform:translateY(-3px) rotate(-.6deg)}
-.wcard:not(:disabled):active{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
-.wcard:disabled{cursor:not-allowed;background:#F3F7FB}
-.wcard:disabled .art{filter:saturate(.2) brightness(1.08)}
-.wcard .art{display:block;width:100%;height:auto;aspect-ratio:25/12;border-bottom:3px solid var(--ink)}
-.wcard .info{padding:10px 12px 13px;display:flex;flex-direction:column;gap:6px}
-.wcard .info small{font-family:var(--display);font-weight:800;font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--pond)}
-.wcard .info b{font-family:var(--display);font-weight:900;font-size:1.28rem;line-height:1}
-.eggs{display:flex;gap:4px;flex-wrap:wrap}
-.eggs i{width:15px;height:15px;border-radius:50%;border:2px solid var(--ink);background:#fff}
-.eggs i.on{background:var(--duck)}
-.wcard .status{font-size:.86rem;line-height:1.25;color:var(--dim);font-weight:700}
-.lock{position:absolute;top:10px;right:10px;width:40px;height:40px;border-radius:50%;background:#fff;border:3px solid var(--ink);display:grid;place-items:center}
-.lock svg{width:20px;height:20px}
-.stamp{position:absolute;top:12px;right:8px;transform:rotate(12deg);font-family:var(--display);font-weight:900;font-size:.76rem;color:#fff;background:var(--lily);border:2.5px solid var(--ink);border-radius:99px;padding:3px 10px}
-.home-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:.9rem;margin-top:16px}
-.link{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;padding:6px;font-weight:700}
+/* character sheet */
+.sheet{position:relative;background:var(--card);border:2.5px solid var(--card-edge);box-shadow:6px 6px 0 var(--shadow);padding:16px 16px 14px;
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px 16px}
+.sheet::before{content:"";position:absolute;top:-12px;left:50%;width:84px;height:24px;margin-left:-42px;background:var(--tape);transform:rotate(-3deg)}
+.sheet .row{display:flex;flex-direction:column;gap:2px;min-width:0}
+.sheet .row b{font-weight:700;font-size:1rem;line-height:1.25}
+.sheet .full{grid-column:1/-1}
+.meter{display:flex;gap:3px;margin-top:4px}
+.meter i{flex:1;height:10px;background:var(--blue);border:1.5px solid var(--card-edge)}
+.meter i.off{background:transparent}
 
-/* Top bar */
-.top{display:flex;align-items:center;gap:10px}
-.where{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.1}
-.where small{color:var(--pond);font-family:var(--display);font-weight:800;font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-@media (prefers-color-scheme: dark){.where small{color:var(--puddle)}}
-.where b{font-family:var(--display);font-weight:900;font-size:1.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.where b.pop{animation:namePop .45s var(--squish)}
-@keyframes namePop{from{transform:translateY(6px);opacity:0}}
-.pill{display:inline-flex;align-items:center;gap:4px;background:var(--cloud);color:var(--ink);border:3px solid var(--ink);border-radius:99px;padding:2px 12px 2px 5px;
-  font-family:var(--display);font-weight:900;font-size:1.05rem;font-variant-numeric:tabular-nums;white-space:nowrap;box-shadow:0 3px 0 var(--ink)}
-.pill svg{width:30px;height:24px}
-.pill.bump{animation:bump .55s var(--squish)}
-@keyframes bump{30%{transform:scale(1.25) rotate(-4deg);background:var(--duck)}}
+/* section heads */
+.sec{display:flex;flex-direction:column;gap:16px}
+.sec-head{display:flex;flex-direction:column;gap:4px}
+.sec-head .row{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap}
 
-/* Stage */
-.stage{position:relative;width:100%;aspect-ratio:4/3;max-width:100%;border-radius:26px;overflow:hidden;border:3px solid var(--ink);background:#0D1F33;
-  box-shadow:0 6px 0 var(--ink);touch-action:manipulation;user-select:none;-webkit-user-select:none;isolation:isolate}
-.stage::after{content:"";position:absolute;inset:0;border-radius:23px;box-shadow:inset 0 0 0 3px rgba(255,255,255,.35), inset 0 -18px 30px rgba(13,31,51,.12);pointer-events:none;z-index:4}
-.layer{position:absolute;inset:0}
-.layer svg{display:block;width:100%;height:100%}
-.duck,.act,.door{cursor:pointer;outline:none}
-.door:hover .dr,.door:focus-visible .dr{filter:brightness(1.35)}
-.act:hover,.act:focus-visible{filter:brightness(1.2)}
-.pulse{animation:pulse 1.4s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
-@keyframes pulse{50%{opacity:.5}}
-.bob{animation:bob 2.6s ease-in-out infinite;transform-box:fill-box}
-@keyframes bob{50%{transform:translateY(-4px)}}
-.arrow{position:absolute;width:52px;height:52px;border-radius:50%;border:3px solid var(--ink);background:#fff;color:var(--ink);
-  display:grid;place-items:center;cursor:pointer;padding:0;z-index:5;box-shadow:0 4px 0 var(--ink);transition:transform .1s, box-shadow .1s}
-.arrow svg{width:24px;height:24px}
-.arrow:hover{background:#FFF6D6}
-.arrow:active{transform:var(--t) translateY(3px);box-shadow:0 1px 0 var(--ink)}
-.a-up{--t:translateX(-50%);top:10px;left:50%;transform:var(--t)}
-.a-down{--t:translateX(-50%);bottom:14px;left:50%;transform:var(--t)}
-.a-left{--t:translateY(-50%);left:10px;top:50%;transform:var(--t)}
-.a-right{--t:translateY(-50%);right:10px;top:50%;transform:var(--t)}
-.arrow::after{content:attr(data-to);position:absolute;white-space:nowrap;font-family:var(--display);font-size:.74rem;font-weight:800;color:var(--ink);background:#fff;
-  border:2px solid var(--ink);padding:0 8px;border-radius:99px;pointer-events:none}
-.a-up::after{top:54px}.a-down::after{bottom:56px}.a-left::after{left:-3px;top:56px}.a-right::after{right:-3px;top:56px}
-.map{position:absolute;top:8px;left:8px;z-index:5;background:#fff;border:2.5px solid var(--ink);border-radius:12px;padding:4px;pointer-events:none;box-shadow:0 3px 0 rgba(23,58,94,.35)}
-.map svg{display:block}
-.toast{position:absolute;left:50%;bottom:78px;transform:translate(-50%,12px) scale(.9);background:#fff;color:var(--ink);font-family:var(--display);font-weight:800;font-size:1rem;
-  padding:7px 16px;border-radius:999px;border:3px solid var(--ink);max-width:88%;text-align:center;box-shadow:0 4px 0 var(--ink);
-  transition:opacity .2s, transform .3s var(--squish);opacity:0;pointer-events:none;z-index:7}
-.toast.show{opacity:1;transform:translate(-50%,0) scale(1)}
-.toast.found{background:var(--duck)}
-.fx{position:absolute;pointer-events:none;z-index:6}
-.fx.dot{width:11px;height:11px;border-radius:50%;margin:-5px 0 0 -5px;border:2px solid var(--ink)}
-.fx.plus{font-family:var(--display);font-weight:900;font-size:1.8rem;color:#fff;-webkit-text-stroke:2px var(--ink);paint-order:stroke;transform:translate(-50%,-50%)}
-.overlay{position:absolute;inset:0;background:rgba(13,31,51,.62);display:grid;place-items:center;padding:16px;z-index:8;animation:fadeIn .25s ease}
-@keyframes fadeIn{from{opacity:0}}
-.done-card{background:#fff;color:var(--ink);border:3px solid var(--ink);border-radius:26px;box-shadow:0 6px 0 var(--ink);padding:10px 18px 18px;text-align:center;max-width:340px;
-  display:flex;flex-direction:column;align-items:center;gap:4px;animation:cardIn .55s var(--squish)}
-@keyframes cardIn{from{transform:scale(.6) rotate(-6deg);opacity:0}}
-.done-card svg{width:110px;height:92px;animation:float 2.6s ease-in-out infinite}
-.done-card h3{font-family:var(--display);font-weight:900;font-size:clamp(1.5rem,6vw,2rem);margin:0;line-height:1.05}
-.done-card p{margin:0 0 10px;color:var(--dim);font-size:.98rem}
-.done-card .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+/* likes: index cards */
+.likes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.like{position:relative;background:var(--card);border:2px solid var(--card-edge);padding:14px 12px 12px;min-width:0;
+  display:flex;flex-direction:column;gap:6px;box-shadow:4px 4px 0 var(--shadow);
+  background-image:linear-gradient(transparent 33px, var(--red) 33px 34.5px, transparent 34.5px);}
+.like:nth-child(3n+1){transform:rotate(-1.4deg)} .like:nth-child(3n+2){transform:rotate(1deg)} .like:nth-child(3n){transform:rotate(-.4deg)}
+.like .ic{width:26px;height:26px;margin-bottom:6px}
+.like h3{font-size:1rem}
+.like p{font-size:.88rem;color:var(--ink-soft);line-height:1.4}
+.like.todo{background:transparent;background-image:none;border:2px dashed var(--dash);box-shadow:none}
+.like.todo h3{font-family:var(--hand);font-weight:400;font-size:1.35rem;color:var(--ink-soft)}
 
-/* Tool row */
-.tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:4px}
-.tools .btn{padding:7px 16px;font-size:1rem}
-.inv{display:flex;gap:6px;margin-left:auto}
-.chip{background:#fff;color:var(--ink);border:3px solid var(--ink);border-radius:99px;padding:3px 12px 3px 8px;font-family:var(--display);font-weight:900;font-size:.92rem;display:flex;align-items:center;gap:6px;animation:cardIn .5s var(--squish)}
 
-/* Duck Log sticker book */
-.log{background:#fff;color:var(--ink);border:3px solid var(--ink);border-radius:26px;padding:14px 14px 16px;box-shadow:0 6px 0 var(--ink);
-  background-image:radial-gradient(circle, #DCEBF7 1.3px, transparent 1.6px);background-size:18px 18px;background-position:4px 4px}
-.log h2{font-family:var(--display);font-weight:900;font-size:1.5rem;margin:0 0 10px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-.log h2 span{font-family:var(--display);font-size:.95rem;color:var(--dim);font-weight:800}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:12px}
-.card{background:#fff;border:3px solid var(--ink);border-radius:20px;padding:8px 6px 10px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:3px;min-width:0;
-  box-shadow:0 4px 0 rgba(23,58,94,.25)}
-.card.got:nth-child(odd){transform:rotate(-1.6deg)}.card.got:nth-child(even){transform:rotate(1.4deg)}
-.card.miss{background:rgba(255,255,255,.7);border:2.5px dashed var(--soft);box-shadow:none}
-.card.new{animation:slap .7s var(--squish)}
-@keyframes slap{0%{transform:scale(1.5) rotate(-12deg);opacity:0}60%{opacity:1}}
-.card svg{width:68px;height:56px}
-.card b{font-family:var(--display);font-weight:800;font-size:.92rem;line-height:1.1}
-.card .hint{font-family:var(--note);font-size:1.02rem;color:var(--dim);line-height:1.1}
-.tier{font-family:var(--display);font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;font-weight:900;border-radius:99px;padding:1px 8px;border:2px solid var(--ink);color:var(--ink)}
-.t-Easy{background:#C9F2D6}.t-Sneaky{background:#E2D8FF}.t-Tricky{background:#FFD4E5}.t-Legendary{background:linear-gradient(90deg,#FFE58A,#FFC23A)}
-.card.miss .tier{opacity:.75}
-.note{color:var(--dim);font-family:var(--note);font-size:1.08rem;line-height:1.25;margin:12px 2px 0}
-:focus-visible{outline:3px solid var(--pond);outline-offset:3px}
-@media (max-width:420px){.arrow{width:48px;height:48px}.arrow::after{display:none}.round{width:42px;height:42px}}
-.card.holiday{border-style:dashed;border-color:#D9822B}
-.card.holiday.got{border-style:solid;border-color:var(--ink)}
-.t-Holiday{background:#FFD3A8}
-.token{cursor:pointer;outline:none}
-.wcard .visit{color:#C2560F;font-weight:800}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* snapshots: taped photos */
+.snaps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;padding:6px 4px 0}
+.snap{position:relative;margin:0;background:var(--card);border:2px solid var(--card-edge);padding:8px 8px 10px;box-shadow:4px 4px 0 var(--shadow);min-width:0}
+.snap:nth-child(1){transform:rotate(-2.2deg)} .snap:nth-child(2){transform:rotate(1.8deg);margin-top:18px}
+.snap::before{content:"";position:absolute;top:-11px;left:50%;width:64px;height:20px;margin-left:-32px;background:var(--tape);transform:rotate(4deg);z-index:1}
+.snap img{display:block;width:100%;max-width:100%;height:auto;aspect-ratio:3/4;object-fit:cover;object-position:50% 50%;border:1.5px solid var(--card-edge)}
+.snap figcaption{font-family:var(--hand);font-size:1.15rem;line-height:1.1;margin-top:8px;text-align:center}
+
+/* games: cartridges */
+.game{position:relative;background:var(--card);border:2.5px solid var(--card-edge);box-shadow:6px 6px 0 var(--shadow);display:flex;flex-direction:column}
+.game .top-strip{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 12px;border-bottom:2.5px solid var(--card-edge);
+  font-family:var(--mono);font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.status{display:inline-flex;align-items:center;gap:6px}
+.status i{width:9px;height:9px;border-radius:50%;background:var(--lime);border:1.5px solid #14233F}
+.status.soon i{background:var(--hi)}
+.window{position:relative;margin:12px;border:2px solid var(--card-edge);overflow:hidden}
+.q-window{background:#EAF6FF;display:grid;place-items:center;padding:16px 12px 10px}
+.q-window svg{width:min(100%,330px);height:auto;display:block}
+.game .body{padding:2px 14px 16px;display:flex;flex-direction:column;gap:12px}
+.game h3{font-family:var(--display);font-weight:400;font-size:1.5rem;letter-spacing:.01em}
+.game p{color:var(--ink-soft)}
+.specs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:2px solid var(--card-edge)}
+.specs div{padding:8px 10px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.specs div+div{border-left:2px solid var(--card-edge)}
+.specs b{font-family:var(--display);font-weight:400;font-size:1.25rem;font-variant-numeric:tabular-nums}
+.go{align-self:flex-start;display:inline-flex;align-items:center;gap:10px;font-family:var(--display);font-size:1.05rem;text-decoration:none;
+  background:var(--red);color:#fff;border:2.5px solid #14233F;padding:11px 18px;box-shadow:4px 4px 0 #14233F;transition:transform .12s, box-shadow .12s}
+.go:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #14233F}
+.go svg{width:16px;height:16px}
+.dom{font-family:var(--mono);font-size:.8rem;color:var(--ink-soft)}
+.next{display:flex;flex-direction:column;gap:8px}
+.next ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.next li{display:grid;grid-template-columns:22px minmax(0,1fr);gap:8px;align-items:start;font-size:.95rem}
+.next li::before{content:"";width:14px;height:14px;margin-top:4px;border:2px solid var(--card-edge)}
+
+.d-window{height:180px;background:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px, transparent 1px),linear-gradient(90deg, var(--grid) 1px, transparent 1px);background-size:18px 18px}
+.d-window .score{position:absolute;right:8px;top:8px;font-family:var(--mono);font-weight:700;font-size:.8rem;background:var(--ink);color:var(--paper);padding:3px 8px;font-variant-numeric:tabular-nums}
+.d-window .hint{position:absolute;left:10px;bottom:8px;font-family:var(--hand);font-size:1.2rem;color:var(--red)}
+.buddy{position:absolute;width:54px;height:54px;padding:0;border:0;background:none;transition:left .45s cubic-bezier(.3,1.4,.5,1), top .45s cubic-bezier(.3,1.4,.5,1), transform .25s}
+.buddy svg{width:100%;height:100%;overflow:visible}
+.buddy.found{transform:scale(1.3) rotate(-10deg)}
+.pop{position:absolute;font-family:var(--display);color:var(--violet);pointer-events:none;animation:pop .9s ease-out forwards}
+@keyframes pop{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-32px)}}
+
+/* how: flow */
+.flow{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.flow li{position:relative;display:grid;grid-template-columns:56px minmax(0,1fr);gap:14px;padding-bottom:22px}
+.flow li:not(:last-child)::after{content:"";position:absolute;left:27px;top:56px;bottom:0;border-left:2.5px dashed var(--ink-soft)}
+.flow .n{width:56px;height:56px;display:grid;place-items:center;font-family:var(--display);font-size:1.5rem;color:#14233F;border:2.5px solid #14233F;box-shadow:3px 3px 0 var(--shadow)}
+.flow li:nth-child(1) .n{background:var(--hi)} .flow li:nth-child(2) .n{background:#FFB8A6}
+.flow li:nth-child(3) .n{background:#B9C8FF} .flow li:nth-child(4) .n{background:var(--lime)}
+.flow h3{margin:6px 0 2px}
+.flow p{font-size:.95rem;color:var(--ink-soft)}
+
+/* footer */
+.foot{margin-top:28px;border-top:2.5px solid var(--card-edge);padding-block:18px calc(28px + env(safe-area-inset-bottom, 0px));
+  display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px}
+.foot .hand{color:var(--blue)}
+
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<div class="sky" aria-hidden="true"><span class="cloud c1"></span><span class="cloud c2"></span><span class="cloud c3"></span></div>
 <div class="wrap">
+  <header class="top">
+    <a class="mark" href="#top" aria-label="Mitchell's Game Room">
+      <svg viewBox="0 0 36 36" aria-hidden="true">
+        <rect x="1.5" y="1.5" width="33" height="33" fill="var(--ink)"/>
+        <g fill="var(--lime)"><rect x="7" y="9" width="5" height="18"/><rect x="24" y="9" width="5" height="18"/><rect x="12" y="12" width="4" height="5"/><rect x="20" y="12" width="4" height="5"/><rect x="16" y="16" width="4" height="5"/></g>
+      </svg>
+      <span>GAME ROOM</span>
+    </a>
+    <a class="jump" href="#games">My games ↓</a>
+  </header>
 
-  <!-- HOME -->
-  <section id="home">
-    <div class="hero">
-      <h1 style="margin:0;width:100%;display:grid;place-items:center" id="heroLogo"><span hidden>Quackers</span></h1>
-      <p class="tagline">Somewhere, a duck is hiding.</p>
-      <p class="lead">Explore each world, find every hidden duck and fill your Duck Log.</p>
-      <button class="btn start" id="startBtn" type="button">Let's go!</button>
-    </div>
-    <h2 class="section-title">Pick a world <span id="totalFound"></span></h2>
-    <div class="worlds" id="worlds"></div>
-    <div class="home-foot">
-      <span>A game by Mitchell. Early test version.</span>
-      <button class="link" id="reset" type="button">Start over</button>
+  <section class="hero" id="top" aria-labelledby="hi">
+    <span class="p1"><i></i>PLAYER 1</span>
+    <h1 id="hi"><small>hi, I'm</small>MITCHELL</h1>
+    <p class="lede">I <span class="hl">design games.</span> I dream up the worlds and the rules, sketch them out, and then build them so you can play them.</p>
+
+    <div class="sheet" aria-label="Character sheet">
+      <div class="row"><span class="label">Class</span><b>Game designer</b></div>
+      <div class="row"><span class="label">Games made</span><b>2 so far</b></div>
+      <div class="row"><span class="label">Now building</span><b>Quackers</b></div>
+      <div class="row"><span class="label">Up next</span><b>Digi Friend</b></div>
+      <div class="row full"><span class="label">Special move</span><b>Hiding things where you'd never look</b></div>
+      <div class="row full"><span class="label">Idea power</span>
+        <div class="meter" aria-label="Idea power full"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      </div>
     </div>
   </section>
 
-  <!-- PLAY -->
-  <section id="play" hidden>
-    <div class="wrap">
-      <div class="top">
-        <button class="round" id="homeBtn" type="button" aria-label="Back to worlds">
-          <svg viewBox="0 0 24 24"><path d="M4 11.5 12 4.5l8 7V20h-5.5v-5h-5v5H4z" fill="#FFCB2F" stroke="#173A5E" stroke-width="2.4" stroke-linejoin="round"/></svg>
-        </button>
-        <div class="where"><small id="worldName">World 1</small><b id="areaName">Front Yard</b></div>
-        <div class="pill" id="count">0 / 6</div>
-        <button class="round" id="soundBtn" type="button" aria-pressed="true" aria-label="Sound on"></button>
+  <section class="sec" aria-labelledby="likes-h">
+    <div class="sec-head">
+      <span class="label">File 01</span>
+      <div class="row"><h2 id="likes-h">Things I like</h2><span class="hand">more coming!</span></div>
+    </div>
+    <div class="likes">
+      <div class="like">
+        <svg class="ic" viewBox="0 0 26 26" aria-hidden="true"><rect x="2" y="7" width="22" height="13" fill="none" stroke="var(--ink)" stroke-width="2.5"/><path d="M8 10.5v6M5 13.5h6" stroke="var(--ink)" stroke-width="2.5"/><rect x="16" y="11" width="3" height="3" fill="var(--red)"/><rect x="19" y="14" width="3" height="3" fill="var(--blue)"/></svg>
+        <h3>Making games</h3>
+        <p>Worlds, secrets and stuff to find.</p>
       </div>
-      <div class="stage" id="stage">
-        <button class="arrow a-up" id="up" type="button" aria-label="Go up"><svg viewBox="0 0 24 24"><path d="M5 15 L12 8 L19 15" fill="none" stroke="#173A5E" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-        <button class="arrow a-down" id="down" type="button" aria-label="Go down"><svg viewBox="0 0 24 24"><path d="M5 9 L12 16 L19 9" fill="none" stroke="#173A5E" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-        <button class="arrow a-left" id="left" type="button" aria-label="Go left"><svg viewBox="0 0 24 24"><path d="M15 5 L8 12 L15 19" fill="none" stroke="#173A5E" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-        <button class="arrow a-right" id="right" type="button" aria-label="Go right"><svg viewBox="0 0 24 24"><path d="M9 5 L16 12 L9 19" fill="none" stroke="#173A5E" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-        <div class="map" id="map" aria-hidden="true"></div>
-        <div class="toast" id="toast" role="status" aria-live="polite"></div>
-        <div class="overlay" id="done" hidden><div class="done-card" id="doneBody"></div></div>
+      <div class="like">
+        <svg class="ic" viewBox="0 0 26 26" aria-hidden="true"><path d="M13 2l3 7 7 .5-5.4 4.6 1.8 7L13 17.3 6.6 21.1l1.8-7L3 9.5 10 9z" fill="var(--hi)" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"/></svg>
+        <h3>Star Wars</h3>
+        <p>Especially The Mandalorian.</p>
       </div>
-      <div class="tools">
-        <button class="btn alt" id="hintBtn" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6" fill="#DDF1FF" stroke="#173A5E" stroke-width="2.6"/><path d="M15 15 L20 20" stroke="#173A5E" stroke-width="3.2" stroke-linecap="round"/></svg>Hint</button>
-        <div class="inv" id="inv"></div>
+      <div class="like">
+        <svg class="ic" viewBox="0 0 26 26" aria-hidden="true"><path d="M2 4h22v4c-3 2-6 2-11 2S5 10 2 8z" fill="var(--red)" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"/><path d="M4 10v12M22 10v12M2 22h22" stroke="var(--ink)" stroke-width="2.5"/></svg>
+        <h3>Theater</h3>
+        <p>Being on stage in a real show.</p>
       </div>
-      <section class="log">
-        <h2>Duck Log <span id="logCount"></span></h2>
-        <div class="cards" id="cards"></div>
-        <p class="note">Tap the arrows or doors to explore. Poke anything that might open. Arrow keys work on a computer too.</p>
-      </section>
+      <div class="like">
+        <svg class="ic" viewBox="0 0 26 26" aria-hidden="true"><path d="M10 20V5l12-3v15" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round"/><circle cx="6.5" cy="20" r="4" fill="var(--blue)" stroke="var(--ink)" stroke-width="2"/><circle cx="18.5" cy="17" r="4" fill="var(--lime)" stroke="var(--ink)" stroke-width="2"/></svg>
+        <h3>Singing</h3>
+        <p>I take voice lessons.</p>
+      </div>
+      <div class="like todo">
+        <span class="label">Slot open</span>
+        <h3>Mitchell picks</h3>
+        <p>A favorite food, book or show.</p>
+      </div>
+      <div class="like todo">
+        <span class="label">Slot open</span>
+        <h3>Mitchell picks</h3>
+        <p>Something he's really good at.</p>
+      </div>
     </div>
   </section>
+
+  <section class="sec" id="games" aria-labelledby="games-h">
+    <div class="sec-head">
+      <span class="label">File 02</span>
+      <div class="row"><h2 id="games-h">Games I'm making</h2><span class="hand">2 so far</span></div>
+    </div>
+
+    <article class="game" aria-labelledby="q-h">
+      <div class="top-strip"><span>Game 01</span><span class="status"><i></i>Playable now</span></div>
+      <div class="window q-window" id="qLogo" role="img" aria-label="Quackers logo"></div>
+      <div class="body">
+        <h3 id="q-h">Quackers</h3>
+        <p>A search-and-find game. Ducks are hiding all over each world. Use the arrows to look around, open doors, peek behind things and fill your Duck Log to unlock the next world. Now with Snowy Peaks, the Theater and the City, three mini games, and Kingsley's shop where you spend Pond Points.</p>
+        <div class="specs">
+          <div><span class="label">Worlds</span><b>6</b></div>
+          <div><span class="label">Mini games</span><b>3</b></div>
+          <div><span class="label">Levels</span><b>30</b></div>
+        </div>
+        <a class="go" href="https://quackersgame.com" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 1.5 L14 8 L3 14.5 Z" fill="#fff"/></svg>PLAY QUACKERS</a>
+        <span class="dom">quackersgame.com</span>
+        <div class="next">
+          <span class="label">Mini games</span>
+          <ul>
+            <li>Egg Guard</li>
+            <li>Scrap Hunt</li>
+            <li>Sandwich Snatch</li>
+          </ul>
+          <span class="label">On my to-do list</span>
+          <ul>
+            <li>Mr. Crow's giant duck-finding robot</li>
+            <li>Special ducks for the Duck Detector</li>
+            <li>Holiday ducks every month</li>
+          </ul>
+        </div>
+      </div>
+    </article>
+
+    <article class="game" aria-labelledby="d-h">
+      <div class="top-strip"><span>Game 02</span><span class="status soon"><i></i>In the lab</span></div>
+      <div class="window d-window" id="board">
+        <span class="score" id="score" aria-live="polite">0 PTS</span>
+        <button class="buddy" id="buddy" type="button" aria-label="Catch Digi Friend"></button>
+        <span class="hint" id="hint">psst... tap me!</span>
+      </div>
+      <div class="body">
+        <h3 id="d-h">Digi Friend</h3>
+        <p>You draw your own little buddy. It sneaks onto your screen and hides, and you have to catch it for points. Miss it and it hides somewhere easier next time. Spend points on harder challenges, like fake buddies to dodge.</p>
+        <span class="hand">this is just a sneak peek. try catching it!</span>
+      </div>
+    </article>
+  </section>
+
+  <section class="sec" aria-labelledby="how-h">
+    <div class="sec-head">
+      <span class="label">File 03</span>
+      <h2 id="how-h">How I make a game</h2>
+    </div>
+    <ol class="flow">
+      <li><span class="n">1</span><div><h3>Dream it up</h3><p>I say the idea out loud: the worlds, the rules, what you're trying to find.</p></div></li>
+      <li><span class="n">2</span><div><h3>Sketch and plan</h3><p>I figure out how it looks and works. My dad asks me lots of questions to make it better.</p></div></li>
+      <li><span class="n">3</span><div><h3>Build it</h3><p>My dad and I build it together with AI, so my ideas turn into a real game fast.</p></div></li>
+      <li><span class="n">4</span><div><h3>Play-test it</h3><p>I play it, find what's too easy or too hard, and we fix it. Then on to the next idea.</p></div></li>
+    </ol>
+  </section>
+
+  <footer class="foot">
+    <span class="label">Mitchell's Game Room</span>
+    <span class="hand">made by me, with help from Dad</span>
+  </footer>
 </div>
 
-<script src="brand/brand-art.js"></script>
 <script>
-/* ---------- Duck art ---------- */
-const ACC = {
-  bat:`<path d="M-4 -6 L-24 -24 L-17 -9 L-30 -8 L-6 3 Z" fill="#2a1f3a"/>`,
-  pirate:`<path d="M2 -24 Q14 -42 27 -24 Z" fill="#1d1d1d"/><circle cx="14" cy="-30" r="2.2" fill="#fff"/>`,
-  snorkel:`<path d="M8 -21 L5 -42" stroke="#ff7a00" stroke-width="3.5" stroke-linecap="round" fill="none"/><rect x="11" y="-25" width="14" height="10" rx="3.5" fill="#8fe3ff" stroke="#203040" stroke-width="2"/>`,
-  crown:`<path d="M5 -25 L7 -36 L11.5 -29 L14.5 -38 L17.5 -29 L22 -36 L24 -25 Z" fill="#ffe14d" stroke="#b88a00" stroke-width="1.5"/>`,
-  chef:`<rect x="7" y="-32" width="15" height="7" fill="#fff"/><circle cx="10" cy="-34" r="5" fill="#fff"/><circle cx="15" cy="-37" r="5" fill="#fff"/><circle cx="20" cy="-34" r="5" fill="#fff"/>`,
-  glow:``,
-  mail:`<rect x="26" y="-20" width="12" height="8" fill="#fff" stroke="#999" stroke-width="1"/><path d="M26 -20 L32 -15 L38 -20" stroke="#999" stroke-width="1" fill="none"/>`
-};
-/* o.outline: brand sticker look (ink line, cheek). o.ghost: empty Duck Log slot. Scene ducks stay unoutlined so hiding is fair. */
-const INK = "#173A5E";
-function duckShape(c, acc, o={}){
-  const ghost = !!o.ghost, line = o.outline||ghost;
-  const L = line ? ` stroke="${ghost?"#9DB7D2":INK}" stroke-width="2.4" stroke-linejoin="round"` : "";
-  const halo = acc==="glow" ? `<circle cx="2" cy="-6" r="36" fill="${c.body}" opacity=".22"/><circle cx="2" cy="-6" r="26" fill="${c.body}" opacity=".18"/>` : "";
-  const pre = acc==="bat" ? ACC.bat : "";
-  const post = acc && acc!=="bat" ? ACC[acc] : "";
-  return `${halo}${pre}<path d="M-19 -3 Q-30 -6 -32 -17 Q-24 -13 -16 -9 Z" fill="${c.body}"${L}/>
-  <ellipse cx="0" cy="0" rx="22" ry="15" fill="${c.body}"${L}/>
-  <path d="M-12 -1 Q-3 -10 9 -2 Q3 8 -9 5 Z" fill="${c.wing}"${L}/>
-  <circle cx="14" cy="-16" r="11.5" fill="${c.body}"${L}/>
-  <path d="M24 -18 Q33 -20 35 -15 Q31 -10 24 -11 Z" fill="${c.beak}"${L}/>
-  ${ghost ? "" : `<ellipse cx="9" cy="-22" rx="3.2" ry="1.6" fill="#fff" opacity=".55" transform="rotate(-28 9 -22)"/>
-  ${line ? `<circle cx="19" cy="-10.5" r="2.6" fill="#FF8FB1" opacity=".75"/>` : ""}
-  <circle cx="18" cy="-19" r="2.5" fill="${line?INK:"#1a1a1a"}"/><circle cx="18.9" cy="-19.9" r=".85" fill="#fff"/>${post}`}`;
-}
-const YELLOW = {body:"#FFCB2F", wing:"#F0A500", beak:"#FF8A3D"};
-/* Turkey Duck: "literally just a turkey" (Mitchell). Same frame as duckShape. */
-function turkeyShape(){
-  const fan = ["#b5412b","#e07b2f","#f2b134","#8b5a2b","#e07b2f","#b5412b","#f2b134"]
-    .map((c,i)=>{ const a = (-150 + i*20) * Math.PI/180; return `<ellipse cx="${(-6+Math.cos(a)*20).toFixed(1)}" cy="${(-8+Math.sin(a)*20).toFixed(1)}" rx="8" ry="17" fill="${c}" transform="rotate(${(-150+i*20)+90} ${(-6+Math.cos(a)*20).toFixed(1)} ${(-8+Math.sin(a)*20).toFixed(1)})"/>`; }).join("");
-  return `${fan}
-  <ellipse cx="0" cy="2" rx="20" ry="14" fill="#7a4a24"/>
-  <ellipse cx="-4" cy="2" rx="10" ry="7" fill="#5e3818"/>
-  <path d="M-6 14 l-3 8 M-6 22 l-4 2 M-6 22 l3 2 M6 14 l-1 8 M5 22 l-4 2 M5 22 l3 2" stroke="#e0a030" stroke-width="2" fill="none"/>
-  <path d="M12 -2 Q18 -14 15 -22" stroke="#7a4a24" stroke-width="7" fill="none" stroke-linecap="round"/>
-  <circle cx="16" cy="-24" r="7" fill="#c9a07a"/>
-  <path d="M22 -25 L29 -22 L22 -20 Z" fill="#f2b134"/>
-  <path d="M21 -20 Q24 -12 20 -9 Q18 -14 19 -20 Z" fill="#d3302f"/>
-  <circle cx="18" cy="-26" r="1.8" fill="#1a1a1a"/><circle cx="18.6" cy="-26.6" r=".6" fill="#fff"/>`;
-}
-const art = d => d.shape==="turkey" ? turkeyShape() : duckShape(d.c, d.acc);
-const acorn = `<ellipse cx="0" cy="2" rx="6" ry="7.5" fill="#a0642c"/><path d="M-7 -2 Q0 -9 7 -2 Q0 1 -7 -2 Z" fill="#6b4220"/><rect x="-1" y="-10" width="2" height="4" fill="#4a2c14"/>`;
-
-/* ---------- Worlds ----------
-   Every area: name, map position [col,row], exits {up,down,left,right}, doors [areaIds], draw(F,D).
-   F = this world's switches (mailbox open, light on...). D(id,x,y,scale,opts) draws a duck unless already found.
-   To add a world: copy one block below, give it new areas and ducks. */
-const sky = c => `<rect width="400" height="300" fill="${c}"/>`;
-const N = 'pointer-events="none"';
-const act = (name, label, inner, cls="") => `<g class="act ${cls}" data-act="${name}" tabindex="0" role="button" aria-label="${label}">${inner}</g>`;
-const door = (to, label, inner) => `<g class="door" data-go="${to}" tabindex="0" role="button" aria-label="${label}">${inner}</g>`;
-const tag = (x,y,t,fill="#fff") => `<text x="${x}" y="${y}" text-anchor="middle" font-family="Grandstander, Nunito, sans-serif" font-size="12" font-weight="900" letter-spacing=".5" fill="${fill}" ${N}>${t}</text>`;
-const fish = (x,y,c,flip) => `<g ${N} transform="translate(${x} ${y}) scale(${flip?-1:1} 1)"><ellipse rx="11" ry="6" fill="${c}"/><path d="M-9 0 L-17 -6 L-17 6 Z" fill="${c}"/><circle cx="5" cy="-1.5" r="1.4" fill="#123"/></g>`;
-const stars = n => Array.from({length:n},(_,i)=>`<circle cx="${(i*73)%400}" cy="${(i*41)%110+8}" r="${i%3?1:1.6}" fill="#fff" opacity=".7" ${N}/>`).join("");
-const books = (y,h,x0,x1,gap) => { let s="",x=x0,i=0; const pal=["#c0392b","#2e86c1","#27ae60","#d4ac0d","#8e44ad","#e67e22"];
-  while(x<x1){ const w=9+(i*7)%7; if(!(gap && x>=gap[0] && x<gap[1])){ s+=`<rect x="${x}" y="${y+((i*5)%9)}" width="${w-1}" height="${h-((i*5)%9)}" fill="${gap&&x>=gap[0]-24&&x<gap[1]+24?"#8e44ad":pal[i%pal.length]}"/>`;} x+=w; i++; } return `<g ${N}>${s}</g>`; };
-
-const WORLDS = [
-{ id:"w1", name:"The Backyard", start:"yard", art:"#6cc24a", sky:"#8fd3ff",
-  ducks:[
-    {id:"normal", name:"Normal Duck", tier:"Easy", area:"yard", hint:"Out in the open", c:YELLOW},
-    {id:"mail", name:"Mail Duck", tier:"Sneaky", area:"yard", hint:"Got a letter?", c:{body:"#ffd9a0",wing:"#f2b866",beak:"#ff8a1f"}, acc:"mail"},
-    {id:"leaf", name:"Leaf Duck", tier:"Sneaky", area:"garden", hint:"Likes bushes", c:{body:"#7FB743",wing:"#5E9330",beak:"#C9A23A"}},
-    {id:"rock", name:"Rock Duck", tier:"Sneaky", area:"pond", hint:"Hides by the water", c:{body:"#A6A196",wing:"#8A857B",beak:"#E07B2F"}},
-    {id:"tiny", name:"Tiny Duck", tier:"Tricky", area:"treetop", hint:"Way up high", c:YELLOW},
-    {id:"bubble", name:"Bubble Duck", tier:"Tricky", area:"house", hint:"Loves bath time", c:{body:"#FF9EC7",wing:"#F57AB0",beak:"#FF8A1F"}}
-  ],
-  areas:{
-    yard:{name:"Front Yard", pos:[1,1], exits:{left:"garden", right:"pond", up:"treetop"}, doors:["house"], draw:(F,D)=>`
-      ${sky("#8fd3ff")}<circle cx="345" cy="40" r="22" fill="#ffe66d" ${N}/>
-      <g ${N}><ellipse cx="150" cy="50" rx="34" ry="12" fill="#fff" opacity=".85"/><ellipse cx="170" cy="42" rx="22" ry="12" fill="#fff" opacity=".85"/></g>
-      <rect y="190" width="400" height="110" fill="#6cc24a"/>
-      <path d="M180 300 Q200 240 300 200 L320 200 Q230 245 225 300 Z" fill="#d8b47a" ${N}/>
-      <g ${N}><rect x="40" y="105" width="28" height="95" fill="#8b5a2b"/>
-      <circle cx="54" cy="92" r="48" fill="#3f9d3a"/><circle cx="24" cy="110" r="26" fill="#3f9d3a"/><circle cx="86" cy="112" r="26" fill="#3f9d3a"/></g>
-      <g ${N}><polygon points="220,102 300,48 380,102" fill="#7a3b2e"/>
-      <rect x="230" y="100" width="140" height="100" fill="#f06b5b"/>
-      <rect x="245" y="120" width="30" height="28" fill="#bfe8ff" stroke="#fff" stroke-width="4"/>
-      <rect x="330" y="120" width="30" height="28" fill="#bfe8ff" stroke="#fff" stroke-width="4"/></g>
-      ${door("house","Go in the house",`<rect class="dr" x="285" y="138" width="34" height="62" rx="3" fill="#5a3a8a"/><circle cx="312" cy="172" r="3" fill="#ffd43b"/>`)}
-      ${tag(302,131,"DOOR")}
-      <rect x="176" y="168" width="6" height="34" fill="#6b4a2b" ${N}/>
-      ${F.mailbox ? D("mail",179,150,.42) : ""}
-      ${act("mailbox","Open the mailbox", F.mailbox
-        ? `<rect x="160" y="150" width="38" height="22" rx="10" fill="#4a6fd1"/><rect x="146" y="164" width="16" height="9" rx="2" fill="#3a5bb5"/><rect x="198" y="140" width="4" height="14" fill="#e53935"/>`
-        : `<rect x="160" y="150" width="38" height="22" rx="10" fill="#4a6fd1"/><rect x="198" y="152" width="4" height="14" fill="#e53935"/><circle cx="162" cy="161" r="2" fill="#2a3f8f"/>`)}
-      ${D("normal",128,242,1)}${T("a1",90,214)}${T("a2",356,206)}`},
-    garden:{name:"Garden", pos:[0,1], exits:{right:"yard"}, doors:[], draw:(F,D)=>`
-      ${sky("#8fd3ff")}<rect y="170" width="400" height="130" fill="#5fb546"/>
-      <rect x="0" y="150" width="400" height="22" fill="#b5835a" ${N}/>${Array.from({length:14},(_,i)=>`<rect x="${i*30+4}" y="138" width="14" height="34" fill="#c9966a" ${N}/>`).join("")}
-      ${[40,110,180].map(x=>`<g ${N}><rect x="${x}" y="200" width="4" height="30" fill="#2e7d32"/><circle cx="${x+2}" cy="196" r="9" fill="#ff6fa8"/><circle cx="${x+2}" cy="196" r="3" fill="#ffd43b"/></g>`).join("")}
-      ${H("turkey",72,240,.92)}
-      <ellipse cx="80" cy="262" rx="60" ry="30" fill="#3f8f34" ${N}/>
-      ${D("leaf",262,222,.9,{flip:1})}
-      <ellipse cx="285" cy="240" rx="52" ry="30" fill="#4a9c3a" ${N}/>
-      <ellipse cx="340" cy="252" rx="44" ry="26" fill="#3f8f34" ${N}/>
-      <ellipse cx="190" cy="264" rx="40" ry="22" fill="#4a9c3a" ${N}/>${T("a3",372,206)}`},
-    pond:{name:"Pond", pos:[2,1], exits:{left:"yard"}, doors:[], draw:(F,D)=>`
-      ${sky("#8fd3ff")}<rect y="160" width="400" height="140" fill="#6cc24a"/>
-      <ellipse cx="190" cy="235" rx="170" ry="52" fill="#3c8fd8"/>
-      <g ${N}><ellipse cx="190" cy="228" rx="150" ry="40" fill="none" stroke="#7cc0f0" stroke-width="2" opacity=".6"/>
-      <ellipse cx="130" cy="230" rx="22" ry="8" fill="#4caf50"/><ellipse cx="220" cy="250" rx="18" ry="6" fill="#4caf50"/>
-      ${[40,52,64].map(x=>`<rect x="${x}" y="170" width="3" height="50" fill="#2e7d32"/><rect x="${x-3}" y="165" width="9" height="20" rx="4" fill="#7b4a1e"/>`).join("")}</g>
-      ${D("rock",322,180,.7)}
-      <ellipse cx="335" cy="200" rx="42" ry="26" fill="#a39e93" ${N}/>
-      <ellipse cx="325" cy="192" rx="16" ry="6" fill="#bdb8ad" ${N}/>${T("a4",78,214)}`},
-    treetop:{name:"Top of the Tree", pos:[1,0], exits:{down:"yard"}, doors:[], draw:(F,D)=>`
-      ${sky("#a9ddff")}
-      <path d="M0 230 Q150 200 400 215 L400 240 Q160 228 0 255 Z" fill="#8b5a2b" ${N}/>
-      ${[[30,40,60],[370,50,70],[0,290,80],[400,290,80],[200,-20,70]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="#3f9d3a" ${N}/>`).join("")}
-      <ellipse cx="240" cy="205" rx="34" ry="14" fill="#6b4220" ${N}/>
-      ${D("tiny",238,198,.36)}
-      <path d="M206 205 Q240 228 274 205 Q270 220 240 222 Q210 220 206 205 Z" fill="#8a5a2c" ${N}/>
-      <circle cx="110" cy="214" r="5" fill="#ff5252" ${N}/><circle cx="118" cy="210" r="5" fill="#ff5252" ${N}/>${T("a5",330,211)}`},
-    house:{name:"Inside the House", pos:[1,2], exits:{}, doors:["yard"], draw:(F,D)=>`
-      <rect width="400" height="300" fill="#ffe2a8"/><rect y="230" width="400" height="70" fill="#c98d5a" ${N}/>
-      <rect x="150" y="60" width="60" height="44" fill="#7ec8e3" stroke="#8b5a2b" stroke-width="6" ${N}/>
-      ${door("yard","Go back outside",`<rect class="dr" x="28" y="118" width="54" height="112" rx="3" fill="#5a3a8a"/><circle cx="72" cy="178" r="4" fill="#ffd43b"/>`)}
-      ${tag(55,110,"EXIT","#5a3a8a")}
-      <ellipse cx="290" cy="196" rx="78" ry="12" fill="#9be0ff" ${N}/>
-      ${D("bubble",286,192,.75)}
-      ${[[240,196,14],[262,202,12],[318,200,15],[338,194,11],[300,205,10]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="#ffffff" opacity=".95" ${N}/>`).join("")}
-      <rect x="210" y="198" width="160" height="50" rx="22" fill="#ffffff" ${N}/>
-      <rect x="225" y="246" width="10" height="12" fill="#bbb" ${N}/><rect x="345" y="246" width="10" height="12" fill="#bbb" ${N}/>${T("a6",182,114)}`}
-  }},
-
-{ id:"w2", name:"Spooky Manor", start:"gate", art:"#6b4fa0", sky:"#2b2350",
-  ducks:[
-    {id:"pumpkin", name:"Pumpkin Duck", tier:"Easy", area:"gate", hint:"Sits with the pumpkins", c:{body:"#ff8c1a",wing:"#e06f00",beak:"#ffd43b"}},
-    {id:"ghost", name:"Ghost Duck", tier:"Sneaky", area:"hall", hint:"Almost see-through", c:{body:"#ffffff",wing:"#dfe6ff",beak:"#c9d3f5"}, opacity:.28},
-    {id:"book", name:"Book Duck", tier:"Sneaky", area:"library", hint:"Reads a lot", c:{body:"#8e44ad",wing:"#6c3483",beak:"#d4ac0d"}},
-    {id:"soup", name:"Soup Duck", tier:"Tricky", area:"kitchen", hint:"Something's cooking", c:YELLOW, acc:"chef"},
-    {id:"bat", name:"Bat Duck", tier:"Tricky", area:"attic", hint:"Hangs upside down", c:{body:"#4b3a6b",wing:"#3a2a55",beak:"#b07a3a"}, acc:"bat"},
-    {id:"spider", name:"Spider Duck", tier:"Legendary", area:"basement", hint:"Needs the lights on", c:{body:"#7a7a85",wing:"#5f5f6a",beak:"#e07b2f"}}
-  ],
-  areas:{
-    gate:{name:"Front Gate", pos:[1,2], exits:{}, doors:["hall"], draw:(F,D)=>`
-      ${sky("#2b2350")}${stars(30)}<circle cx="330" cy="50" r="26" fill="#f4f0c8" ${N}/><circle cx="318" cy="44" r="5" fill="#e2ddb0" ${N}/>
-      <g ${N}><polygon points="110,72 200,20 290,72" fill="#1f1830"/><rect x="120" y="70" width="160" height="140" fill="#3b2f52"/>
-      <rect x="140" y="90" width="22" height="28" fill="#ffd86b"/><rect x="238" y="90" width="22" height="28" fill="#2a2140"/><rect x="140" y="140" width="22" height="28" fill="#2a2140"/><rect x="238" y="140" width="22" height="28" fill="#ffd86b"/></g>
-      ${door("hall","Go in the front door",`<path class="dr" d="M180 210 V165 Q200 140 220 165 V210 Z" fill="#6b3f2a"/><circle cx="212" cy="190" r="3" fill="#ffd43b"/>`)}
-      ${tag(200,136,"DOOR","#ffd86b")}
-      <rect y="205" width="400" height="95" fill="#2f3d24" ${N}/>
-      <path d="M200 300 L182 210 L218 210 L240 300 Z" fill="#5a4a3a" ${N}/>
-      <g ${N}>${Array.from({length:22},(_,i)=>{const x=i*19; return (x>160&&x<240)?"":`<rect x="${x}" y="190" width="4" height="48" fill="#111"/><path d="M${x-2} 192 L${x+2} 182 L${x+6} 192 Z" fill="#111"/>`;}).join("")}<rect x="0" y="200" width="162" height="4" fill="#111"/><rect x="240" y="200" width="160" height="4" fill="#111"/></g>
-      <ellipse cx="60" cy="262" rx="26" ry="20" fill="#ff7b00" ${N}/>
-      ${D("pumpkin",96,256,.7)}
-      <ellipse cx="112" cy="272" rx="24" ry="18" fill="#ff8a1a" ${N}/><rect x="109" y="250" width="5" height="8" fill="#3f6b1f" ${N}/>
-      <ellipse cx="335" cy="262" rx="28" ry="21" fill="#ff7b00" ${N}/><path d="M325 258 l6 -6 l6 6 z M341 258 l6 -6 l6 6 z" fill="#3a1d00" ${N}/>`},
-    hall:{name:"Grand Hall", pos:[1,1], exits:{left:"library", right:"kitchen", up:"attic"}, doors:["gate","basement"], draw:(F,D)=>`
-      <rect width="400" height="300" fill="#4a3566"/>
-      <g ${N}>${Array.from({length:14},(_,i)=>`<rect x="${i*30}" y="0" width="12" height="230" fill="#553d74"/>`).join("")}</g>
-      <rect y="230" width="400" height="70" fill="#5a3b28" ${N}/>
-      <g ${N}><rect x="170" y="40" width="60" height="70" fill="#8b6a2b"/><rect x="178" y="48" width="44" height="54" fill="#2c3e50"/><circle cx="200" cy="70" r="12" fill="#e8d7b0"/></g>
-      ${door("gate","Go back outside",`<rect class="dr" x="92" y="140" width="50" height="90" rx="3" fill="#6b3f2a"/><circle cx="132" cy="186" r="3" fill="#ffd43b"/>`)}
-      ${tag(117,132,"OUT","#ffd86b")}
-      ${door("basement","Go down the stairs",`<path class="dr" d="M170 300 L180 240 L220 240 L230 300 Z" fill="#1a1222"/><path d="M178 254 h44 M176 268 h48 M174 282 h52" stroke="#3a2a44" stroke-width="3"/>`)}
-      ${tag(200,236,"STAIRS","#ffd86b")}
-      <g ${N}><rect x="300" y="110" width="34" height="120" fill="#3b2414"/><circle cx="317" cy="135" r="12" fill="#e8d7b0"/><line x1="317" y1="135" x2="317" y2="127" stroke="#222" stroke-width="2"/><line x1="317" y1="135" x2="323" y2="138" stroke="#222" stroke-width="2"/><rect x="310" y="160" width="14" height="50" fill="#2a190c"/></g>
-      ${D("ghost",252,206,.85)}`},
-    library:{name:"Library", pos:[0,1], exits:{right:"hall"}, doors:[], draw:(F,D)=>`
-      <rect width="400" height="300" fill="#3d2b1f"/>
-      <rect x="60" y="30" width="290" height="250" fill="#5a3d26" ${N}/>
-      ${books(40,64,70,340)}${books(124,64,70,340,[226,266])}${books(208,64,70,340)}
-      <g ${N}><rect x="60" y="104" width="290" height="10" fill="#7a5233"/><rect x="60" y="188" width="290" height="10" fill="#7a5233"/><rect x="60" y="272" width="290" height="10" fill="#7a5233"/></g>
-      ${D("book",246,180,.55)}
-      <g ${N}><rect x="20" y="40" width="6" height="240" fill="#8b5a2b"/><rect x="44" y="40" width="6" height="240" fill="#8b5a2b"/>${[60,100,140,180,220,260].map(y=>`<rect x="20" y="${y}" width="30" height="5" fill="#8b5a2b"/>`).join("")}</g>`},
-    kitchen:{name:"Kitchen", pos:[2,1], exits:{left:"hall"}, doors:[], draw:(F,D)=>`
-      <rect width="400" height="300" fill="#5b4a6e"/>
-      <g ${N}>${Array.from({length:40},(_,i)=>`<rect x="${(i%10)*40+2}" y="${Math.floor(i/10)*30+40}" width="36" height="26" fill="#66557a"/>`).join("")}</g>
-      <rect y="190" width="400" height="110" fill="#6b4a35" ${N}/>
-      <rect x="170" y="160" width="140" height="32" fill="#2b2b33" ${N}/><circle cx="200" cy="176" r="8" fill="#e74c3c" ${N}/><circle cx="280" cy="176" r="8" fill="#444" ${N}/>
-      ${F.lid ? D("soup",236,124,.55) : ""}
-      <rect x="203" y="118" width="66" height="44" rx="6" fill="#55555f" ${N}/><rect x="196" y="124" width="10" height="6" fill="#55555f" ${N}/><rect x="266" y="124" width="10" height="6" fill="#55555f" ${N}/>
-      ${F.lid ? `<g ${N} opacity=".6"><path d="M222 110 q-6 -10 0 -20 q6 -10 0 -20" stroke="#fff" stroke-width="3" fill="none"/><path d="M250 110 q-6 -10 0 -20 q6 -10 0 -20" stroke="#fff" stroke-width="3" fill="none"/></g>
-        <g ${N}><ellipse cx="330" cy="186" rx="30" ry="6" fill="#77777f"/><rect x="326" y="176" width="8" height="6" fill="#999"/></g>`
-      : act("lid","Lift the pot lid",`<ellipse cx="236" cy="118" rx="36" ry="7" fill="#77777f"/><rect x="230" y="106" width="12" height="7" rx="2" fill="#999"/>`,"pulse")}
-      <g ${N}><rect x="40" y="120" width="60" height="70" fill="#3a2a20"/><circle cx="70" cy="135" r="8" fill="#e8d7b0"/></g>`},
-    attic:{name:"Attic", pos:[1,0], exits:{down:"hall"}, doors:[], draw:(F,D)=>`
-      <rect width="400" height="300" fill="#2a2030"/>
-      <rect y="40" width="400" height="14" fill="#4a3424" ${N}/>
-      <g ${N}>${[60,130,200,350].map(x=>`<g transform="translate(${x} 58)"><path d="M0 0 q-10 6 -16 0 q4 10 16 8 q12 2 16 -8 q-6 6 -16 0z" fill="#3a2a55"/><ellipse cx="0" cy="6" rx="5" ry="8" fill="#3a2a55"/></g>`).join("")}</g>
-      ${D("bat",290,72,.6,{upside:1})}
-      <rect y="230" width="400" height="70" fill="#3a2a22" ${N}/>
-      <g ${N}><rect x="40" y="190" width="60" height="44" fill="#7a5a3a"/><rect x="90" y="200" width="44" height="34" fill="#8a6a4a"/><rect x="290" y="180" width="70" height="54" fill="#6a4a2a"/></g>`},
-    basement:{name:"Basement", pos:[2,2], exits:{}, doors:["hall"], draw:(F,D)=> {
-      const back = door("hall","Go back up the stairs",`<path class="dr" d="M10 300 L10 220 L60 220 L60 300 Z" fill="${F.light?"#3a2a44":"#141020"}"/><path d="M14 240 h42 M14 260 h42 M14 280 h42" stroke="${F.light?"#5a4a64":"#222034"}" stroke-width="3"/>`) + tag(35,214,"UP",F.light?"#ffd86b":"#5b6a99");
-      return F.light ? `
-      <rect width="400" height="300" fill="#5a5a63"/>
-      <g ${N}>${Array.from({length:40},(_,i)=>`<rect x="${(i%8)*52+((Math.floor(i/8))%2?26:0)-10}" y="${Math.floor(i/8)*40+20}" width="48" height="36" fill="#666670"/>`).join("")}</g>
-      <rect y="240" width="400" height="60" fill="#3c3c44" ${N}/>
-      <g ${N}><line x1="200" y1="0" x2="200" y2="40" stroke="#222" stroke-width="2"/><circle cx="200" cy="48" r="12" fill="#ffe66d"/><circle cx="200" cy="48" r="30" fill="#ffe66d" opacity=".25"/></g>
-      ${back}
-      ${act("light","Turn the light off",`<rect x="90" y="125" width="22" height="32" rx="3" fill="#ddd"/><rect x="97" y="130" width="8" height="10" fill="#4cd2a0"/>`)}
-      <g ${N}><rect x="130" y="200" width="60" height="44" fill="#8a6a4a"/><rect x="240" y="210" width="80" height="34" fill="#7a5a3a"/></g>
-      ${D("spider",330,96,.5)}
-      <g ${N} stroke="#e8e8f0" stroke-width="1" fill="none" opacity=".8"><path d="M400 30 L300 130"/><path d="M400 30 L290 70"/><path d="M400 30 L350 150"/><path d="M400 30 L395 150"/>
-      <path d="M330 100 Q345 85 352 64"/><path d="M315 115 Q340 105 372 70 Q378 110 365 128"/><path d="M300 130 Q330 118 350 150"/></g>
-      <g ${N}><line x1="372" y1="40" x2="372" y2="58" stroke="#222"/><circle cx="372" cy="62" r="4" fill="#111"/></g>`
-    : `<rect width="400" height="300" fill="#07070d"/>
-      ${back}
-      ${tag(220,150,"It's too dark to see anything...","#7d86b8")}
-      ${act("light","Turn on the light",`<circle cx="101" cy="141" r="26" fill="#ffd43b" opacity=".18"/><rect x="90" y="125" width="22" height="32" rx="3" fill="#bbb"/><rect x="97" y="142" width="8" height="10" fill="#e74c3c"/>`,"pulse")}`; }}
-  }},
-
-{ id:"w3", name:"Under the Sea", start:"beach", art:"#2a9fd6", sky:"#1f6fa8",
-  ducks:[
-    {id:"snorkel", name:"Snorkel Duck", tier:"Easy", area:"shallows", hint:"Out for a swim", c:YELLOW, acc:"snorkel"},
-    {id:"sand", name:"Sandcastle Duck", tier:"Sneaky", area:"beach", hint:"Lives in a castle", c:{body:"#e8c98a",wing:"#d6b06e",beak:"#f08a2b"}},
-    {id:"coral", name:"Coral Duck", tier:"Sneaky", area:"reef", hint:"Pink like the reef", c:{body:"#ff7aa8",wing:"#e0558a",beak:"#ffd43b"}},
-    {id:"clam", name:"Clam Duck", tier:"Tricky", area:"reef", hint:"Shy, hides in a shell", c:{body:"#fff4dc",wing:"#f0dfbf",beak:"#ff8a1f"}},
-    {id:"pirate", name:"Pirate Duck", tier:"Tricky", area:"cabin", hint:"Arr! Behind the barrel", c:YELLOW, acc:"pirate"},
-    {id:"glow", name:"Glow Duck", tier:"Tricky", area:"trench", hint:"Only seen with a light", c:{body:"#9bffea",wing:"#5fe0c8",beak:"#ffd43b"}, acc:"glow"},
-    {id:"golden", name:"Golden Duck", tier:"Legendary", area:"cabin", hint:"Locked away", c:{body:"#ffcf33",wing:"#e0a800",beak:"#ff8a1f"}, acc:"crown"}
-  ],
-  areas:{
-    beach:{name:"Sunny Beach", pos:[1,0], exits:{down:"shallows"}, doors:[], draw:(F,D)=>`
-      ${sky("#8fd3ff")}<circle cx="70" cy="45" r="24" fill="#ffe66d" ${N}/>
-      <rect y="110" width="400" height="60" fill="#2a9fd6" ${N}/><path d="M0 112 q25 -8 50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0" fill="none" stroke="#fff" stroke-width="3" opacity=".7" ${N}/>
-      <path d="M0 165 Q200 145 400 165 L400 300 L0 300 Z" fill="#f1d79a"/>
-      <g ${N}><path d="M40 260 Q55 190 70 140" stroke="#8b5a2b" stroke-width="10" fill="none"/>${[[-40,-6],[-30,18],[30,-8],[36,16]].map(([dx,dy])=>`<path d="M70 140 q${dx/2} ${dy-14} ${dx} ${dy}" stroke="#3f9d3a" stroke-width="9" fill="none" stroke-linecap="round"/>`).join("")}</g>
-      ${D("sand",300,202,.6)}
-      <g ${N}><rect x="240" y="200" width="120" height="50" fill="#e3c27f"/><rect x="230" y="170" width="30" height="80" fill="#d9b66f"/><rect x="340" y="170" width="30" height="80" fill="#d9b66f"/>
-      ${[230,240,250,340,350,360].map(x=>`<rect x="${x}" y="162" width="7" height="10" fill="#d9b66f"/>`).join("")}<path d="M288 250 v-22 q12 -14 24 0 v22 z" fill="#b8954f"/><path d="M245 170 v-30 l14 6 l-14 6" fill="#e74c3c" stroke="#8b5a2b" stroke-width="1"/></g>
-      <g ${N}><path d="M140 250 l10 -14 l10 14 z" fill="#ff9e80"/><circle cx="180" cy="270" r="6" fill="#fff"/></g>`},
-    shallows:{name:"Shallow Water", pos:[1,1], exits:{up:"beach", left:"reef", right:"wreck", down:"trench"}, doors:[], draw:(F,D)=>`
-      <rect width="400" height="300" fill="#2f9ad8"/><rect y="150" width="400" height="150" fill="#2588c4" ${N}/>
-      <g ${N} fill="#fff" opacity=".08"><polygon points="60,0 100,0 40,300 0,300"/><polygon points="200,0 230,0 190,300 150,300"/><polygon points="320,0 350,0 330,300 290,300"/></g>
-      <path d="M0 265 Q200 245 400 265 L400 300 L0 300 Z" fill="#e6c98a" ${N}/>
-      <g ${N}>${[30,60,340,370].map(x=>`<path d="M${x} 280 q10 -20 0 -40 q-10 -20 0 -40" stroke="#2e8b57" stroke-width="6" fill="none"/>`).join("")}</g>
-      ${fish(250,90,"#ffb347")}${fish(280,110,"#ff6f61",1)}${fish(90,220,"#ffd43b")}
-      <g class="bob">${D("snorkel",160,140,.8)}</g>`},
-    reef:{name:"Coral Reef", pos:[0,1], exits:{right:"shallows"}, doors:[], draw:(F,D)=>`
-      <rect width="400" height="300" fill="#2386c4"/>
-      <path d="M0 255 Q200 235 400 255 L400 300 L0 300 Z" fill="#e6c98a" ${N}/>
-      <g ${N}>${[[320,220],[350,200],[370,230]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="18" fill="#ff9f43"/>`).join("")}</g>
-      ${D("coral",236,190,.62)}
-      <g ${N}>${[[205,215,20],[225,230,18],[250,222,20],[272,206,17],[262,240,16],[215,245,14],[240,250,14]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="#ff7aa8"/>`).join("")}
-      <rect x="236" y="240" width="8" height="20" fill="#e0558a"/></g>
-      ${fish(120,80,"#ffd43b")}${fish(320,120,"#8fe3ff",1)}
-      ${F.clam ? `${D("clam",96,236,.36)}<g ${N}><path d="M64 250 Q92 274 120 250 Z" fill="#b48ad1"/><path d="M64 250 Q70 214 96 206 Q122 214 120 250" fill="none" stroke="#c9a0dc" stroke-width="6"/></g>`
-        : act("clam","Open the clam",`<path d="M64 250 Q92 274 120 250 Z" fill="#b48ad1"/><path d="M64 250 Q92 226 120 250 Z" fill="#c9a0dc"/><path d="M78 244 l0 8 M92 240 l0 12 M106 244 l0 8" stroke="#9a72b8" stroke-width="2"/>`,"pulse")}`},
-    wreck:{name:"Shipwreck", pos:[2,1], exits:{left:"shallows"}, doors:["cabin"], draw:(F,D)=>`
-      <rect width="400" height="300" fill="#1f6fa8"/>
-      <path d="M0 260 Q200 240 400 260 L400 300 L0 300 Z" fill="#d9bb7a" ${N}/>
-      <g ${N}><polygon points="110,150 370,120 350,255 140,265" fill="#6b4423"/>
-      ${[160,190,220].map(y=>`<line x1="118" y1="${y}" x2="362" y2="${y-24}" stroke="#4f3018" stroke-width="3"/>`).join("")}
-      <rect x="250" y="40" width="10" height="95" fill="#5a3a1f" transform="rotate(12 255 130)"/></g>
-      ${door("cabin","Swim inside the ship",`<ellipse class="dr" cx="235" cy="206" rx="28" ry="32" fill="#140b05"/>`)}
-      ${tag(235,166,"IN","#ffd86b")}
-      ${fish(70,100,"#ffb347")}${fish(90,130,"#ffb347")}`},
-    cabin:{name:"Captain's Cabin", pos:[2,2], exits:{}, doors:["wreck"], draw:(F,D)=>`
-      <rect width="400" height="300" fill="#6b4a2b"/>
-      <g ${N}>${Array.from({length:8},(_,i)=>`<line x1="0" y1="${i*36+20}" x2="400" y2="${i*36+20}" stroke="#5a3d22" stroke-width="3"/>`).join("")}
-      <circle cx="200" cy="80" r="26" fill="#8b6a3a"/><circle cx="200" cy="80" r="19" fill="#2f9ad8"/></g>${fish(200,82,"#ffd43b")}
-      ${door("wreck","Swim back out",`<rect class="dr" x="26" y="124" width="48" height="106" rx="3" fill="#3a2414"/><circle cx="64" cy="178" r="4" fill="#ffd43b"/>`)}
-      ${tag(50,116,"OUT","#ffd86b")}
-      <rect y="230" width="400" height="70" fill="#5a3d22" ${N}/>
-      ${D("pirate",130,196,.72)}
-      <g ${N}><rect x="96" y="196" width="60" height="64" rx="10" fill="#8b5a2b"/><rect x="96" y="208" width="60" height="5" fill="#3a2414"/><rect x="96" y="242" width="60" height="5" fill="#3a2414"/></g>
-      ${F.chest ? `${D("golden",292,222,.55)}<g ${N}><rect x="250" y="226" width="84" height="42" fill="#8b5a2b"/><rect x="250" y="226" width="84" height="6" fill="#ffd43b"/><path d="M250 226 L260 190 L344 190 L334 226 Z" fill="#a06a35" opacity=".0"/><circle cx="262" cy="230" r="5" fill="#ffd43b"/><circle cx="320" cy="230" r="5" fill="#ffd43b"/></g><path d="M252 226 L240 180 L330 172 L334 226 Z" fill="#a06a35" opacity=".35" ${N}/>`
-        : act("chest", F.key ? "Unlock the chest" : "Try the chest",`<rect x="250" y="226" width="84" height="42" fill="#8b5a2b"/><path d="M250 226 Q292 196 334 226 Z" fill="#a06a35"/><rect x="250" y="224" width="84" height="6" fill="#ffd43b"/><rect x="285" y="230" width="14" height="16" rx="2" fill="#ffd43b"/><circle cx="292" cy="237" r="2.5" fill="#3a2414"/>`, F.key ? "pulse" : "")}`},
-    trench:{name:"Deep Trench", pos:[1,2], exits:{up:"shallows"}, doors:[], draw:(F,D)=>{
-      const fishy = (lit)=>`<g transform="translate(300 120)" ${N}><ellipse rx="34" ry="22" fill="${lit?"#3a4a6a":"#121a2a"}"/><path d="M-30 0 L-52 -16 L-52 16 Z" fill="${lit?"#3a4a6a":"#121a2a"}"/><path d="M14 8 L30 4 L14 14" fill="#ddd"/><circle cx="16" cy="-6" r="4" fill="#fff"/><path d="M6 -20 Q20 -46 40 -40" stroke="${lit?"#6a7a9a":"#26324a"}" stroke-width="3" fill="none"/></g>`;
-      return F.lamp ? `
-      <rect width="400" height="300" fill="#0d2847"/><circle cx="340" cy="80" r="140" fill="#ffe66d" opacity=".08" ${N}/>
-      <g ${N}><path d="M0 300 L0 200 Q40 180 70 220 Q110 190 150 240 L150 300Z" fill="#081a30"/><path d="M400 300 L400 210 Q360 190 330 230 Q290 200 260 250 L260 300Z" fill="#081a30"/></g>
-      ${fishy(1)}${act("lamp","Turn the light off",`<circle cx="340" cy="80" r="11" fill="#ffe66d"/><circle cx="340" cy="80" r="22" fill="#ffe66d" opacity=".3"/>`)}
-      ${D("glow",110,170,.6)}
-      ${F.key ? "" : act("key","Pick up the key",`<g transform="translate(205 252) rotate(-15)"><circle r="16" fill="transparent"/><circle r="9" fill="none" stroke="#ffd43b" stroke-width="5"/><rect x="8" y="-2.5" width="26" height="5" fill="#ffd43b"/><rect x="26" y="0" width="4" height="9" fill="#ffd43b"/><rect x="18" y="0" width="4" height="7" fill="#ffd43b"/></g>`,"pulse")}`
-      : `<rect width="400" height="300" fill="#040a16"/>
-      ${fishy(0)}${tag(170,190,"Brrr, it's so dark down here...","#5b6a99")}
-      ${act("lamp","Tap the glowing light",`<circle cx="340" cy="80" r="22" fill="#ffe66d" opacity=".25"/><circle cx="340" cy="80" r="9" fill="#ffe66d"/>`,"pulse")}`; }}
-  }}
-];
-
-/* What each tappable thing does. Return a message to show. */
-const ACTS = {
-  mailbox:F=>{ if(F.mailbox) return "It's already open."; F.mailbox=1; return "Creak! The mailbox opens."; },
-  lid:F=>{ F.lid=1; return "You lift the lid... something smells good!"; },
-  light:F=>{ F.light = F.light?0:1; return F.light ? "Click! The light is on." : "Lights off. Spooky!"; },
-  clam:F=>{ F.clam=1; return "The clam opens up!"; },
-  lamp:F=>{ F.lamp = F.lamp?0:1; return F.lamp ? "The fish's light glows bright!" : "Back to the dark..."; },
-  key:F=>{ F.key=1; return "You found a key! It must open something."; },
-  chest:F=>{ if(!F.key) return "Locked tight. A key must be hiding somewhere dark."; F.chest=1; return "The key fits. The chest pops open!"; }
+/* Quackers brand art. Shared by the brand guide and the game.
+   mascot(opts) -> SVG markup for viewBox "0 0 120 100" (the explorer duck, outlined).
+   logo(opts)   -> full <svg> for the Quackers wordmark (viewBox 0 0 640 210).
+   Colours come from BRAND so the guide, game and SVG files always match. */
+var BRAND = {
+  ink:"#173A5E", duck:"#FFCB2F", duckDeep:"#F0A500", beak:"#FF8A3D", pond:"#2387D9",
+  puddle:"#8FD0FF", lily:"#3FB86A", bubble:"#FF6FA6", sky:"#EAF6FF", cloud:"#FFFFFF", cheek:"#FF8FB1"
 };
 
-/* ---------- State and saving ---------- */
-const SAVE = "quackers-v2";
-const allDucks = WORLDS.flatMap((w,wi)=>w.ducks.map(d=>({...d, world:wi})));
-const DUCK = Object.fromEntries(allDucks.map(d=>[d.id,d]));
-
-/* ---------- Holiday ducks ----------
-   Each one lives in a world, shows up only in its month (the player's own date), and needs a task first.
-   Thanksgiving test: find 6 acorns around The Backyard, then search for the Turkey Duck.
-   Later rule (not built yet): holiday ducks also need the pigeon's device from the City world. */
-const HOLIDAYS = [
-  {id:"turkey", name:"Turkey Duck", holiday:"Thanksgiving", month:10, monthName:"November", world:"w1", area:"garden",
-   tier:"Holiday", shape:"turkey", c:{body:"#7a4a24",wing:"#5e3818",beak:"#f2b134"},
-   tokenName:"acorn", tokens:{a1:"yard",a2:"yard",a3:"garden",a4:"pond",a5:"treetop",a6:"house"}}
-];
-HOLIDAYS.forEach(h=>{ DUCK[h.id] = {...h, worldIndex:WORLDS.findIndex(w=>w.id===h.world)}; });
-const NOW_MONTH = (()=>{ try{ const m = +new URLSearchParams(location.search).get("month"); if(m>=1 && m<=12) return m-1; }catch(e){} return new Date().getMonth(); })();
-const holidayHere = () => HOLIDAYS.find(h=>h.world===W().id);
-const holidayOn = h => !!h && h.month===NOW_MONTH;
-const tokensAll = h => Object.keys(h.tokens).length;
-const tokensGot = h => S.holiday.tokens.filter(t=>t in h.tokens).length;
-const holidayLive = h => holidayOn(h) && !found.has(h.id);
-function T(id,x,y){
-  const h = holidayHere(); if(!holidayLive(h) || !(id in h.tokens) || S.holiday.tokens.includes(id)) return "";
-  return `<g class="token" data-token="${id}" tabindex="0" role="button" aria-label="Something small" transform="translate(${x} ${y})"><circle r="16" fill="transparent"/>${acorn}</g>`;
-}
-function H(id,x,y,s){ const h = HOLIDAYS.find(k=>k.id===id); if(!holidayOn(h) || tokensGot(h) < tokensAll(h)) return ""; return D(id,x,y,s); }
-const silhouette = svg => svg.replace(/fill="#[0-9a-fA-F]{3,6}"/g,'fill="#C9DCEC"').replace(/stroke="#[0-9a-fA-F]{3,6}"/g,'stroke="#C9DCEC"');
-function fresh(){ return {found:[], flags:{w1:{},w2:{},w3:{}}, visited:{w1:[],w2:[],w3:[]}, unlocked:1, sound:true, world:0, area:{}, holiday:{tokens:[]}}; }
-let S = fresh();
-function load(){ try{ const s = JSON.parse(localStorage.getItem(SAVE)||"null"); if(s && s.flags) S = Object.assign(fresh(), s); }catch(e){} }
-function save(){ try{ localStorage.setItem(SAVE, JSON.stringify(S)); }catch(e){} }
-const found = new Set();
-function syncFound(){ found.clear(); S.found.forEach(id=>found.add(id)); }
-const W = () => WORLDS[S.world];
-const F = () => S.flags[W().id];
-const curArea = () => S.area[W().id] || W().start;
-const worldDone = wi => WORLDS[wi].ducks.every(d=>found.has(d.id));
-const worldCount = wi => WORLDS[wi].ducks.filter(d=>found.has(d.id)).length;
-
-/* ---------- Drawing ---------- */
-const $ = id => document.getElementById(id);
-function D(id,x,y,s,o={}){
-  if(found.has(id)) return "";
-  const d = DUCK[id]; const sx = o.flip ? -s : s, sy = o.upside ? -s : s;
-  const op = d.opacity ? ` opacity="${d.opacity}"` : "";
-  return `<g class="duck" data-duck="${id}" tabindex="0" role="button" aria-label="Something hiding" transform="translate(${x} ${y}) scale(${sx} ${sy})"${op}>
-    <circle cx="4" cy="-6" r="30" fill="transparent"/>${art(d)}</g>`;
-}
-function sceneSVG(){ return `<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">${W().areas[curArea()].draw(F(), D)}</svg>`; }
-
-function renderMap(){
-  const w = W(), A = w.areas, cell=22, gap=8, ch=cell*.75;
-  const ids = Object.keys(A); const vis = new Set(S.visited[w.id]);
-  const cols = Math.max(...ids.map(k=>A[k].pos[0]))+1, rows = Math.max(...ids.map(k=>A[k].pos[1]))+1;
-  const cx = k => A[k].pos[0]*(cell+gap)+cell/2+2, cy = k => A[k].pos[1]*(ch+gap)+ch/2+2;
-  let lines="", boxes="";
-  ids.forEach(k=>{
-    Object.values(A[k].exits).forEach(t=>{ if(k<t) lines+=`<line x1="${cx(k)}" y1="${cy(k)}" x2="${cx(t)}" y2="${cy(t)}" stroke="#173A5E" stroke-width="2.5" stroke-linecap="round" opacity=".45"/>`; });
-    A[k].doors.forEach(t=>{ if(k<t) lines+=`<line x1="${cx(k)}" y1="${cy(k)}" x2="${cx(t)}" y2="${cy(t)}" stroke="#173A5E" stroke-width="2.5" stroke-dasharray="1 4" stroke-linecap="round" opacity=".6"/>`; });
-  });
-  const hint = $("map").dataset.hint;
-  ids.forEach(k=>{
-    const here = k===curArea(), seen = vis.has(k);
-    boxes += `<rect x="${cx(k)-cell/2}" y="${cy(k)-ch/2}" width="${cell}" height="${ch}" rx="4"
-      fill="${k===hint?"#FF6FA6":here?"#FFCB2F":seen?"#8FD0FF":"#EAF6FF"}" stroke="#173A5E" stroke-width="${here||k===hint?2.5:1.6}" ${k===hint?'class="pulse"':""}/>`;
-    if(!seen && !here && k!==hint) boxes += `<text x="${cx(k)}" y="${cy(k)+4}" text-anchor="middle" font-size="10" font-weight="900" fill="#9DB7D2" font-family="Grandstander,sans-serif">?</text>`;
-  });
-  const wpx = cols*(cell+gap)-gap+4, hpx = rows*(ch+gap)-gap+4;
-  $("map").innerHTML = `<svg viewBox="0 0 ${wpx} ${hpx}" width="${Math.round(wpx*1.1)}" height="${Math.round(hpx*1.1)}">${lines}${boxes}</svg>`;
-}
-function renderArrows(){
-  const a = W().areas[curArea()];
-  ["up","down","left","right"].forEach(d=>{ const to = a.exits[d]; $(d).hidden = !to; if(to){ $(d).dataset.to = W().areas[to].name; $(d).setAttribute("aria-label", `Go to ${W().areas[to].name}`);} });
-}
-function renderTop(){
-  $("worldName").textContent = `World ${S.world+1} · ${W().name}`;
-  const an = $("areaName"), newName = W().areas[curArea()].name;
-  if(an.textContent !== newName){ an.textContent = newName; an.classList.remove("pop"); void an.offsetWidth; an.classList.add("pop"); }
-  const n = worldCount(S.world), t = W().ducks.length;
-  $("count").innerHTML = `<svg viewBox="-34 -34 72 52" aria-hidden="true">${duckShape(YELLOW,null,{outline:1})}</svg>${n} / ${t}`;
-  $("count").setAttribute("aria-label", `${n} of ${t} ducks found`);
-  $("logCount").textContent = `${n} of ${t} found`;
-  const f = F(); let inv = (f.key && !f.chest) ? `<span class="chip"><svg width="28" height="18" viewBox="-12 -10 48 20" aria-hidden="true"><path d="M5 -3 H32 V3 H28 V8 H24 V3 H5 Z" fill="#FFCB2F" stroke="#173A5E" stroke-width="2.2" stroke-linejoin="round"/><circle r="8" fill="#FFCB2F" stroke="#173A5E" stroke-width="2.2"/><circle r="3" fill="#fff" stroke="#173A5E" stroke-width="1.6"/></svg>Key</span>` : "";
-  const h = holidayHere(); if(holidayLive(h)) inv += `<span class="chip" aria-label="${tokensGot(h)} of ${tokensAll(h)} acorns"><svg width="16" height="18" viewBox="-8 -11 16 20" aria-hidden="true">${acorn}</svg>${tokensGot(h)} / ${tokensAll(h)}</span>`;
-  $("inv").innerHTML = inv;
-}
-function renderLog(newId){
-  $("cards").innerHTML = W().ducks.map(d=>{
-    const got = found.has(d.id);
-    if(got) return `<div class="card got ${d.id===newId?"new":""}">
-      <svg viewBox="-36 -44 76 62" aria-hidden="true">${duckShape(d.c, d.acc==="glow"?null:d.acc, {outline:1})}</svg>
-      <span class="tier t-${d.tier}">${d.tier==="Legendary"?"✦ ":""}${d.tier}</span><b>${d.name}</b></div>`;
-    return `<div class="card miss">
-      <svg viewBox="-36 -44 76 62" aria-hidden="true">${duckShape({body:"#EAF3FA",wing:"#EAF3FA",beak:"#EAF3FA"},null,{ghost:1})}<text x="0" y="6" text-anchor="middle" font-family="Grandstander,sans-serif" font-weight="900" font-size="20" fill="#9DB7D2">?</text></svg>
-      <span class="tier t-${d.tier}">${d.tier}</span><span class="hint">${d.hint}</span></div>`;
-  }).join("") + holidayCard(newId);
-}
-function holidayCard(newId){
-  const h = holidayHere(); if(!h) return "";
-  const got = found.has(h.id), on = holidayOn(h), n = tokensGot(h), t = tokensAll(h);
-  const note = !on ? `Comes back in ${h.monthName}` : n<t ? `Find ${t} acorns: ${n} of ${t}` : "All acorns found. Search the world!";
-  if(got) return `<div class="card got holiday ${h.id===newId?"new":""}">
-    <svg viewBox="-38 -48 80 72" aria-hidden="true">${turkeyShape()}</svg>
-    <span class="tier t-Holiday">${h.holiday}</span><b>${h.name}</b></div>`;
-  return `<div class="card miss holiday">
-    <svg viewBox="-38 -48 80 72" aria-hidden="true">${silhouette(turkeyShape())}</svg>
-    <span class="tier t-Holiday">${h.holiday}</span><span class="hint">${note}</span></div>`;
-}
-/* Little picture for each world card (brand: ink outline on the shapes, one pop colour) */
-const O = 'stroke="#173A5E" stroke-width="2.5" stroke-linejoin="round"';
-const CARD_ART = {
-  w1: d=>`<rect width="250" height="120" fill="#8FD3FF"/><circle cx="210" cy="30" r="16" fill="#FFE066" ${O}/><path d="M28 36 h44 a10 10 0 0 0 -14 -13 a12 12 0 0 0 -23 4 a8 8 0 0 0 -7 9z" fill="#fff"/>
-    <path d="M150 74 V52 L172 36 L194 52 V74Z" fill="#F06B5B" ${O}/><rect x="166" y="56" width="12" height="18" rx="2" fill="#5A3A8A" ${O}/><path d="M0 88 Q80 62 250 84 V120 H0Z" fill="#6CC24A" ${O}/><g transform="translate(92 92) scale(1.05)">${d}</g>`,
-  w2: d=>`<rect width="250" height="120" fill="#2B2350"/>${[[30,20],[70,40],[120,14],[160,34],[236,60],[20,64]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.6" fill="#fff" opacity=".7"/>`).join("")}<circle cx="204" cy="30" r="17" fill="#F4F0C8" ${O}/>
-    <path d="M140 96 V50 L172 26 L204 50 V96Z" fill="#4A3566" ${O}/><rect x="158" y="58" width="12" height="14" rx="2" fill="#FFD86B"/><rect x="176" y="58" width="12" height="14" rx="2" fill="#2A2140"/>
-    <path d="M0 96 Q120 82 250 98 V120 H0Z" fill="#3B2F52" ${O}/><ellipse cx="222" cy="100" rx="14" ry="11" fill="#FF8A1A" ${O}/><path d="M216 98 l3 -4 l3 4z M224 98 l3 -4 l3 4z" fill="#173A5E"/><g transform="translate(80 98) scale(1.05)">${d}</g>`,
-  w3: d=>`<rect width="250" height="120" fill="#2F9AD8"/><path d="M0 22 q20 -8 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0" fill="none" stroke="#fff" stroke-width="3" opacity=".7"/>
-    <circle cx="150" cy="58" r="5" fill="none" stroke="#fff" stroke-width="2"/><circle cx="160" cy="42" r="3" fill="none" stroke="#fff" stroke-width="2"/>
-    <path d="M0 102 Q125 88 250 102 V120 H0Z" fill="#E6C98A" ${O}/><g fill="#FF7AA8" ${O}><circle cx="196" cy="94" r="11"/><circle cx="212" cy="86" r="10"/><circle cx="222" cy="100" r="9"/></g><g class="bob"><g transform="translate(90 80) scale(1.05)">${d}</g></g>`
-};
-const LOCK = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 11 V8 a4.5 4.5 0 0 1 9 0 V11" fill="none" stroke="#173A5E" stroke-width="2.8"/><rect x="4.5" y="10.5" width="15" height="11" rx="3" fill="#FFCB2F" stroke="#173A5E" stroke-width="2.4"/></svg>`;
-function renderHome(){
-  if(!$("heroLogo").querySelector("svg")) $("heroLogo").innerHTML = logo({id:"home", cls:"logo"});
-  const total = allDucks.length, got = allDucks.filter(d=>found.has(d.id)).length;
-  $("totalFound").textContent = got ? `${got} of ${total} ducks found` : `${total} ducks to find`;
-  const cur = Math.min(S.world, S.unlocked-1), started = S.found.length || Object.values(S.visited).some(v=>v.length);
-  $("startBtn").textContent = started ? `Keep exploring: ${WORLDS[cur].name}` : "Let's go!";
-  $("startBtn").dataset.world = cur;
-  $("worlds").innerHTML = WORLDS.map((w,i)=>{
-    const open = i < S.unlocked, n = worldCount(i), t = w.ducks.length, done = n===t;
-    const eggs = w.ducks.map(d=>`<i class="${found.has(d.id)?"on":""}"></i>`).join("");
-    const star = w.ducks[0];
-    const status = !open ? `Find every ${WORLDS[i-1].name.replace(/^The /,"")} duck to open` : done ? `All ${t} found!` : n ? `${n} of ${t} found` : `${t} ducks are hiding here`;
-    return `<button class="wcard" type="button" data-world="${i}" ${open?"":"disabled"} aria-label="World ${i+1}, ${w.name}. ${status}">
-      ${done?'<span class="stamp">All found!</span>':""}${open?"":`<span class="lock">${LOCK}</span>`}
-      <svg class="art" viewBox="0 0 250 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${CARD_ART[w.id](open?duckShape(star.c, star.acc==="glow"?null:star.acc,{outline:1}):"")}</svg>
-      <span class="info"><small>World ${i+1}</small><b>${w.name}</b>
-        <span class="eggs" aria-hidden="true">${eggs}</span>
-        <span class="status">${status}</span>
-        ${HOLIDAYS.filter(h=>h.world===w.id && holidayOn(h) && !found.has(h.id)).map(h=>`<span class="status visit">A ${h.holiday} visitor is here!</span>`).join("")}</span></button>`;
-  }).join("");
+function mascot(o){
+  o = o || {};
+  var B = BRAND, ink = o.ink || B.ink, body = o.body || B.duck, wing = o.wing || B.duckDeep,
+      beak = o.beak || B.beak, sw = o.stroke || 3, eye = o.eye || "open", hat = o.hat === undefined ? "boat" : o.hat;
+  var S = 'stroke="'+ink+'" stroke-width="'+sw+'" stroke-linejoin="round" stroke-linecap="round"';
+  var eyes = {
+    open: '<circle cx="89" cy="34" r="4.8" fill="'+ink+'"/><circle cx="90.7" cy="32.3" r="1.7" fill="#fff"/>',
+    happy:'<path d="M84.5 36 Q89 29.5 93.5 36" fill="none" '+S+'/>',
+    wow:  '<circle cx="89" cy="34" r="6.4" fill="#fff" '+S+'/><circle cx="89.6" cy="34.4" r="3.6" fill="'+ink+'"/><circle cx="90.8" cy="33" r="1.2" fill="#fff"/>',
+    sneaky:'<circle cx="89" cy="35" r="4.6" fill="'+ink+'"/><circle cx="90.5" cy="34.6" r="1.4" fill="#fff"/><path d="M83 34.5 Q89 26.5 95 34.5 Z" fill="'+body+'" '+S+'/>',
+    sleepy:'<path d="M84.5 34 Q89 38.5 93.5 34" fill="none" '+S+'/>',
+    none:''
+  };
+  var flat = !!o.flat;
+  var hats = {
+    boat:'<path d="M63 23 L81.5 2.5 L100 23 Z" fill="#fff" '+S+'/><rect x="61" y="19" width="41.5" height="7" rx="3.5" fill="'+B.pond+'" '+S+'/>',
+    crown:'<path d="M68 21 L69 6 L76 13 L82 3 L88 13 L95 6 L96 21 Z" fill="#FFE070" '+S+'/><circle cx="82" cy="15" r="2.4" fill="'+B.bubble+'"/>',
+    mask:'',
+    none:''
+  };
+  var extra = "";
+  if(o.mask) extra += '<path d="M66 33 Q85 25 103 31 L103.5 40 Q85 35 64 42 Z" fill="'+ink+'"/>';
+  var spots = o.spots ? '<g fill="'+o.spots+'"><circle cx="40" cy="70" r="5"/><circle cx="58" cy="78" r="4"/><circle cx="70" cy="56" r="3.5"/><circle cx="76" cy="44" r="3.2"/><circle cx="30" cy="58" r="3"/></g>' : "";
+  return ''+
+    '<path d="M27 58 Q10 52 7 34 Q21 39 34 46 Z" fill="'+body+'" '+S+'/>'+
+    '<ellipse cx="55" cy="64" rx="37" ry="25" fill="'+body+'" '+S+'/>'+
+    spots+
+    '<path d="M36 63 Q51 47 70 60 Q60 77 40 71 Z" fill="'+wing+'" '+S+'/>'+
+    '<circle cx="82" cy="39" r="21" fill="'+body+'" '+S+'/>'+
+    (flat ? '' : '<ellipse cx="73" cy="28" rx="5.5" ry="2.6" fill="#fff" opacity=".6" transform="rotate(-28 73 28)"/>'+
+    '<ellipse cx="33" cy="54" rx="9" ry="3" fill="#fff" opacity=".45" transform="rotate(-18 33 54)"/>')+
+    '<path d="M100 40 Q115 37 117 44 Q111 52 100 50 Z" fill="'+beak+'" '+S+'/>'+
+    '<path d="M102 45.6 L113.5 45" fill="none" stroke="'+ink+'" stroke-width="2" stroke-linecap="round"/>'+
+    (o.mask ? extra : flat ? '' : '<circle cx="91" cy="47.5" r="4.5" fill="'+B.cheek+'" opacity=".7"/>')+
+    (eye in eyes ? eyes[eye] : eyes.open)+
+    (hats[hat] || "")+
+    (eye==="sleepy" ? '<text x="104" y="22" font-family="Patrick Hand, cursive" font-size="14" fill="'+ink+'">z</text><text x="111" y="12" font-family="Patrick Hand, cursive" font-size="10" fill="'+ink+'">z</text>' : "");
 }
 
-/* ---------- Moving around ---------- */
-let busy = false;
-const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-function showArea(kind){
-  const stage = $("stage"), olds = [...stage.querySelectorAll(".layer")];
-  const layer = document.createElement("div"); layer.className="layer"; layer.innerHTML = sceneSVG();
-  stage.insertBefore(layer, stage.firstChild);
-  const vis = S.visited[W().id]; if(!vis.includes(curArea())) vis.push(curArea());
-  $("map").dataset.hint = ""; renderMap(); renderArrows(); renderTop(); save();
-  if(!olds.length) return;
-  if(reduce || !kind || !layer.animate){ olds.forEach(o=>o.remove()); return; }
-  busy = true;
-  const old = olds[0]; olds.slice(1).forEach(o=>o.remove());
-  const dirs = {left:[-1,0], right:[1,0], up:[0,-1], down:[0,1]};
-  let a, b;
-  if(kind==="door"){ a=[{transform:"scale(1)",opacity:1},{transform:"scale(1.25)",opacity:0}]; b=[{transform:"scale(.85)",opacity:0},{transform:"scale(1)",opacity:1}]; }
-  else { const [dx,dy]=dirs[kind]; a=[{transform:"none"},{transform:`translate(${-dx*100}%,${-dy*100}%)`}]; b=[{transform:`translate(${dx*100}%,${dy*100}%)`},{transform:"none"}]; }
-  const opt = {duration:320, easing:"cubic-bezier(.3,.7,.2,1)"};
-  const done = ()=>{ old.remove(); busy=false; };
-  old.animate(a,opt); const an = layer.animate(b,opt); an.onfinish = done; setTimeout(()=>{ if(busy) done(); }, 700);
+function logo(o){
+  o = o || {};
+  var B = BRAND, id = o.id || "q";
+  var dy = "0 -6 10 -9 10 -9 8", rot = "-6 4 -3 5 -4 3 -5";
+  var t = 'x="204" y="150" dy="'+dy+'" rotate="'+rot+'" textLength="414" lengthAdjust="spacing"';
+  var font = 'font-family="Grandstander, \'Baloo 2\', \'Arial Rounded MT Bold\', sans-serif" font-weight="900" font-size="112"';
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 210" role="img" aria-label="Quackers"'+(o.cls?' class="'+o.cls+'"':'')+'>'+
+    '<defs><linearGradient id="'+id+'g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE066"/><stop offset=".55" stop-color="'+B.duck+'"/><stop offset="1" stop-color="#FFA91F"/></linearGradient></defs>'+
+    '<g fill="none" stroke="'+B.puddle+'" stroke-width="6" stroke-linecap="round" class="ripple">'+
+      '<path d="M34 190 q16 -9 32 0 t32 0 t32 0"/><path d="M210 194 q18 -9 36 0 t36 0 t36 0 t36 0"/><path d="M470 190 q16 -9 32 0 t32 0 t32 0"/></g>'+
+    '<g class="logo-duck"><g transform="translate(57.6 66) scale(.62)">'+mascot({eye:o.eye||"open"})+'</g></g>'+
+    '<circle cx="96" cy="100" r="58" fill="none" stroke="'+B.ink+'" stroke-width="34"/>'+
+    '<circle cx="96" cy="100" r="58" fill="none" stroke="#fff" stroke-width="26"/>'+
+    '<circle cx="96" cy="100" r="58" fill="none" stroke="'+B.beak+'" stroke-width="26" stroke-dasharray="36 55.1" stroke-dashoffset="18" transform="rotate(-45 96 100)"/>'+
+    '<path d="M136 140 Q152 166 190 172" fill="none" stroke="'+B.ink+'" stroke-width="24" stroke-linecap="round"/>'+
+    '<path d="M136 140 Q152 166 190 172" fill="none" stroke="'+B.pond+'" stroke-width="15" stroke-linecap="round"/>'+
+    '<g '+font+'>'+
+      '<text '+t+' fill="'+B.ink+'" stroke="'+B.ink+'" stroke-width="24" stroke-linejoin="round">uackers</text>'+
+      '<text '+t+' fill="#fff" stroke="#fff" stroke-width="14" stroke-linejoin="round">uackers</text>'+
+      '<text '+t+' fill="url(#'+id+'g)">uackers</text>'+
+    '</g></svg>';
 }
-const layerEl = () => $("stage").querySelector(".layer");
-function move(dir){ if(busy || !$("done").hidden) return; const to = W().areas[curArea()].exits[dir]; if(!to) return; S.area[W().id]=to; blip(dir); showArea(dir); }
-function enterDoor(to){ if(busy) return; S.area[W().id]=to; blip("door"); showArea("door"); }
-["up","down","left","right"].forEach(d => $(d).addEventListener("click", ()=>move(d)));
-addEventListener("keydown", e=>{
-  if($("play").hidden) return;
-  const k = {ArrowUp:"up",ArrowDown:"down",ArrowLeft:"left",ArrowRight:"right"}[e.key];
-  if(k && !e.target.closest(".duck,.act,.door,.token")){ e.preventDefault(); move(k); }
-});
+if (typeof module !== "undefined") module.exports = { BRAND: BRAND, mascot: mascot, logo: logo };
 
-/* ---------- Sound ---------- */
-let actx=null;
-function ctx(){ try{ actx = actx || new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==="suspended") actx.resume(); return actx; }catch(e){ return null; } }
-function tone(f1,f2,dur,type="sine",vol=.18,when=0){
-  if(!S.sound) return; const c=ctx(); if(!c) return;
-  try{ const t=c.currentTime+when, o=c.createOscillator(), g=c.createGain(), fl=c.createBiquadFilter();
-    o.type=type; o.frequency.setValueAtTime(f1,t); o.frequency.exponentialRampToValueAtTime(f2,t+dur);
-    fl.type="lowpass"; fl.frequency.value=1600; g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(vol,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+dur);
-    o.connect(fl); fl.connect(g); g.connect(c.destination); o.start(t); o.stop(t+dur+.05); }catch(e){}
-}
-const quack = ()=>{ tone(560,260,.18,"sawtooth",.25); tone(520,250,.16,"sawtooth",.18,.2); };
-const blip = (k)=> tone(k==="door"?300:420, k==="door"?200:520, .08, "triangle", .08);
-const pop = ()=> tone(300,700,.12,"sine",.15);
-const fanfare = ()=> [523,659,784,1046].forEach((f,i)=>tone(f,f*1.01,.22,"triangle",.16,i*.13));
-function setSoundBtn(){ $("soundBtn").innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 9h4l5.5-4.5v15L7.5 15h-4z" fill="#FFCB2F" stroke="#173A5E" stroke-width="2.2" stroke-linejoin="round"/>${S.sound?'<path d="M16 8.5q3 3.5 0 7M18.5 6q5 6 0 12" stroke="#173A5E" stroke-width="2.4" stroke-linecap="round" fill="none"/>':'<path d="M16.5 9l5 6M21.5 9l-5 6" stroke="#173A5E" stroke-width="2.4" stroke-linecap="round"/>'}</svg>`;
-  $("soundBtn").setAttribute("aria-pressed", String(S.sound)); $("soundBtn").setAttribute("aria-label", S.sound?"Sound on":"Sound off"); }
-$("soundBtn").addEventListener("click", ()=>{ S.sound=!S.sound; save(); setSoundBtn(); });
+(function(){
+  var q=document.getElementById("qLogo");
+  if(q && typeof logo==="function") q.innerHTML=logo({id:"ql"});
 
-/* ---------- Finding ducks ---------- */
-let toastTimer;
-function toast(msg, ms=1800, kind=""){ if(!msg) return; const t=$("toast"); t.textContent=msg; t.className="toast "+kind; void t.offsetWidth; t.classList.add("show"); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),ms); }
-function burst(x,y,colors){
-  if(reduce) return; const stage=$("stage");
-  for(let i=0;i<14;i++){ const p=document.createElement("div"); p.className="fx dot"; p.style.left=x+"px"; p.style.top=y+"px"; p.style.background=colors[i%colors.length]; stage.appendChild(p);
-    const a=i/14*Math.PI*2, r=40+Math.random()*40;
-    if(p.animate) p.animate([{transform:"translate(0,0) scale(1)",opacity:1},{transform:`translate(${Math.cos(a)*r}px,${Math.sin(a)*r}px) scale(.3)`,opacity:0}],{duration:650,easing:"cubic-bezier(.2,.8,.3,1)"}).onfinish=()=>p.remove(); else p.remove(); }
-  const plus=document.createElement("div"); plus.className="fx plus"; plus.textContent="+1"; plus.style.left=x+"px"; plus.style.top=y+"px"; stage.appendChild(plus);
-  if(plus.animate) plus.animate([{transform:"translate(-50%,-50%)",opacity:1},{transform:"translate(-50%,-160%)",opacity:0}],{duration:900,easing:"ease-out"}).onfinish=()=>plus.remove(); else plus.remove();
-}
-function catchDuck(el){
-  const id = el.dataset.duck; if(found.has(id)) return;
-  found.add(id); S.found.push(id); save();
-  const sr=$("stage").getBoundingClientRect(), r=el.getBoundingClientRect();
-  burst(r.left+r.width/2-sr.left, r.top+r.height/2-sr.top, [DUCK[id].c.body,"#fff","#FFCB2F","#FF6FA6"]);
-  quack();
-  el.style.pointerEvents="none";
-  if(el.animate && !reduce){ const tf = el.getAttribute("transform"); el.removeAttribute("transform"); el.style.transformBox="view-box";
-    el.animate([{transform:css(tf)+" scale(1)"},{transform:css(tf)+" scale(1.5)",opacity:1},{transform:css(tf)+" scale(0)",opacity:0}],{duration:380,fill:"forwards"}); }
-  toast(DUCK[id].holiday ? `Gobble! You found the ${DUCK[id].name}! Happy ${DUCK[id].holiday}!` : `Quack! ${DUCK[id].name} found!`, DUCK[id].holiday ? 3000 : 1900, "found");
-  $("count").classList.remove("bump"); void $("count").offsetWidth; $("count").classList.add("bump");
-  renderLog(id); renderTop();
-  setTimeout(()=>{ const l=layerEl(); if(l) l.innerHTML=sceneSVG(); if(!DUCK[id].holiday && worldDone(S.world) && $("done").hidden) worldComplete(); }, 420);
-}
-const css = tf => tf.replace(/translate\(([-\d.]+) ([-\d.]+)\)/,"translate($1px,$2px)").replace(/scale\(([-\d.]+) ([-\d.]+)\)/,"scale($1,$2)");
-function worldComplete(){
-  const last = S.world === WORLDS.length-1;
-  if(!last) S.unlocked = Math.max(S.unlocked, S.world+2); save();
-  fanfare();
-  const total = allDucks.length, all = allDucks.every(d=>found.has(d.id));
-  const hero = `<svg viewBox="0 0 120 100" aria-hidden="true">${mascot({eye:"happy", hat: all ? "crown" : "boat"})}</svg>`;
-  let html;
-  if(all) html = `${hero}<h3>Every duck found!</h3><p>All ${total} ducks are in your Duck Log. Mitchell is dreaming up more worlds.</p><div class="row"><button class="btn" id="doneBtn" type="button">Back to worlds</button></div>`;
-  else if(last) html = `${hero}<h3>Duck Log full!</h3><p>${W().name} is all yours. A few ducks are still hiding in other worlds.</p><div class="row"><button class="btn" id="doneBtn" type="button">Back to worlds</button></div>`;
-  else html = `${hero}<h3>Duck Log full!</h3><p>${W().name} is all yours. Next stop: ${WORLDS[S.world+1].name}.</p><div class="row"><button class="btn go" id="doneBtn" type="button">Next world</button><button class="btn alt" id="doneHome" type="button">Worlds</button></div>`;
-  $("doneBody").innerHTML = html;
-  $("done").hidden = false;
-  const sr=$("stage").getBoundingClientRect(); for(let k=0;k<3;k++) setTimeout(()=>burst(sr.width*(.25+k*.25), sr.height*.3, ["#FFCB2F","#3FB86A","#FF6FA6","#8FD0FF"]), k*180);
-  const nextWorld = last || all ? null : S.world+1;
-  $("doneBtn").addEventListener("click", ()=>{ $("done").hidden=true; if(nextWorld===null) goHome(); else openWorld(nextWorld); });
-  if($("doneHome")) $("doneHome").addEventListener("click", ()=>{ $("done").hidden=true; goHome(); });
-}
-function onStageTap(e){
-  if(busy || !$("done").hidden) return;
-  const d = e.target.closest(".duck"); if(d){ catchDuck(d); return; }
-  const tk = e.target.closest(".token");
-  if(tk){ const h = holidayHere(); if(!h || S.holiday.tokens.includes(tk.dataset.token)) return;
-    const sr=$("stage").getBoundingClientRect(), r=tk.getBoundingClientRect();
-    burst(r.left+r.width/2-sr.left, r.top+r.height/2-sr.top, ["#a0642c","#f2b134","#fff"]);
-    S.holiday.tokens.push(tk.dataset.token); save(); pop();
-    const n = tokensGot(h), t = tokensAll(h);
-    toast(n<t ? `Acorn ${n} of ${t}!` : `All ${t} acorns! The ${h.name} is hiding somewhere in ${W().name}. Go find it!`, n<t ? 1800 : 3400);
-    layerEl().innerHTML = sceneSVG(); renderTop(); renderLog(); return; }
-  const a = e.target.closest(".act");
-  if(a){ const msg = ACTS[a.dataset.act](F()); pop(); toast(msg); save(); layerEl().innerHTML = sceneSVG(); renderTop(); return; }
-  const g = e.target.closest(".door"); if(g) enterDoor(g.dataset.go);
-}
-$("stage").addEventListener("click", onStageTap);
-$("stage").addEventListener("keydown", e=>{ if((e.key==="Enter"||e.key===" ") && e.target.closest(".duck,.act,.door,.token")){ e.preventDefault(); onStageTap(e); } });
-
-$("hintBtn").addEventListener("click", ()=>{
-  const left = W().ducks.filter(d=>!found.has(d.id)), h = holidayHere();
-  if(!left.length && holidayLive(h)){
-    const miss = Object.entries(h.tokens).find(([id])=>!S.holiday.tokens.includes(id));
-    const a = miss ? miss[1] : h.area;
-    toast(miss ? (a===curArea() ? "An acorn is somewhere right here!" : `Psst... an acorn is in the ${W().areas[a].name}.`) : (a===curArea() ? `The ${h.name} is right here somewhere!` : `The ${h.name} is hiding in the ${W().areas[a].name}.`), 2600);
-    $("map").dataset.hint = a; renderMap(); return;
+  // Digi Friend sneak peek: a doodle buddy that hops to a new spot when caught.
+  var board=document.getElementById("board"), buddy=document.getElementById("buddy"),
+      score=document.getElementById("score"), hint=document.getElementById("hint"), pts=0;
+  buddy.innerHTML='<svg viewBox="0 0 54 54"><path d="M27 6 C40 5 48 15 47 27 C46 40 38 48 27 48 C14 48 7 40 7 28 C7 15 14 7 27 6 Z" fill="#7A4DFF" stroke="#14233F" stroke-width="2.5" stroke-linejoin="round"/>'+
+    '<path d="M17 9 L13 1 M37 9 L42 2" stroke="#14233F" stroke-width="2.5" stroke-linecap="round"/><rect x="10" y="-2" width="6" height="6" fill="#B8F02E" stroke="#14233F" stroke-width="2"/><rect x="39" y="-1" width="6" height="6" fill="#FF5A36" stroke="#14233F" stroke-width="2"/>'+
+    '<rect x="14" y="19" width="10" height="11" fill="#fff" stroke="#14233F" stroke-width="2.2"/><rect x="30" y="19" width="10" height="11" fill="#fff" stroke="#14233F" stroke-width="2.2"/>'+
+    '<rect x="18" y="23" width="4.5" height="5" fill="#14233F"/><rect x="34" y="23" width="4.5" height="5" fill="#14233F"/>'+
+    '<path d="M19 37 h16" stroke="#14233F" stroke-width="2.8" stroke-linecap="square"/><path d="M19 37 v3 M35 37 v3" stroke="#14233F" stroke-width="2.5"/></svg>';
+  function place(first){
+    var w=board.clientWidth||300, h=board.clientHeight||180;
+    var x = first ? w*0.58 : 8 + Math.random()*Math.max(10, w-70);
+    var y = first ? 52 : 30 + Math.random()*Math.max(10, h-30-80);
+    buddy.style.left=x+"px"; buddy.style.top=y+"px";
   }
-  if(!left.length){ toast("Every duck here is found!"); return; }
-  const d = left.find(x=>x.area===curArea()) || left[0]; const where = W().areas[d.area].name;
-  toast(d.area===curArea() ? `A duck is right here. ${d.hint}...` : `Psst... try the ${where}.`, 2600);
-  $("map").dataset.hint = d.area; renderMap();
-});
-
-/* ---------- Screens ---------- */
-function openWorld(i){
-  S.world = i; save();
-  $("home").hidden = true; $("play").hidden = false; $("done").hidden = true;
-  $("stage").querySelectorAll(".layer").forEach(l=>l.remove());
-  busy = false;
-  renderLog(); showArea(null);
-  $("play").classList.remove("screen-in"); void $("play").offsetWidth; $("play").classList.add("screen-in");
-  const h = holidayHere();
-  if(holidayLive(h) && tokensGot(h)===0) toast(`A ${h.holiday} visitor is in ${W().name}! Find ${tokensAll(h)} hidden acorns.`, 3400);
-  else if(worldDone(i)) toast("Every duck here is found. Explore away!", 2200);
-}
-function goHome(){ renderHome(); $("play").hidden = true; $("home").hidden = false; $("home").classList.remove("screen-in"); void $("home").offsetWidth; $("home").classList.add("screen-in"); scrollTo(0,0); }
-$("startBtn").addEventListener("click", ()=>{ pop(); openWorld(+$("startBtn").dataset.world || 0); });
-$("homeBtn").addEventListener("click", goHome);
-$("worlds").addEventListener("click", e=>{ const b=e.target.closest(".wcard"); if(b && !b.disabled){ pop(); openWorld(+b.dataset.world); } });
-$("reset").addEventListener("click", ()=>{
-  const b=$("reset");
-  if(b.dataset.sure){ S=fresh(); syncFound(); save(); delete b.dataset.sure; b.textContent="Start over"; renderHome(); }
-  else { b.dataset.sure="1"; b.textContent="Tap again to erase every duck"; setTimeout(()=>{ delete b.dataset.sure; b.textContent="Start over"; },4000); }
-});
-
-/* Test hook (used only by automated checks) */
-window.QUACKERS = { WORLDS, HOLIDAYS, month:NOW_MONTH, get state(){ return S; }, openWorld, go:(a)=>{ S.area[W().id]=a; showArea(null); } };
-
-load(); syncFound(); setSoundBtn(); renderHome();
+  place(true);
+  buddy.addEventListener("click", function(){
+    pts+=10; score.textContent=pts+" PTS";
+    var p=document.createElement("span"); p.className="pop"; p.textContent="+10";
+    p.style.left=buddy.style.left; p.style.top=buddy.style.top; board.appendChild(p);
+    setTimeout(function(){ p.remove(); }, 950);
+    hint.textContent = pts>=50 ? "so fast! the real game is coming" : "you got me! bet you can't again";
+    buddy.classList.add("found");
+    setTimeout(function(){ buddy.classList.remove("found"); place(false); }, 200);
+  });
+})();
 </script>
+
 </body>
 </html>
