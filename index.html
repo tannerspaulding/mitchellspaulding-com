@@ -101,6 +101,15 @@ p{margin:0}
 .like.todo h3{font-family:var(--hand);font-weight:400;font-size:1.35rem;color:var(--ink-soft)}
 
 
+/* Wings of Fire shelf */
+.shelf{margin-top:20px;background:var(--card);border:2px solid var(--card-edge);box-shadow:4px 4px 0 var(--shadow);padding:14px 12px 12px}
+.shelf-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 10px;margin-bottom:12px}
+.shelf-head h3{font-size:1rem}
+.books{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 10px}
+.book{display:flex;flex-direction:column;gap:5px;color:inherit;text-decoration:none;min-width:0}
+.book img{display:block;width:100%;height:auto;aspect-ratio:2/3;object-fit:cover;border:1.5px solid var(--card-edge);box-shadow:3px 3px 0 var(--shadow);background:var(--grid)}
+.book span{font-family:var(--mono,"Space Mono",monospace);font-size:.7rem;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft)}
+.shelf-note{margin-top:12px;font-size:.88rem;color:var(--ink-soft)}
 /* snapshots: taped photos */
 .snaps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;padding:6px 4px 0}
 .snap{position:relative;margin:0;background:var(--card);border:2px solid var(--card-edge);padding:8px 8px 10px;box-shadow:4px 4px 0 var(--shadow);min-width:0}
@@ -220,16 +229,28 @@ p{margin:0}
         <h3>Singing</h3>
         <p>I take voice lessons.</p>
       </div>
-      <div class="like todo">
-        <span class="label">Slot open</span>
-        <h3>Mitchell picks</h3>
-        <p>A favorite food, book or show.</p>
+      <div class="like">
+        <svg class="ic" viewBox="0 0 26 26" aria-hidden="true"><path d="M3 15c3-1 5-4 6-8 2 3 5 4 8 3l6-5-2 8c-1 4-5 7-10 7H6z" fill="var(--red)" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"/><path d="M9 7l3 6M17 10l-2 5" stroke="var(--ink)" stroke-width="1.8"/><circle cx="20" cy="9" r="1.3" fill="var(--ink)"/></svg>
+        <h3>Wings of Fire</h3>
+        <p>My favorite books. Dragons, prophecies and secrets.</p>
       </div>
       <div class="like todo">
         <span class="label">Slot open</span>
         <h3>Mitchell picks</h3>
         <p>Something he's really good at.</p>
       </div>
+    </div>
+    <div class="shelf" aria-labelledby="wof-h">
+      <div class="shelf-head"><h3 id="wof-h">My Wings of Fire shelf</h3><span class="hand">by Tui T. Sutherland</span></div>
+      <div class="books">
+        <a class="book" href="https://tuibooks.com/book/the-dragonet-prophecy/" target="_blank" rel="noopener"><img src="https://tuibooks.com/wp-content/uploads/2020/09/cover_wof_01-1-291x450.jpg" alt="Cover of Wings of Fire: The Dragonet Prophecy" loading="lazy" width="300" height="450" referrerpolicy="no-referrer"><span>Book 1</span></a>
+        <a class="book" href="https://tuibooks.com/book/moon-rising/" target="_blank" rel="noopener"><img src="https://tuibooks.com/wp-content/uploads/2021/01/wingsoffire-book6-319x450.jpg" alt="Cover of Wings of Fire: Moon Rising" loading="lazy" width="300" height="450" referrerpolicy="no-referrer"><span>Book 6</span></a>
+        <a class="book" href="https://tuibooks.com/book/the-lost-continent/" target="_blank" rel="noopener"><img src="https://tuibooks.com/wp-content/uploads/2021/01/wingsoffire-book11-319x450.jpg" alt="Cover of Wings of Fire: The Lost Continent" loading="lazy" width="300" height="450" referrerpolicy="no-referrer"><span>Book 11</span></a>
+        <a class="book" href="https://tuibooks.com/book/the-hybrid-prince/" target="_blank" rel="noopener"><img src="https://tuibooks.com/wp-content/uploads/2026/01/HYBRID-PRINCE-298x450.jpg" alt="Cover of Wings of Fire: The Hybrid Prince" loading="lazy" width="300" height="450" referrerpolicy="no-referrer"><span>Book 16</span></a>
+        <a class="book" href="https://tuibooks.com/book/darkstalker/" target="_blank" rel="noopener"><img src="https://tuibooks.com/wp-content/uploads/2021/01/wingsoffire-darkstalker-319x450.jpg" alt="Cover of Wings of Fire: Darkstalker" loading="lazy" width="300" height="450" referrerpolicy="no-referrer"><span>Legends</span></a>
+        <a class="book" href="https://tuibooks.com/book/dragonslayer/" target="_blank" rel="noopener"><img src="https://tuibooks.com/wp-content/uploads/2021/01/wingsoffire-dragonslayer-319x450.jpg" alt="Cover of Wings of Fire: Dragonslayer" loading="lazy" width="300" height="450" referrerpolicy="no-referrer"><span>Legends</span></a>
+      </div>
+      <p class="shelf-note">16 books in the main series, plus Legends and the graphic novels.</p>
     </div>
   </section>
 
