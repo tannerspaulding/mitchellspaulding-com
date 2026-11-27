@@ -476,7 +476,7 @@ td.r,th.r{text-align:right}
     <!-- BOARD -->
     <div class="view" id="v-board" role="tabpanel" aria-labelledby="t-board" hidden>
       <section class="card" aria-labelledby="c6">
-        <div class="card-head"><h2 id="c6">Leaderboard names</h2><p>Newest first. Hide takes a name off the board right away; Show puts it back.</p></div>
+        <div class="card-head"><h2 id="c6">Leaderboard names</h2><p>Most ducks first, newest first on a tie. Hide takes a name off the board right away; Show puts it back.</p></div>
         <ul class="names" id="names"></ul>
       </section>
     </div>
@@ -819,7 +819,7 @@ window.addEventListener("qs-geo",drawMap);
 function ago(t){ const h=Math.round((now-t)/36e5); return h<24?`${h}h ago`:`${Math.round(h/24)}d ago`; }
 function drawNames(){
   if(!S.names.length){ $("names").innerHTML=`<li><span class="small">No names on the board yet.</span></li>`; return; }
-  $("names").innerHTML=S.names.map(n=>`<li class="${n.hidden?"off":""}"><b>${esc(n.name)}</b><span class="meta">${n.ducks} ducks · ${ago(n.at)}</span><button type="button" class="pill ${n.hidden?"show":"hide"}" data-pid="${esc(n.pid)}" aria-label="${n.hidden?"Show":"Hide"} ${esc(n.name)}">${n.hidden?"Show":"Hide"}</button></li>`).join("");
+  $("names").innerHTML=S.names.slice().sort((a,b)=>(b.ducks||0)-(a.ducks||0)||(b.at||0)-(a.at||0)).map(n=>`<li class="${n.hidden?"off":""}"><b>${esc(n.name)}</b><span class="meta">${n.ducks} ducks · ${ago(n.at)}</span><button type="button" class="pill ${n.hidden?"show":"hide"}" data-pid="${esc(n.pid)}" aria-label="${n.hidden?"Show":"Hide"} ${esc(n.name)}">${n.hidden?"Show":"Hide"}</button></li>`).join("");
   $("names").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{ const n=S.names.find(x=>x.pid===b.dataset.pid), want=n.hidden?0:1;
     if(PREVIEW){ n.hidden=want; drawNames(); return; }
     b.disabled=true; api("/v1/admin/hide",{method:"POST",body:JSON.stringify({pid:n.pid,hidden:!!want})}).then(j=>{ if(j.ok){ n.hidden=want; drawNames(); } else { b.disabled=false; if(j.status===401) load(); } }).catch(()=>{ b.disabled=false; }); }));
