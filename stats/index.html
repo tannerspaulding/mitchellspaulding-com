@@ -504,7 +504,8 @@ td.r,th.r{text-align:right}
 <script>
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const API="https://quackers-api.tannerspaulding81.workers.dev";
+const API="https://quackers-stats.tannerspaulding81.workers.dev", OLD_API="https://quackers-api.tannerspaulding81.workers.dev";
+let base=API;
 const PREVIEW=!!window.QS_SAMPLE, DAY=864e5, TK="qs-token";
 let S=null, now=Date.now(), mapView="us", lvGame="egg";
 // Live refresh: reload the numbers every minute while the page is open and on screen. It pauses after
@@ -532,7 +533,9 @@ const fmtN=n=>Number(n||0).toLocaleString("en-US");
 
 // ---- login: the password goes to the Worker, which hands back a 7-day token kept only in this tab ----
 const tok=()=>{ try{ return sessionStorage.getItem(TK)||""; }catch(_){ return ""; } };
-async function api(path,opts={}){ const r=await fetch(API+path,{...opts,headers:{"Content-Type":"application/json",Authorization:"Bearer "+tok(),...(opts.headers||{})}}); const j=await r.json().catch(()=>({ok:false,msg:"The stats server sent something odd. Try again."})); j.status=r.status; return j; }
+async function api(path,opts={}){ const go=b=>fetch(b+path,{...opts,headers:{"Content-Type":"application/json",Authorization:"Bearer "+tok(),...(opts.headers||{})}});
+  let r; if(PREVIEW){ r=await go(base); } else { try{ r=await go(base); }catch(e){ if(base===OLD_API) throw e; r=null; }
+    if(base===API&&(!r||r.status===404)){ try{ const o=await go(OLD_API); if(o.status!==404){ base=OLD_API; r=o; } }catch(_){} if(!r) throw new Error("offline"); } } const j=await r.json().catch(()=>({ok:false,msg:"The stats server sent something odd. Try again."})); j.status=r.status; return j; }
 function show(on){ $("loginView").hidden=on; $("dash").hidden=!on; $("logout").hidden=!on; $("refresh").hidden=!on; }
 const live=()=>!$("dash").hidden;
 const clock=t=>new Date(t).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
