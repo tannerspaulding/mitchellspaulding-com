@@ -173,6 +173,28 @@ p{margin:0}
 .foot .hand{color:var(--blue)}
 
 @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+/* Section menu, same as the stats page: a bar along the bottom on phones, a rail beside the page on computers. */
+.secnav{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;background:var(--card);border-top:2.5px solid var(--card-edge);box-shadow:0 -3px 0 var(--shadow);
+  padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px);overflow:hidden}
+.secnav a{flex:1 1 0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px 7px;text-decoration:none;color:var(--ink);border-left:2px solid var(--grid-major);min-width:0}
+.secnav a:first-child{border-left:0}
+.secnav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.secnav span{font-family:var(--mono);font-size:.6rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;max-width:100%;overflow:hidden}
+.secnav.many span{font-size:.5rem;letter-spacing:0}
+.secnav.many svg{width:20px;height:20px}
+.secnav a[aria-current="true"]{background:var(--hi);color:#14233F}
+.secnav a:focus-visible{outline:3px solid var(--blue);outline-offset:-3px}
+section[id]{scroll-margin-top:16px}
+.foot{padding-bottom:calc(92px + env(safe-area-inset-bottom, 0px))!important}
+@media (min-width:960px){
+  .secnav.many span{font-size:.6rem;letter-spacing:.04em}
+  .secnav{top:max(24px, env(safe-area-inset-top, 0px));bottom:auto;right:auto;left:calc(50% - 280px - 24px - 104px);width:104px;flex-direction:column;
+    border:2.5px solid var(--card-edge);box-shadow:4px 4px 0 var(--shadow);padding:0;overflow:visible}
+  .secnav a{flex:none;border-left:0;border-top:2px solid var(--grid-major);padding:12px 4px 10px}
+  .secnav a:first-child{border-top:0}
+  .foot{padding-bottom:calc(28px + env(safe-area-inset-bottom, 0px))!important}
+}
+@media (min-width:960px) and (max-height:620px){.secnav a{padding:7px 4px 6px}.secnav svg{width:18px;height:18px}}
 </style>
 </head>
 <body>
@@ -205,7 +227,7 @@ p{margin:0}
     </div>
   </section>
 
-  <section class="sec" aria-labelledby="likes-h">
+  <section class="sec" id="likes" aria-labelledby="likes-h">
     <div class="sec-head">
       <span class="label">File 01</span>
       <div class="row"><h2 id="likes-h">Things I like</h2><span class="hand">more coming!</span></div>
@@ -261,7 +283,7 @@ p{margin:0}
     </div>
   </section>
 
-  <section class="sec" aria-labelledby="snaps-h">
+  <section class="sec" id="snaps" aria-labelledby="snaps-h">
     <div class="sec-head">
       <span class="label">File 02</span>
       <h2 id="snaps-h">Snapshots</h2>
@@ -283,11 +305,11 @@ p{margin:0}
       <div class="window q-window" id="qLogo" role="img" aria-label="Quackers logo"></div>
       <div class="body">
         <h3 id="q-h">Quackers</h3>
-        <p>A search-and-find game. Ducks are hiding all over each world. Use the arrows to look around, open doors, peek behind things and fill your Duck Log to unlock the next world. Now with Snowy Peaks, the Theater and the City, three mini games, and Kingsley's shop where you spend Pond Points.</p>
+        <p>A search-and-find game. Ducks are hiding all over each world. Use the arrows to look around, open doors, peek behind things and fill your Duck Log to unlock the next world. Now with eight worlds, all the way up to the Mall and the Spaceship, four mini games, and Kingsley's shop where you spend Pond Points.</p>
         <div class="specs">
-          <div><span class="label">Worlds</span><b>6</b></div>
-          <div><span class="label">Mini games</span><b>3</b></div>
-          <div><span class="label">Levels</span><b>30</b></div>
+          <div><span class="label">Worlds</span><b>8</b></div>
+          <div><span class="label">Mini games</span><b>4</b></div>
+          <div><span class="label">Ducks</span><b>65</b></div>
         </div>
         <a class="go" href="https://quackersgame.com" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 1.5 L14 8 L3 14.5 Z" fill="#fff"/></svg>PLAY QUACKERS</a>
         <span class="dom">quackersgame.com</span>
@@ -298,6 +320,7 @@ p{margin:0}
             <li>Egg Guard</li>
             <li>Scrap Hunt</li>
             <li>Sandwich Snatch</li>
+            <li>Platypus Jump</li>
           </ul>
           <span class="label">On my to-do list</span>
           <ul>
@@ -324,7 +347,7 @@ p{margin:0}
     </article>
   </section>
 
-  <section class="sec" aria-labelledby="how-h">
+  <section class="sec" id="how" aria-labelledby="how-h">
     <div class="sec-head">
       <span class="label">File 04</span>
       <h2 id="how-h">How I make a game</h2>
@@ -342,6 +365,33 @@ p{margin:0}
     <span class="hand">made by me, with help from Dad</span>
   </footer>
 </div>
+
+<nav class="secnav" id="secnav" aria-label="Sections">
+  <a href="#top"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4.5 4.5-6.5 8-6.5s6.5 2 8 6.5"/></svg><span>Me</span></a>
+  <a href="#likes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7a4.3 4.3 0 0 1 7.5 2.8C19.5 15.4 12 20 12 20z"/></svg><span>Likes</span></a>
+  <a href="#snaps"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8h4l2-3h6l2 3h4v11H3z"/><circle cx="12" cy="13" r="3.5"/></svg><span>Snaps</span></a>
+  <a href="#games"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="7" width="19" height="11" rx="4"/><path d="M7 10.5v4M5 12.5h4"/><circle cx="16" cy="11.5" r=".9"/><circle cx="18" cy="13.8" r=".9"/></svg><span>Games</span></a>
+  <a href="#how"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h5v-5h5v-5h5V5"/><path d="M4 20V5"/></svg><span>How</span></a>
+</nav>
+<script>
+/* Section menu: highlight the section you're reading. Links are plain anchors. */
+(function(){
+  var nav=document.getElementById("secnav"); if(!nav) return;
+  var links=[].slice.call(nav.querySelectorAll("a[href^='#']")), map={};
+  links.forEach(function(a){ var el=document.getElementById(a.getAttribute("href").slice(1)); if(el) map[el.id]=a; });
+  function mark(id){ links.forEach(function(a){ if(a===map[id]) a.setAttribute("aria-current","true"); else a.removeAttribute("aria-current"); }); }
+  if(!("IntersectionObserver" in window)) return;
+  var seen={};
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(e){ seen[e.target.id]=e.isIntersecting; });
+    var ids=Object.keys(map), cur=null;
+    for(var i=0;i<ids.length;i++){ if(seen[ids[i]]){ cur=ids[i]; break; } }
+    if(cur) mark(cur);
+  },{rootMargin:"-30% 0px -60% 0px"});
+  Object.keys(map).forEach(function(id){ io.observe(document.getElementById(id)); });
+  var first=Object.keys(map)[0]; if(first) mark(first);
+})();
+</script>
 
 <script>
 /* Quackers brand art. Shared by the brand guide and the game.
