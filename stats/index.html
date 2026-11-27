@@ -193,13 +193,54 @@ td.r,th.r{text-align:right}
 .winbox.made{background:var(--okbg)}
 .runner{font-size:.86rem;color:var(--ink-soft);margin:10px 0 0}
 @media (max-width:440px){.ideas li{grid-template-columns:auto minmax(0,1fr)}.ideas .acts{grid-column:1/-1;justify-content:flex-end}}
+/* v4: live refresh, views, limits */
+.topR{display:flex;gap:8px;align-items:center}
+.refresh{display:inline-flex;align-items:center;gap:6px}
+.refresh svg{width:15px;height:15px}
+.refresh.spin svg{animation:qs-spin .9s linear infinite}
+.refresh:disabled{opacity:.75}
+@keyframes qs-spin{to{transform:rotate(360deg)}}
+.summary{display:flex;flex-direction:column;gap:10px}
+.sumhead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.summary h1{font-family:var(--display);font-weight:400;font-size:clamp(1.5rem,6.5vw,2.1rem);line-height:1;text-shadow:2px 2px 0 var(--red)}
+.updated{font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);margin:0;min-height:1.1em}
+.updated.warn{color:var(--bad)}
+.alert{font:inherit;font-weight:600;font-size:.9rem;text-align:left;border:2.5px solid var(--card-edge);background:var(--hi);color:#14233F;padding:10px 12px;box-shadow:3px 3px 0 var(--shadow);cursor:pointer}
+.alert.hot{background:var(--red);color:#fff}
+.alert:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--shadow)}
+.views{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;border:2.5px solid var(--card-edge);background:var(--card);box-shadow:4px 4px 0 var(--shadow);position:sticky;top:8px;z-index:5}
+.views button{position:relative;font:inherit;background:none;border:0;border-left:2px solid var(--rule);color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px 7px;cursor:pointer;min-width:0}
+.views button:first-child{border-left:0}
+.views svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.views span{font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.views button[aria-selected="true"]{background:var(--hi);color:#14233F}
+.views button:focus-visible{outline:3px solid var(--blue);outline-offset:-3px}
+.badge{position:absolute;top:4px;right:calc(50% - 22px);min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--red);color:#fff;font-style:normal;font-family:var(--mono);font-size:.62rem;font-weight:700;line-height:17px;text-align:center;border:1.5px solid var(--card)}
+.view{display:flex;flex-direction:column;gap:28px}
+.view[hidden]{display:none!important}
+@media (max-width:700px){
+  .views{position:fixed;top:auto;left:0;right:0;bottom:0;border-width:2.5px 0 0;box-shadow:0 -3px 0 var(--shadow);padding-bottom:env(safe-area-inset-bottom)}
+  .dash{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+}
+.gauges{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+.gauges li{display:flex;flex-direction:column;gap:5px}
+.gauges .gtop{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.gauges b{font-weight:600}
+.gauges .v{font-family:var(--mono);font-size:.78rem;font-variant-numeric:tabular-nums;white-space:nowrap}
+.gauges li.hot .v{color:var(--bad);font-weight:700}
+.gauges .track{height:14px}
+.gauges small{font-size:.8rem;color:var(--ink-soft)}
+.gauges .track.warm i{background:var(--red)}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="top">
-    <div class="mark"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="2" y="2" width="36" height="36" fill="var(--hi)" stroke="var(--card-edge)" stroke-width="2.5"/><path d="M10 28V12l5 9 5-9v16M30 15c-2-3-8-3-8 1 0 4 8 2 8 7 0 4-6 4-8 1" fill="none" stroke="#14233F" stroke-width="2.6" stroke-linecap="square"/></svg><span>MITCHELLSPAULDING.COM / STATS</span></div>
-    <button class="chip" type="button" id="logout" hidden>Log out</button>
+    <div class="mark"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="2" y="2" width="36" height="36" fill="var(--hi)" stroke="var(--card-edge)" stroke-width="2.5"/><path d="M10 28V12l5 9 5-9v16M30 15c-2-3-8-3-8 1 0 4 8 2 8 7 0 4-6 4-8 1" fill="none" stroke="#14233F" stroke-width="2.6" stroke-linecap="square"/></svg><span>QUACKERS STATS</span></div>
+    <div class="topR">
+      <button class="chip refresh" type="button" id="refresh" hidden aria-describedby="updated"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 10a6 6 0 1 1-1.8-4.3M16 3v4h-4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square"/></svg><span>Refresh</span></button>
+      <button class="chip" type="button" id="logout" hidden>Log out</button>
+    </div>
   </div>
 
   <!-- Login -->
@@ -218,145 +259,173 @@ td.r,th.r{text-align:right}
 
   <!-- Dashboard -->
   <div id="dash" class="dash" hidden>
-    <section class="hero" aria-labelledby="ht">
-      <span class="sample" id="sampleTag" hidden><i></i>SAMPLE NUMBERS</span>
-      <span class="label">Playtest report</span>
-      <h1 id="ht">Quackers Stats</h1>
-      <p class="hand">Who's hunting ducks out there?</p>
-    </section>
-
-    <div class="counts" id="counts"></div>
-
-    <div class="sec"><span>PLAYERS</span></div>
-
-    <section class="card" aria-labelledby="c1">
-      <div class="card-head"><h2 id="c1">Players each day</h2><p>Different players who opened Quackers each day, last 14 days. Today is red.</p></div>
-      <div class="chart" id="dayChart"></div>
-      <button class="toggle" type="button" data-for="dayTbl">Show as table</button>
-      <div class="tbl" id="dayTbl" hidden></div>
-    </section>
-
-    <div class="sec"><span>MAP</span></div>
-
-    <section class="card" aria-labelledby="c5">
-      <div class="card-head"><h2 id="c5">Where they play</h2><p>Cities from the last 30 days. Each player counts once per day in the city their internet connection points to, which can be off by a town or two.</p></div>
-      <div class="tabs" role="group" aria-label="Map view"><button class="tab" type="button" data-map="us" aria-pressed="true">USA</button><button class="tab" type="button" data-map="world" aria-pressed="false">World</button></div>
-      <div class="map" id="map"></div>
-      <h3 class="sub">Top cities</h3>
-      <ol class="rows" id="cities"></ol>
-      <button class="toggle" type="button" data-for="stateWrap">Show states and countries</button>
-      <div id="stateWrap" hidden><ol class="places" id="places"></ol></div>
-    </section>
-
-    <div class="sec"><span>PROGRESS</span></div>
-
-    <section class="card" aria-labelledby="c2">
-      <div class="card-head"><h2 id="c2">How far they get</h2><p>Out of every player, how many opened each world, and how many found every duck in it.</p></div>
-      <div class="key"><span><i></i>Got to this world</span><span><i class="done"></i>Found every duck</span></div>
-      <ol class="funnel" id="funnel"></ol>
-    </section>
-
-    <section class="card" aria-labelledby="c7">
-      <div class="card-head"><h2 id="c7">Last stop before leaving</h2><p id="quitNote">Where players were the last time they played, for players who haven't been back in 3 days.</p></div>
-      <ol class="rows" id="quits"></ol>
-    </section>
-
-    <section class="card" aria-labelledby="c3">
-      <div class="card-head"><h2 id="c3">Ducks found</h2><p>How many ducks each player has found so far.</p></div>
-      <div class="chart" id="duckChart"></div>
-      <p class="hand" id="duckNote"></p>
-    </section>
-
-    <section class="card" aria-labelledby="c8">
-      <div class="card-head"><h2 id="c8">Hardest ducks to find</h2><p>Share of all players who have found each duck. Low numbers mean a tough hiding spot.</p></div>
-      <ol class="rows" id="hardDucks"></ol>
-      <p class="hand" id="easyNote"></p>
-      <button class="toggle" type="button" data-for="duckTbl">Show every duck</button>
-      <div class="tbl" id="duckTbl" hidden></div>
-    </section>
-
-    <div class="sec"><span>MINI GAMES</span></div>
-
-    <section class="card" aria-labelledby="c4">
-      <div class="card-head"><h2 id="c4">Best levels</h2><p>Boxes show the average best level, out of 10.</p></div>
-      <div class="games" id="games"></div>
-    </section>
-
-    <section class="card" aria-labelledby="c9">
-      <div class="card-head"><h2 id="c9">Where players lose</h2><p>Share of tries on each level that ended in a loss. The toughest level is red.</p></div>
-      <div class="tabs" role="group" aria-label="Mini game" id="lvTabs"></div>
-      <div class="chart" id="lvChart"></div>
-      <p class="hand" id="lvNote"></p>
-      <button class="toggle" type="button" data-for="lvTbl">Show as table</button>
-      <div class="tbl" id="lvTbl" hidden></div>
-    </section>
-
-    <div class="sec"><span>SHOP</span></div>
-
-    <section class="card" aria-labelledby="c10">
-      <div class="card-head"><h2 id="c10">Pond Points</h2><p>All Pond Points earned and spent in Kingsley's shop, by every player together.</p></div>
-      <div class="stats3" id="econ"></div>
-      <div class="two">
-        <div><h3 class="sub">Earned from</h3><ol class="rows" id="earnRows"></ol></div>
-        <div><h3 class="sub">Most bought</h3><ol class="rows" id="shopRows"></ol></div>
+    <section class="summary" aria-labelledby="ht">
+      <div class="sumhead">
+        <h1 id="ht">At a glance</h1>
+        <span class="sample" id="sampleTag" hidden><i></i>SAMPLE NUMBERS</span>
       </div>
+      <p class="updated" id="updated" aria-live="polite"></p>
+      <div class="counts" id="counts"></div>
+      <button type="button" class="alert" id="ideaAlert" hidden></button>
     </section>
 
-    <div class="sec"><span>PLAY TIME</span></div>
+    <nav class="views" id="views" role="tablist" aria-label="Stats views">
+      <button type="button" role="tab" id="t-players" data-view="players" aria-controls="v-players"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6M15.5 5.2a3 3 0 0 1 0 5.6M18 14.4c2 .8 3 2.8 3 5.6"/></svg><span>Players</span></button>
+      <button type="button" role="tab" id="t-progress" data-view="progress" aria-controls="v-progress"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg><span>Progress</span></button>
+      <button type="button" role="tab" id="t-games" data-view="games" aria-controls="v-games"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="7" width="19" height="11" rx="4"/><path d="M7.5 10.5v4M5.5 12.5h4M15.5 11.5h.01M18 13.5h.01"/></svg><span>Games</span></button>
+      <button type="button" role="tab" id="t-ideas" data-view="ideas" aria-controls="v-ideas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.3 1 2.1h5c0-.8.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg><span>Ideas</span><i class="badge" id="ideaBadge" hidden></i></button>
+      <button type="button" role="tab" id="t-limits" data-view="limits" aria-controls="v-limits"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 17a8.5 8.5 0 1 1 17 0M12 17l4-6"/></svg><span>Limits</span><i class="badge warn" id="limitBadge" hidden>!</i></button>
+      <button type="button" role="tab" id="t-board" data-view="board" aria-controls="v-board"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg><span>Board</span></button>
+    </nav>
 
-    <section class="card" aria-labelledby="c11">
-      <div class="card-head"><h2 id="c11">How long they play</h2><p>Play sessions in the last 30 days, in minutes. A session ends when the game is closed or put away.</p></div>
-      <div class="chart" id="lenChart"></div>
-    </section>
+    <!-- PLAYERS -->
+    <div class="view" id="v-players" role="tabpanel" aria-labelledby="t-players">
+      <section class="card" aria-labelledby="c1">
+        <div class="card-head"><h2 id="c1">Players each day</h2><p>Different players who opened Quackers each day, last 14 days. Today is red.</p></div>
+        <div class="chart" id="dayChart"></div>
+        <button class="toggle" type="button" data-for="dayTbl">Show as table</button>
+        <div class="tbl" id="dayTbl" hidden></div>
+      </section>
 
-    <section class="card" aria-labelledby="c12">
-      <div class="card-head"><h2 id="c12">When they play</h2><p>Sessions started at each hour of the player's own clock, last 30 days. The busiest hour is red.</p></div>
-      <div class="chart" id="hourChart"></div>
-      <h3 class="sub">By day of the week</h3>
-      <div class="chart" id="dowChart"></div>
-    </section>
+      <section class="card" aria-labelledby="c5">
+        <div class="card-head"><h2 id="c5">Where they play</h2><p>Cities from the last 30 days. Each player counts once per day in the city their internet connection points to, which can be off by a town or two.</p></div>
+        <div class="tabs" role="group" aria-label="Map view"><button class="tab" type="button" data-map="us" aria-pressed="true">USA</button><button class="tab" type="button" data-map="world" aria-pressed="false">World</button></div>
+        <div class="map" id="map"></div>
+        <h3 class="sub">Top cities</h3>
+        <ol class="rows" id="cities"></ol>
+        <button class="toggle" type="button" data-for="stateWrap">Show states and countries</button>
+        <div id="stateWrap" hidden><ol class="places" id="places"></ol></div>
+      </section>
 
-    <section class="card" aria-labelledby="c6b">
-      <div class="card-head"><h2 id="c6b">Devices</h2><p>What players use, and whether they added Quackers to their home screen.</p></div>
-      <div class="devices" id="devices"></div>
-      <div class="key"><span><i></i>Home-screen app</span><span><i class="b"></i>Web browser</span></div>
-      <div class="split" id="modeSplit" role="img"></div>
-      <p class="small" id="modeNote"></p>
-    </section>
+      <section class="card" aria-labelledby="c11">
+        <div class="card-head"><h2 id="c11">How long they play</h2><p>Play sessions in the last 30 days, in minutes. A session ends when the game is closed or put away.</p></div>
+        <div class="chart" id="lenChart"></div>
+      </section>
 
-    <div class="sec"><span>LEADERBOARD</span></div>
+      <section class="card" aria-labelledby="c12">
+        <div class="card-head"><h2 id="c12">When they play</h2><p>Sessions started at each hour of the player's own clock, last 30 days. The busiest hour is red.</p></div>
+        <div class="chart" id="hourChart"></div>
+        <h3 class="sub">By day of the week</h3>
+        <div class="chart" id="dowChart"></div>
+      </section>
 
-    <section class="card" aria-labelledby="c6">
-      <div class="card-head"><h2 id="c6">Leaderboard names</h2><p>Newest first. Hide takes a name off the board right away; Show puts it back.</p></div>
-      <ul class="names" id="names"></ul>
-    </section>
+      <section class="card" aria-labelledby="c6b">
+        <div class="card-head"><h2 id="c6b">Devices</h2><p>What players use, and whether they added Quackers to their home screen.</p></div>
+        <div class="devices" id="devices"></div>
+        <div class="key"><span><i></i>Home-screen app</span><span><i class="b"></i>Web browser</span></div>
+        <div class="split" id="modeSplit" role="img"></div>
+        <p class="small" id="modeNote"></p>
+      </section>
+    </div>
 
+    <!-- PROGRESS -->
+    <div class="view" id="v-progress" role="tabpanel" aria-labelledby="t-progress" hidden>
+      <section class="card" aria-labelledby="c2">
+        <div class="card-head"><h2 id="c2">How far they get</h2><p>Out of every player, how many opened each world, and how many found every duck in it.</p></div>
+        <div class="key"><span><i></i>Got to this world</span><span><i class="done"></i>Found every duck</span></div>
+        <ol class="funnel" id="funnel"></ol>
+      </section>
 
-    <div class="sec"><span>IDEA BOX</span></div>
+      <section class="card" aria-labelledby="c7">
+        <div class="card-head"><h2 id="c7">Last stop before leaving</h2><p id="quitNote">Where players were the last time they played, for players who haven't been back in 3 days.</p></div>
+        <ol class="rows" id="quits"></ol>
+      </section>
 
-    <section class="card" aria-labelledby="c13">
-      <div class="card-head"><h2 id="c13">Ideas waiting for you</h2><p>New duck and world ideas from players. Nobody else sees an idea until you approve it. Reject deletes it.</p></div>
-      <ul class="ideas" id="pending"></ul>
-    </section>
+      <section class="card" aria-labelledby="c3">
+        <div class="card-head"><h2 id="c3">Ducks found</h2><p>How many ducks each player has found so far.</p></div>
+        <div class="chart" id="duckChart"></div>
+        <p class="hand" id="duckNote"></p>
+      </section>
 
-    <section class="card" aria-labelledby="c14">
-      <div class="card-head"><h2 id="c14">This month's vote</h2><p id="monthNote">Approved ideas players can vote on. One vote per device per idea, and nobody can vote for their own. Starts fresh on the 1st.</p></div>
-      <p class="hand" id="leader"></p>
-      <ol class="rows" id="voteRows"></ol>
-    </section>
+      <section class="card" aria-labelledby="c8">
+        <div class="card-head"><h2 id="c8">Hardest ducks to find</h2><p>Share of all players who have found each duck. Low numbers mean a tough hiding spot.</p></div>
+        <ol class="rows" id="hardDucks"></ol>
+        <p class="hand" id="easyNote"></p>
+        <button class="toggle" type="button" data-for="duckTbl">Show every duck</button>
+        <div class="tbl" id="duckTbl" hidden></div>
+      </section>
+    </div>
 
-    <section class="card win" aria-labelledby="c15">
-      <div class="card-head"><h2 id="c15">Last month's winner</h2><p>The idea with the most votes last month. Mark it as made once it's in the game, and players see that it happened.</p></div>
-      <div id="winner"></div>
-    </section>
+    <!-- GAMES -->
+    <div class="view" id="v-games" role="tabpanel" aria-labelledby="t-games" hidden>
+      <section class="card" aria-labelledby="c4">
+        <div class="card-head"><h2 id="c4">Best levels</h2><p>Boxes show the average best level, out of 10.</p></div>
+        <div class="games" id="games"></div>
+      </section>
 
-    <div class="sec"><span>FRIEND LINKS</span></div>
+      <section class="card" aria-labelledby="c9">
+        <div class="card-head"><h2 id="c9">Where players lose</h2><p>Share of tries on each level that ended in a loss. The toughest level is red.</p></div>
+        <div class="tabs" role="group" aria-label="Mini game" id="lvTabs"></div>
+        <div class="chart" id="lvChart"></div>
+        <p class="hand" id="lvNote"></p>
+        <button class="toggle" type="button" data-for="lvTbl">Show as table</button>
+        <div class="tbl" id="lvTbl" hidden></div>
+      </section>
 
-    <section class="card" aria-labelledby="c16">
-      <div class="card-head"><h2 id="c16">Friends who joined</h2><p>A friend counts when a new device opens a player's link and finds its first duck. Who invited whom isn't kept.</p></div>
-      <div class="stats3" id="friendStats"></div>
-      <p class="small" id="friendNote"></p>
-    </section>
+      <section class="card" aria-labelledby="c10">
+        <div class="card-head"><h2 id="c10">Pond Points</h2><p>All Pond Points earned and spent in Kingsley's shop, by every player together.</p></div>
+        <div class="stats3" id="econ"></div>
+        <div class="two">
+          <div><h3 class="sub">Earned from</h3><ol class="rows" id="earnRows"></ol></div>
+          <div><h3 class="sub">Most bought</h3><ol class="rows" id="shopRows"></ol></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- IDEAS -->
+    <div class="view" id="v-ideas" role="tabpanel" aria-labelledby="t-ideas" hidden>
+      <section class="card" aria-labelledby="c13">
+        <div class="card-head"><h2 id="c13">Ideas waiting for you</h2><p>New duck and world ideas from players. Nobody else sees an idea until you approve it. Reject deletes it.</p></div>
+        <ul class="ideas" id="pending"></ul>
+      </section>
+
+      <section class="card" aria-labelledby="c14">
+        <div class="card-head"><h2 id="c14">This month's vote</h2><p id="monthNote">Approved ideas players can vote on. One vote per device per idea, and nobody can vote for their own. Starts fresh on the 1st.</p></div>
+        <p class="hand" id="leader"></p>
+        <ol class="rows" id="voteRows"></ol>
+      </section>
+
+      <section class="card win" aria-labelledby="c15">
+        <div class="card-head"><h2 id="c15">Last month's winner</h2><p>The idea with the most votes last month. Mark it as made once it's in the game, and players see that it happened.</p></div>
+        <div id="winner"></div>
+      </section>
+
+      <section class="card" aria-labelledby="c16">
+        <div class="card-head"><h2 id="c16">Friends who joined</h2><p>A friend counts when a new device opens a player's link and finds its first duck. Who invited whom isn't kept.</p></div>
+        <div class="stats3" id="friendStats"></div>
+        <p class="small" id="friendNote"></p>
+      </section>
+    </div>
+
+    <!-- BOARD -->
+    <div class="view" id="v-board" role="tabpanel" aria-labelledby="t-board" hidden>
+      <section class="card" aria-labelledby="c6">
+        <div class="card-head"><h2 id="c6">Leaderboard names</h2><p>Newest first. Hide takes a name off the board right away; Show puts it back.</p></div>
+        <ul class="names" id="names"></ul>
+      </section>
+    </div>
+
+    <!-- LIMITS -->
+    <div class="view" id="v-limits" role="tabpanel" aria-labelledby="t-limits" hidden>
+      <section class="card" aria-labelledby="c17">
+        <div class="card-head"><h2 id="c17">Free plan today</h2><p id="resetNote">How much of Cloudflare's free daily allowance Quackers has used. It resets at midnight UTC. Anything at 70% or more turns red.</p></div>
+        <ul class="gauges" id="gauges"></ul>
+        <p class="small" id="usageNote"></p>
+      </section>
+
+      <section class="card" aria-labelledby="c18">
+        <div class="card-head"><h2 id="c18">Last 14 days</h2><p>Worker requests each day. The free limit is 100,000 a day.</p></div>
+        <div class="chart" id="reqChart"></div>
+        <h3 class="sub">Database rows written each day</h3>
+        <div class="chart" id="rwChart"></div>
+      </section>
+
+      <section class="card" aria-labelledby="c19">
+        <div class="card-head"><h2 id="c19">Game downloads this month</h2><p>A rough estimate. GitHub doesn't share the real number, so this counts game opens and assumes each one downloads the whole game.</p></div>
+        <ul class="gauges" id="dlGauge"></ul>
+        <p class="small" id="dlNote"></p>
+      </section>
+    </div>
 
     <div class="foot">
       <p id="stamp"></p>
@@ -370,6 +439,10 @@ const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",
 const API="https://quackers-api.tannerspaulding81.workers.dev";
 const PREVIEW=!!window.QS_SAMPLE, DAY=864e5, TK="qs-token";
 let S=null, now=Date.now(), mapView="us", lvGame="egg";
+// Live refresh: reload the numbers every minute while the page is open and on screen. It pauses after
+// 10 minutes without a tap or scroll, so a page left open doesn't keep using the free daily allowance.
+const AUTO=60000, IDLE=10*6e4, VIEWS=["players","progress","games","ideas","limits","board"];
+let busy=false, lastLoad=0, lastTry=0, lastAct=Date.now(), failed=false, view="players";
 const WORLD_IDS=["yard","manor","sea","snow","theater","city","mall"];
 const WORLDS=["The Backyard","Spooky Manor","Under the Sea","Snowy Peaks","The Theater","The City","The Mall"];
 const WNAME=w=>WORLDS[WORLD_IDS.indexOf(w)]||(w?w[0].toUpperCase()+w.slice(1):"Unknown");
@@ -384,24 +457,66 @@ const fmtN=n=>Number(n||0).toLocaleString("en-US");
 // ---- login: the password goes to the Worker, which hands back a 7-day token kept only in this tab ----
 const tok=()=>{ try{ return sessionStorage.getItem(TK)||""; }catch(_){ return ""; } };
 async function api(path,opts={}){ const r=await fetch(API+path,{...opts,headers:{"Content-Type":"application/json",Authorization:"Bearer "+tok(),...(opts.headers||{})}}); const j=await r.json().catch(()=>({ok:false,msg:"The stats server sent something odd. Try again."})); j.status=r.status; return j; }
-function show(on){ $("loginView").hidden=on; $("dash").hidden=!on; $("logout").hidden=!on; }
-function loginMsg(t){ $("loginErr").hidden=!t; $("loginErr").textContent=t||""; }
-async function load(){
-  if(PREVIEW){ S=window.QS_SAMPLE; now=S.at; show(true); draw(); return; }
-  let j; try{ j=await api("/v1/admin/summary"); }catch(_){ show(false); loginMsg("Can't reach the stats server. Check your connection and try again."); return; }
-  if(!j.ok){ try{ sessionStorage.removeItem(TK); }catch(_){} show(false); if(j.status===500) loginMsg("The stats server hit an error. If the database update in Cloudflare hasn't been run yet, run it, then try again."); else if(j.status!==401) loginMsg(j.msg||"Something went wrong."); else if(tok()) loginMsg("Please log in again."); return; }
-  S=j; now=j.at; show(true); draw();
+function show(on){ $("loginView").hidden=on; $("dash").hidden=!on; $("logout").hidden=!on; $("refresh").hidden=!on; }
+const live=()=>!$("dash").hidden;
+const clock=t=>new Date(t).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
+function setUpdated(){
+  const el=$("updated"), b=$("refresh");
+  b.classList.toggle("spin",busy); b.disabled=busy;
+  if(busy){ el.textContent="Updating…"; return; }
+  if(!lastLoad){ el.textContent=""; return; }
+  const paused=Date.now()-lastAct>=IDLE;
+  el.textContent=failed?`Couldn't refresh just now. Showing numbers from ${clock(lastLoad)}.`:`Updated ${clock(lastLoad)}. ${paused?"Live updates paused. Tap Refresh.":"Updates every minute."}`;
+  el.classList.toggle("warn",failed);
 }
+function loginMsg(t){ $("loginErr").hidden=!t; $("loginErr").textContent=t||""; }
+async function load(quiet){
+  if(busy) return; busy=true; lastTry=Date.now(); setUpdated();
+  try{
+    if(PREVIEW){ if(S&&quiet!=="first") nudge(); else S=window.QS_SAMPLE; now=S.at=Date.now(); await new Promise(r=>setTimeout(r,350)); }
+    else {
+      let j; try{ j=await api("/v1/admin/summary"); }catch(_){ j=null; }
+      // A refresh that fails keeps the numbers on screen; only the first load or a lapsed login goes back to the login.
+      if(!j||(!j.ok&&j.status!==401&&live())){ if(live()){ failed=true; return; } show(false); loginMsg(j?(j.status===500?"The stats server hit an error. If the database update in Cloudflare hasn't been run yet, run it, then try again.":j.msg||"Something went wrong."):"Can't reach the stats server. Check your connection and try again."); return; }
+      if(!j.ok){ try{ sessionStorage.removeItem(TK); }catch(_){} show(false); if(j.status===500) loginMsg("The stats server hit an error. If the database update in Cloudflare hasn't been run yet, run it, then try again."); else if(j.status!==401) loginMsg(j.msg||"Something went wrong."); else if(tok()) loginMsg("Please log in again."); return; }
+      S=j; now=j.at;
+    }
+    failed=false; lastLoad=Date.now(); show(true); draw();
+  } finally { busy=false; setUpdated(); }
+}
+// Preview only: make the sample numbers tick up a little on each refresh, so the refresh can be seen working.
+function nudge(){ const k=Math.random()<.6?1:0; S.today+=k; S.week+=k; S.daily[13].n+=k; if(Math.random()<.3){ S.players++; } if(S.usage){ const u=S.usage.today, r=20+Math.round(Math.random()*30); u.requests+=r; u.rowsWritten+=r*4; u.rowsRead+=r*25+S.readCost; S.usage.days[13].req=u.requests; S.usage.days[13].rw=u.rowsWritten; } S.opens.n+=k; }
+$("refresh").addEventListener("click",()=>{ lastAct=Date.now(); load(true); });
+const poke=()=>{ const wasPaused=Date.now()-lastAct>=IDLE; lastAct=Date.now(); if(wasPaused&&live()){ if(Date.now()-lastTry>=AUTO) load(true); else setUpdated(); } };
+["pointerdown","keydown","wheel","touchstart"].forEach(e=>addEventListener(e,poke,{passive:true}));
+addEventListener("scroll",poke,{passive:true});
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible"&&live()){ lastAct=Date.now(); if(Date.now()-lastTry>=30000) load(true); else setUpdated(); } });
+setInterval(()=>{ if(!live()||document.visibilityState!=="visible") return;
+  if(Date.now()-lastAct<IDLE&&Date.now()-lastTry>=AUTO) load(true); else setUpdated(); },10000);
+
+// ---- views: the summary stays on top; the detail is split into views picked from the tab bar ----
+function setView(v,scroll){
+  if(!VIEWS.includes(v)) v="players"; view=v;
+  document.querySelectorAll("#views [role=tab]").forEach(b=>{ const on=b.dataset.view===v; b.setAttribute("aria-selected",on); b.tabIndex=on?0:-1; });
+  VIEWS.forEach(k=>{ $("v-"+k).hidden=k!==v; });
+  try{ history.replaceState(null,"","#"+v); }catch(_){}
+  if(v==="players") drawMap();
+  if(scroll){ const top=$("views").getBoundingClientRect().top+scrollY-8; if(scrollY>top) scrollTo({top}); }
+}
+document.querySelectorAll("#views [role=tab]").forEach(b=>{
+  b.addEventListener("click",()=>setView(b.dataset.view,true));
+  b.addEventListener("keydown",e=>{ const i=VIEWS.indexOf(view), d=e.key==="ArrowRight"?1:e.key==="ArrowLeft"?-1:0; if(!d) return; e.preventDefault(); const n=VIEWS[(i+d+VIEWS.length)%VIEWS.length]; setView(n,true); $("t-"+n).focus(); }); });
+setView((location.hash||"").slice(1));
 $("loginForm").addEventListener("submit",async e=>{ e.preventDefault();
   const pw=$("pw").value; if(!pw){ loginMsg("Type the password first."); return; }
   loginMsg("");
-  if(PREVIEW){ try{ sessionStorage.setItem(TK,"preview"); }catch(_){} $("pw").value=""; load(); return; }
+  if(PREVIEW){ try{ sessionStorage.setItem(TK,"preview"); }catch(_){} $("pw").value=""; lastAct=Date.now(); load("first"); return; }
   let j; try{ j=await api("/v1/admin/login",{method:"POST",body:JSON.stringify({password:pw})}); }catch(_){ loginMsg("Can't reach the stats server. Check your connection and try again."); return; }
   if(!j.ok){ loginMsg(j.msg||"That password didn't work."); return; }
-  try{ sessionStorage.setItem(TK,j.token); }catch(_){} $("pw").value=""; load(); });
-$("logout").addEventListener("click",()=>{ try{ sessionStorage.removeItem(TK); }catch(_){} S=null; show(false); loginMsg(""); });
+  try{ sessionStorage.setItem(TK,j.token); }catch(_){} $("pw").value=""; lastAct=Date.now(); load("first"); });
+$("logout").addEventListener("click",()=>{ try{ sessionStorage.removeItem(TK); }catch(_){} S=null; lastLoad=0; show(false); loginMsg(""); setUpdated(); });
 if(PREVIEW){ $("sampleTag").hidden=false; $("loginNote").textContent="Preview: any password opens sample numbers. The real page checks the password on the server and locks after 10 wrong tries in an hour."; }
-if(tok()) load();
+if(tok()) load("first");
 
 document.querySelectorAll(".toggle").forEach(b=>{ const base=b.textContent; b.addEventListener("click",()=>{ const t=$(b.dataset.for); t.hidden=!t.hidden; b.textContent=t.hidden?base:base.replace(/^Show( as)?/,"Hide").replace(/^Hide table$/,"Hide table"); }); });
 document.querySelectorAll("[data-map]").forEach(b=>b.addEventListener("click",()=>{ mapView=b.dataset.map; document.querySelectorAll("[data-map]").forEach(x=>x.setAttribute("aria-pressed",x===b)); drawMap(); }));
@@ -519,9 +634,9 @@ function draw(){
   $("modeNote").textContent=known?`${plural(modes.app||0,"player")} use the home-screen app and ${modes.browser||0} play in a browser.${modes.unknown?` ${modes.unknown} played before this was tracked.`:""}`:"Not tracked yet.";
 
   drawNames();
-  drawIdeas(); drawFriends();
+  drawIdeas(); drawFriends(); drawLimits(); drawAlert();
   if(!PREVIEW&&!S.sessions) $("stamp").textContent="The stats server is still running the older Worker code, so the newer sections stay empty until the new code is deployed. "; else $("stamp").textContent="";
-  $("stamp").textContent+=`Numbers as of ${new Date(now).toLocaleString("en-US",{weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})}. Reload to refresh.`;
+  $("stamp").textContent+=`Numbers as of ${new Date(now).toLocaleString("en-US",{weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})}. The page updates every minute while it's open.`;
 }
 
 function drawLevels(){
@@ -599,6 +714,48 @@ function drawFriends(){
   $("friendStats").innerHTML=[["Links made",fmtN(F.links)],["Friends joined",fmtN(F.joins)],["Last 30 days",fmtN(F.recent)]].map(([l,v])=>`<div class="dev"><span class="label">${l}</span><b>${v}</b></div>`).join("");
   $("friendNote").textContent=F.links?`${plural(F.sharers,"player")} brought at least one friend.`:"Nobody has made a friend link yet.";
 }
+
+// ---- free-plan limits ----
+const GAME_KB=250; // about one full download of the game (its files come to roughly 200 KB, plus icons), on the high side
+const V4_MSG="Run the newest database update in Cloudflare to start counting.";
+const fmtBytes=b=>b>=1e9?`${(b/1e9).toFixed(1)} GB`:b>=1e6?`${(b/1e6).toFixed(1)} MB`:`${Math.round(b/1e3)} KB`;
+const short=n=>n>=1e6?`${(n/1e6).toFixed(n>=1e7?0:1)}M`:n>=1e4?`${Math.round(n/1e3)}K`:fmtN(n);
+const pctTxt=p=>p<1&&p>0?"under 1%":`${Math.round(p)}%`;
+function gauge(name,used,limit,fmt,sub){ const p=limit?used/limit*100:0, hot=p>=70;
+  return `<li class="${hot?"hot":""}"><div class="gtop"><b>${esc(name)}</b><span class="v">${pctTxt(p)}${hot?" · near the limit":""}</span></div><span class="track${hot?" warm":""}" role="img" aria-label="${esc(name)}: ${pctTxt(p)} of the free limit"><i style="width:${Math.min(100,Math.max(p,p>0?1:0))}%"></i></span><small>${esc(fmt(used))} of ${esc(fmt(limit))}${sub?` · ${esc(sub)}`:""}</small></li>`; }
+function limitHits(){ const U=S.usage; if(!U) return []; const t=U.today, L=U.limits, out=[];
+  [["requests","Worker requests"],["rowsWritten","Database writes"],["rowsRead","Database reads"],["storageBytes","Database size"]].forEach(([k,n])=>{ if(L[k]&&t[k]/L[k]>=.7) out.push(n); });
+  if(S.opens&&S.opens.n*GAME_KB*1e3/100e9>=.7) out.push("Game downloads");
+  return out; }
+function drawLimits(){
+  const U=S.usage, reset=new Date(); reset.setUTCHours(24,0,0,0);
+  $("resetNote").textContent=`How much of Cloudflare's free daily allowance Quackers has used today. It starts over at ${clock(reset)} your time (midnight UTC). Anything at 70% or more turns red.`;
+  if(!U){ $("gauges").innerHTML=`<li><span class="small">${V4_MSG}</span></li>`; $("usageNote").textContent=""; $("reqChart").innerHTML=""; $("rwChart").innerHTML=""; }
+  else { const t=U.today, L=U.limits;
+    $("gauges").innerHTML=gauge("Worker requests",t.requests,L.requests,fmtN,"every ping, score, idea and page load")
+      +gauge("Database writes",t.rowsWritten,L.rowsWritten,fmtN,"rows saved")
+      +gauge("Database reads",t.rowsRead,L.rowsRead,short,"rows looked at")
+      +gauge("Database size",t.storageBytes,L.storageBytes,fmtBytes,"this limit doesn't reset");
+    $("usageNote").textContent=`The Worker counts these itself, so they can run a little low. Each refresh of this page reads about ${fmtN(S.readCost||0)} rows.`;
+    const dl=d=>fmtDay(d.day).replace(/^\w+ /,"");
+    $("reqChart").dataset.title="Worker requests each day, last 14 days";
+    bars($("reqChart"),U.days,{value:d=>d.req,label:(d,i)=>i%2===1||i===13?dl(d):"",tipText:d=>`${wk(d.day)} ${fmtDay(d.day)}: ${fmtN(d.req)} requests (${pctTxt(d.req/L.requests*100)})`,highlight:(d,i)=>i===13});
+    $("rwChart").dataset.title="Database rows written each day, last 14 days";
+    bars($("rwChart"),U.days,{value:d=>d.rw,label:(d,i)=>i%2===1||i===13?dl(d):"",tipText:d=>`${wk(d.day)} ${fmtDay(d.day)}: ${fmtN(d.rw)} rows written (${pctTxt(d.rw/L.rowsWritten*100)})`,highlight:(d,i)=>i===13}); }
+  if(!S.opens){ $("dlGauge").innerHTML=`<li><span class="small">Deploy the newest Worker code in Cloudflare to start this estimate.</span></li>`; $("dlNote").textContent=""; $("limitBadge").hidden=!limitHits().length; return; }
+  const o=S.opens, bytes=o.n*GAME_KB*1e3;
+  $("dlGauge").innerHTML=gauge(`${mName(o.month)} so far`,bytes,100e9,fmtBytes,`${fmtN(o.n)} game opens`);
+  $("dlNote").textContent=`Each open counts as about ${GAME_KB} KB, the whole game. Real downloads are lower, because a phone keeps the game's files after the first visit, so treat this as the most it could be. GitHub's soft limit is about 100 GB a month, roughly ${fmtN(Math.round(100e9/(GAME_KB*1e3)))} opens.`;
+  const hits=limitHits(); $("limitBadge").hidden=!hits.length;
+}
+function drawAlert(){
+  const a=$("ideaAlert"), hits=limitHits(), n=S.ideas?S.ideas.pending.length:0;
+  $("ideaBadge").hidden=!n; $("ideaBadge").textContent=n>9?"9+":n;
+  if(hits.length){ a.hidden=false; a.className="alert hot"; a.dataset.go="limits"; a.textContent=`${hits.join(" and ")} ${hits.length>1?"are":"is"} at 70% or more of the free limit. See Limits.`; return; }
+  if(n){ a.hidden=false; a.className="alert"; a.dataset.go="ideas"; a.textContent=`${plural(n,"new idea")} waiting for your OK. See Ideas.`; return; }
+  a.hidden=true;
+}
+$("ideaAlert").addEventListener("click",e=>setView(e.currentTarget.dataset.go,true));
 </script>
 </body>
 </html>
