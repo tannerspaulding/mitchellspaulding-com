@@ -190,6 +190,8 @@ td.r,th.r{text-align:right}
 .kind{font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border:2px solid var(--card-edge);padding:2px 6px;background:var(--blue-soft);color:#14233F}
 .kind.world{background:var(--lime)}
 .pill.ok{background:var(--okbg)} .pill.no{background:var(--card)}
+.rows.acts li{grid-template-columns:minmax(0,10rem) minmax(0,1fr) 3.4rem auto}
+@media (max-width:440px){.rows.acts li{grid-template-columns:minmax(0,1fr) 3.4rem auto}.rows.acts .track{grid-column:1/-1;grid-row:2}}
 .rows .nm .kind{margin-right:6px;font-size:.56rem;padding:1px 4px;vertical-align:1px}
 .winbox{border:2.5px solid var(--card-edge);background:var(--hi);color:#14233F;padding:14px;display:flex;flex-direction:column;gap:8px;box-shadow:4px 4px 0 var(--shadow)}
 .winbox b{font-family:var(--display);font-weight:400;font-size:1.25rem;line-height:1.1}
@@ -448,9 +450,14 @@ td.r,th.r{text-align:right}
       </section>
 
       <section class="card" aria-labelledby="c14">
-        <div class="card-head"><h2 id="c14">This month's vote</h2><p id="monthNote">Approved ideas players can vote on. One vote per device per idea, and nobody can vote for their own. Starts fresh on the 1st.</p></div>
+        <div class="card-head"><h2 id="c14">This month's vote</h2><p id="monthNote">Approved ideas players can vote on. One vote per device per idea. Starts fresh on the 1st. Tap Built it once an idea is in the game: it leaves the vote, and the player who sent it sees "Your idea was built!" next time they open Quackers.</p></div>
         <p class="hand" id="leader"></p>
         <ol class="rows" id="voteRows"></ol>
+      </section>
+
+      <section class="card" aria-labelledby="c15b">
+        <div class="card-head"><h2 id="c15b">Built from player ideas</h2><p>Ideas you've marked as built, newest first. Players see these in the Idea Box, with no names. Undo puts an idea back in the vote if it's still this month's.</p></div>
+        <ul class="ideas" id="builtList"></ul>
       </section>
 
       <section class="card win" aria-labelledby="c15">
@@ -629,10 +636,11 @@ function bars(host,data,{label,value,tipText,highlight,max:fixedMax,unit=""}){
     h.addEventListener("pointerenter",on); h.addEventListener("pointerleave",off); h.addEventListener("click",on); });
 }
 // ---- labeled bar rows ----
-function rows(host,list,{name,sub,value,text,max,warm,empty="Nothing yet."}){
+function rows(host,list,{name,sub,value,text,max,warm,act,empty="Nothing yet."}){
   if(!list.length){ host.innerHTML=`<li><span class="small">${esc(empty)}</span></li>`; return; }
   const m=max||Math.max(1,...list.map(value));
-  host.innerHTML=list.map(d=>`<li><span class="nm">${esc(name(d))}${sub?`<small>${esc(sub(d))}</small>`:""}</span><span class="track${warm?" warm":""}"><i style="width:${Math.min(100,value(d)/m*100)}%"></i></span><span class="v">${esc(text?text(d):value(d))}</span></li>`).join("");
+  host.innerHTML=list.map(d=>`<li><span class="nm">${esc(name(d))}${sub?`<small>${esc(sub(d))}</small>`:""}</span><span class="track${warm?" warm":""}"><i style="width:${Math.min(100,value(d)/m*100)}%"></i></span><span class="v">${esc(text?text(d):value(d))}</span>${act?act(d):""}</li>`).join("");
+  if(act) host.classList.add("acts");
 }
 const fmtDay=s=>new Date(s+"T12:00:00Z").toLocaleDateString("en-US",{month:"short",day:"numeric",timeZone:"UTC"});
 const wk=s=>new Date(s+"T12:00:00Z").toLocaleDateString("en-US",{weekday:"short",timeZone:"UTC"});
@@ -826,7 +834,11 @@ function review(id,action){
   const apply=()=>{ const p=find(I.pending);
     if(action==="approve"&&p){ I.pending=I.pending.filter(x=>x.id!==id); I.now.push({id,kind:p.kind,text:p.text,votes:0,status:"approved"}); }
     if(action==="reject") I.pending=I.pending.filter(x=>x.id!==id);
-    for(const l of [I.now,I.prev]){ const x=find(l); if(x&&action==="made"){ x.status="done"; I.made++; } if(x&&action==="unmade"){ x.status="approved"; I.made=Math.max(0,I.made-1); } }
+    for(const l of [I.now,I.prev]){ const x=find(l); if(x&&action==="made"){ x.status="done"; } if(x&&action==="unmade"){ x.status="approved"; } }
+    if(I.built){ const b=find(I.built), x=find(I.now)||find(I.prev);
+      if(action==="made"&&!b&&x) I.built.unshift({id,kind:x.kind,text:x.text,votes:x.votes,month:I.now.includes(x)?I.month:I.last});
+      if(action==="unmade"&&b){ I.built=I.built.filter(y=>y.id!==id); if(b.month===I.month&&!find(I.now)) I.now.push({id,kind:b.kind,text:b.text,votes:b.votes,status:"approved"}); } }
+    if(action==="made") I.made++; if(action==="unmade") I.made=Math.max(0,I.made-1);
     drawIdeas(); };
   if(PREVIEW){ apply(); return Promise.resolve(); }
   return api("/v1/admin/idea",{method:"POST",body:JSON.stringify({id,action})}).then(j=>{ if(j.ok) apply(); else if(j.status===401) load(); else throw 0; });
@@ -838,9 +850,16 @@ function drawIdeas(){
   $("pending").innerHTML=I.pending.length?I.pending.map(x=>`<li>${kindTag(x.kind)}<span class="txt"><b>${esc(x.text)}</b><small>${ago(x.at)}</small></span><span class="acts"><button type="button" class="pill ok" data-id="${x.id}" data-a="approve" aria-label="Approve: ${esc(x.text)}">Approve</button><button type="button" class="pill no" data-id="${x.id}" data-a="reject" aria-label="Reject: ${esc(x.text)}">Reject</button></span></li>`).join(""):`<li><span class="small">No ideas waiting. You're all caught up.</span></li>`;
   $("pending").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{ b.parentNode.querySelectorAll("button").forEach(x=>x.disabled=true);
     review(+b.dataset.id,b.dataset.a).catch(()=>b.parentNode.querySelectorAll("button").forEach(x=>x.disabled=false)); }));
-  const now=I.now.slice().sort((a,b)=>b.votes-a.votes), top=now[0];
+  const now=I.now.filter(x=>x.status!=="done").sort((a,b)=>b.votes-a.votes), top=now[0];
   $("leader").textContent=top&&top.votes?`Leading: ${top.text} (${plural(top.votes,"vote")})`:now.length?"No votes yet this month.":"";
-  rows($("voteRows"),now,{name:x=>x.text,sub:x=>x.kind==="world"?"New world":"New duck",value:x=>x.votes,text:x=>plural(x.votes,"vote"),empty:"No approved ideas yet this month."});
+  rows($("voteRows"),now,{name:x=>x.text,sub:x=>x.kind==="world"?"New world":"New duck",value:x=>x.votes,text:x=>plural(x.votes,"vote"),
+    act:x=>`<button type="button" class="pill ok built" data-id="${x.id}" aria-label="Built it: ${esc(x.text)}">Built it</button>`,empty:"No approved ideas yet this month."});
+  $("voteRows").querySelectorAll("button.built").forEach(b=>b.addEventListener("click",()=>{ b.disabled=true; review(+b.dataset.id,"made").catch(()=>{ b.disabled=false; }); }));
+  const built=I.built||I.now.filter(x=>x.status==="done");
+  $("builtList").innerHTML=built.length?built.map(x=>`<li>${kindTag(x.kind)}<span class="txt"><b>${esc(x.text)}</b><small>${x.month?`${mName(x.month)} idea · `:""}${plural(x.votes||0,"vote")}</small></span><span class="acts"><button type="button" class="pill no" data-id="${x.id}" aria-label="Undo built: ${esc(x.text)}">Undo</button></span></li>`).join("")
+    :`<li><span class="small">Nothing built yet. Tap Built it on an idea in this month's vote once it's in the game.</span></li>`;
+  if(!I.built&&!PREVIEW) $("builtList").insertAdjacentHTML("beforeend",`<li><span class="small">Paste the new stats Worker code in Cloudflare to see ideas built in earlier months here.</span></li>`);
+  $("builtList").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{ b.disabled=true; review(+b.dataset.id,"unmade").catch(()=>{ b.disabled=false; }); }));
   const prev=I.prev.slice().sort((a,b)=>b.votes-a.votes), w=prev.find(x=>x.votes>0);
   if(!w){ $("winner").innerHTML=`<p class="small">No winner for ${mName(I.last)}. Ideas need at least one vote to win.</p>`; return; }
   const made=w.status==="done", rest=prev.filter(x=>x!==w&&x.votes>0);
