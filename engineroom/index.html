@@ -1,0 +1,919 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<title>The Engine Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a builder's manual. One column of numbered lessons, studs mark each step, the practice room opens wide. */
+:root{
+  --paper:#EDF2F7; --sheet:#FFFFFF; --ink:#142238; --ink-2:#4A5B74; --line:#CBD6E3;
+  --brick:#F2B705; --brick-ink:#3A2C00; --red:#D9412B; --teal:#11897B; --sky:#2F6FD6;
+  --code-bg:#14223A; --code-fg:#E5EEF9; --code-key:#FFC94D; --code-str:#7FE0C9; --code-com:#8FA3BF;
+  --ok-bg:#DDF3EE; --bad-bg:#FBE3DE; --warn-bg:#FFF1C7; --hi:#FFF4B8;
+  --f-display:"Fredoka","Trebuchet MS",system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#0C1524; --sheet:#142035; --ink:#E6EEF8; --ink-2:#A4B3C9; --line:#2A3A55;
+  --brick:#F5C02A; --brick-ink:#2A1F00; --red:#FF7A63; --teal:#3CC9B4; --sky:#7FA9FF;
+  --code-bg:#081120; --code-fg:#E5EEF9; --code-key:#FFC94D; --code-str:#7FE0C9; --code-com:#7F93B0;
+  --ok-bg:#123A35; --bad-bg:#46211C; --warn-bg:#3D3210; --hi:#3B3615; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --paper:#0C1524; --sheet:#142035; --ink:#E6EEF8; --ink-2:#A4B3C9; --line:#2A3A55;
+  --brick:#F5C02A; --brick-ink:#2A1F00; --red:#FF7A63; --teal:#3CC9B4; --sky:#7FA9FF;
+  --code-bg:#081120; --code-fg:#E5EEF9; --code-key:#FFC94D; --code-str:#7FE0C9; --code-com:#7F93B0;
+  --ok-bg:#123A35; --bad-bg:#46211C; --warn-bg:#3D3210; --hi:#3B3615; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
+.wrap{max-width:980px;margin:0 auto}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+p{margin:0}
+a{color:var(--sky)}
+code,.mono{font-family:var(--f-mono);font-size:.86em}
+:focus-visible{outline:3px solid var(--sky);outline-offset:2px;border-radius:6px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+
+/* top nav */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+nav.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);border-bottom:1px solid var(--line);
+  margin:0 calc(-1*max(16px,env(safe-area-inset-left,0px)));padding:10px max(16px,env(safe-area-inset-left,0px))}
+nav.top .wrap{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+nav.top a{flex:none;text-decoration:none;color:var(--ink);font-family:var(--f-display);font-weight:600;font-size:15px;
+  padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--sheet)}
+nav.top a:hover{border-color:var(--ink-2)}
+
+/* hero */
+.hero{padding-block:48px 28px;display:grid;gap:18px}
+.kicker{font-family:var(--f-display);font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:14px;color:var(--ink-2)}
+.hero h1{font-size:clamp(40px,7vw,68px);font-weight:700}
+.hero h1 span{background:var(--brick);color:var(--brick-ink);padding:0 .18em;border-radius:10px}
+.hero p.lede{font-size:20px;max-width:60ch;color:var(--ink)}
+.pillrow{display:flex;flex-wrap:wrap;gap:8px}
+.pill{font-size:14px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--sheet);border:1px solid var(--line);color:var(--ink-2)}
+
+/* lessons */
+section.lesson{margin-top:40px;background:var(--sheet);border:1px solid var(--line);border-radius:18px;padding:28px clamp(16px,4vw,36px);display:grid;gap:18px}
+.lhead{display:flex;gap:16px;align-items:center}
+.stud{flex:none;width:52px;height:52px;border-radius:12px;background:var(--brick);color:var(--brick-ink);display:grid;place-items:center;
+  font-family:var(--f-display);font-weight:700;font-size:24px;position:relative;box-shadow:inset 0 -4px 0 rgba(0,0,0,.14)}
+.stud::before,.stud::after{content:"";position:absolute;top:-7px;width:14px;height:8px;border-radius:4px 4px 0 0;background:var(--brick)}
+.stud::before{left:9px}.stud::after{right:9px}
+.lhead h2{font-size:clamp(26px,4vw,34px)}
+.lhead .sub{color:var(--ink-2);font-size:15px}
+.lesson > p, .lesson .prose{max-width:66ch}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.part{border:2px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:8px;align-content:start}
+.part h3{font-size:21px}
+.part .like{font-size:15px;color:var(--ink-2);border-top:1px dashed var(--line);padding-top:8px}
+.part .tag{justify-self:start;font-size:13px;font-weight:700;padding:2px 8px;border-radius:6px;color:#fff}
+.t-front{background:var(--sky)} .t-worker{background:var(--red)} .t-db{background:var(--teal)}
+
+.callout{border-radius:12px;padding:14px 16px;display:grid;gap:6px;max-width:72ch}
+.callout b.h{font-family:var(--f-display);font-size:17px}
+.c-privacy{background:var(--ok-bg)} .c-why{background:var(--warn-bg)} .c-dad{background:var(--bad-bg)}
+
+pre.code{background:var(--code-bg);color:var(--code-fg);border-radius:12px;padding:14px 16px;margin:0;overflow-x:auto;font-family:var(--f-mono);font-size:14px;line-height:1.6;min-width:0}
+pre.code .k{color:var(--code-key)} pre.code .s{color:var(--code-str)} pre.code .c{color:var(--code-com);font-style:italic}
+
+.diagram{overflow-x:auto}
+.diagram svg{display:block;min-width:620px;width:100%;height:auto}
+.dnode rect{fill:var(--sheet);stroke:var(--line);stroke-width:2}
+.dnode text{fill:var(--ink);font-family:var(--f-display);font-weight:600}
+.dnode text.small{font-family:var(--f-body);font-weight:400;fill:var(--ink-2)}
+.dnode.on rect{stroke:var(--brick);stroke-width:4;fill:var(--hi)}
+.darrow{stroke:var(--ink-2);stroke-width:2.5;fill:none}
+.darrow.on{stroke:var(--brick);stroke-width:4}
+.dlabel{fill:var(--ink-2);font-family:var(--f-mono);font-size:12px}
+
+/* stepper */
+.stepper{display:grid;gap:12px}
+.steps{display:grid;gap:6px;padding:0;margin:0;list-style:none}
+.steps li{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;border-radius:10px;border:1px solid transparent;color:var(--ink-2)}
+.steps li .n{flex:none;width:28px;height:28px;border-radius:8px;background:var(--line);color:var(--ink);display:grid;place-items:center;font-family:var(--f-display);font-weight:700}
+.steps li.on{background:var(--hi);border-color:var(--brick);color:var(--ink)}
+.steps li.on .n{background:var(--brick);color:var(--brick-ink)}
+.steps li.done{color:var(--ink)}
+.steps li.done .n{background:var(--teal);color:#fff}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button{font:inherit;font-family:var(--f-display);font-weight:600;font-size:16px;cursor:pointer;border-radius:10px;border:2px solid var(--ink);background:var(--sheet);color:var(--ink);padding:8px 14px}
+button.primary{background:var(--brick);color:var(--brick-ink);border-color:var(--brick);box-shadow:inset 0 -3px 0 rgba(0,0,0,.15)}
+button.small{font-size:14px;padding:5px 10px;border-width:1.5px}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:hover:not(:disabled){filter:brightness(1.05)}
+
+/* tables */
+.tblwrap{overflow-x:auto;min-width:0}
+table.t{border-collapse:separate;border-spacing:0;font-size:14px;min-width:100%}
+table.t caption{caption-side:top;text-align:left;font-family:var(--f-display);font-weight:600;font-size:17px;padding-bottom:6px}
+table.t th,table.t td{padding:6px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+table.t th{background:var(--paper);font-weight:600;color:var(--ink-2)}
+table.t th:first-child{border-top-left-radius:8px} table.t th:last-child{border-top-right-radius:8px}
+table.t tr.hi td{background:var(--hi)}
+table.t th.newcol{background:var(--brick);color:var(--brick-ink)}
+table.t td.empty{color:var(--ink-2);font-family:var(--f-body);font-style:italic}
+
+/* rules list */
+.rules{list-style:none;padding:0;margin:0;display:grid;gap:8px;max-width:70ch}
+.rules li{display:flex;gap:10px;align-items:flex-start}
+.rules li::before{content:"";flex:none;width:18px;height:18px;margin-top:4px;border-radius:5px;border:2px solid var(--red)}
+
+/* sandbox */
+.sandbox{border:3px dashed var(--brick)}
+.warnbar{background:var(--warn-bg);border-radius:10px;padding:10px 14px;font-weight:700}
+.sbgrid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px}
+@media (max-width:820px){.sbgrid{grid-template-columns:minmax(0,1fr)}}
+.panel{border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;gap:12px;align-content:start;min-width:0;background:var(--sheet)}
+.panel h3{font-size:19px;display:flex;gap:8px;align-items:center}
+.panel h3 .tag{font-family:var(--f-body);font-size:12px;font-weight:700;padding:2px 7px;border-radius:6px;color:#fff}
+label.f{display:grid;gap:4px;font-size:14px;font-weight:700;color:var(--ink-2)}
+select,input[type=text]{font:inherit;font-size:15px;padding:8px 10px;border-radius:8px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);width:100%;min-width:0}
+.frow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.devices{display:grid;gap:8px}
+.dev{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:10px;background:var(--paper)}
+.dev .nm{font-weight:700}
+.dev .meta{font-size:13px;color:var(--ink-2);font-family:var(--f-mono)}
+.daybadge{font-family:var(--f-display);font-weight:600;background:var(--ink);color:var(--paper);padding:3px 10px;border-radius:8px}
+.trace{list-style:none;padding:0;margin:0;display:grid;gap:4px;font-size:15px}
+.trace li{padding:6px 10px;border-radius:8px;display:flex;gap:8px}
+.trace li.ok{background:var(--ok-bg)} .trace li.bad{background:var(--bad-bg)} .trace li.info{background:var(--paper)}
+.trace li .ic{flex:none;font-weight:700;width:1.2em}
+.resp{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+@media (max-width:560px){.resp{grid-template-columns:minmax(0,1fr)}}
+.resp .lbl{font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:4px}
+.unlock{background:var(--brick);color:var(--brick-ink);border-radius:10px;padding:10px 14px;font-family:var(--f-display);font-weight:600}
+.err{color:var(--red);font-weight:700;font-size:14px}
+.sqlnote{font-size:14px;color:var(--ink-2)}
+
+/* missions */
+.missions{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.missions li{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;padding:10px 12px;border-radius:10px;background:var(--paper)}
+.missions li .box{grid-row:span 2;width:26px;height:26px;border-radius:7px;border:2px solid var(--ink-2);display:grid;place-items:center;font-weight:700}
+.missions li.done .box{background:var(--teal);border-color:var(--teal);color:#fff}
+.missions li .mt{font-weight:700}
+.missions li .mh{font-size:14px;color:var(--ink-2)}
+.missions li.done .mt{text-decoration:line-through;text-decoration-thickness:2px}
+.meter{height:12px;border-radius:999px;background:var(--line);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--teal);width:0;transition:width .4s}
+
+/* checklist */
+.check{list-style:none;padding:0;margin:0;display:grid;gap:10px;max-width:74ch}
+.check li{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:start;padding:12px 14px;border:1px solid var(--line);border-radius:12px}
+.check input{width:22px;height:22px;margin-top:3px;accent-color:var(--teal);grid-row:span 2}
+.check .who{justify-self:start;font-size:12px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--paper);color:var(--ink-2)}
+.check .who.dad{background:var(--red);color:#fff}
+.check .ct{font-weight:700}
+.check .cd{font-size:15px;color:var(--ink-2)}
+.check .cd code{color:var(--ink)}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-size:15px;padding:6px 12px;border-radius:999px;border:1.5px solid var(--line);background:var(--paper)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.role{border:2px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:8px;align-content:start}
+.role h3{font-size:21px}
+.role ul{margin:0;padding-left:1.1em;display:grid;gap:4px}
+.role .who{justify-self:start;font-size:13px;font-weight:700;padding:2px 8px;border-radius:6px;color:#fff}
+.r-kid{background:var(--sky)} .r-grown{background:var(--red)} .r-ai{background:var(--teal)}
+.words{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.word{padding:10px 12px;border-radius:10px;background:var(--paper)}
+.word b{font-family:var(--f-display);font-size:17px;display:block}
+.word span{font-size:15px;color:var(--ink-2)}
+footer{margin-top:40px;color:var(--ink-2);font-size:14px;text-align:center}
+
+/* ---- course platform shell ---- */
+body{padding-left:0;padding-right:0}
+.gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.logo{width:34px;height:34px;flex:none}
+.lg-ink{fill:var(--ink)} .lg-yel{fill:var(--brick)} .lg-teal{fill:var(--teal)} .lg-paper{fill:var(--sheet)}
+header.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;background:var(--sheet);border-bottom:1px solid var(--line)}
+header.bar .in{max-width:1240px;margin:0 auto;display:flex;align-items:center;gap:16px;padding-block:10px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);font-family:var(--f-display);font-weight:700;font-size:20px}
+.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
+.tabs a{flex:none;text-decoration:none;color:var(--ink-2);font-family:var(--f-display);font-weight:600;font-size:16px;padding:8px 12px;border-radius:10px}
+.tabs a[aria-current="page"]{color:var(--ink);background:var(--paper)}
+.tabs a:hover{color:var(--ink)}
+.me{display:flex;align-items:center;gap:10px}
+.xp{font-family:var(--f-display);font-weight:600;font-size:14px;padding:5px 10px;border-radius:999px;background:var(--brick);color:var(--brick-ink);white-space:nowrap}
+.av{width:34px;height:34px;border-radius:50%;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-family:var(--f-display);font-weight:700;font-size:14px}
+main.view{max-width:1240px;margin:0 auto;padding-block:24px 64px}
+.sample{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);background:var(--paper);border:1px dashed var(--line);border-radius:6px;padding:2px 7px}
+/* classroom */
+.welcome{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,340px);gap:18px;align-items:stretch}
+@media (max-width:860px){.welcome{grid-template-columns:minmax(0,1fr)}}
+.wcard{background:var(--sheet);border:1px solid var(--line);border-radius:18px;padding:24px;display:grid;gap:12px;align-content:start}
+.wcard h1{font-size:clamp(30px,5vw,44px)}
+.wcard .lede{font-size:18px;max-width:58ch}
+.cont{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.cont .kicker{color:color-mix(in srgb,var(--paper) 70%,transparent)}
+.cont h3{font-size:22px}
+.bar2{height:10px;border-radius:999px;background:color-mix(in srgb,var(--line) 60%,transparent);overflow:hidden}
+.bar2 i{display:block;height:100%;background:var(--teal);width:0;transition:width .4s}
+.cont .bar2{background:rgba(255,255,255,.18)}
+.sechead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-top:32px;margin-bottom:12px}
+.sechead h2{font-size:26px}
+.courses{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.course{background:var(--sheet);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:grid;grid-template-rows:auto 1fr;text-decoration:none;color:var(--ink)}
+.course .cover{height:112px;display:grid;place-items:center;position:relative}
+.course .cover b{font-family:var(--f-display);font-size:44px;font-weight:700;color:rgba(255,255,255,.92)}
+.course .cover .state{position:absolute;top:10px;left:10px;font-size:12px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--sheet);color:var(--ink)}
+.course .cb{padding:14px 16px;display:grid;gap:8px;align-content:start}
+.course h3{font-size:19px}
+.course .meta{font-size:14px;color:var(--ink-2)}
+.course.locked{opacity:.78}
+.course.open:hover{border-color:var(--ink-2)}
+.cv1{background:linear-gradient(135deg,#142238,#2F6FD6)} .cv2{background:linear-gradient(135deg,#2F6FD6,#11897B)} .cv3{background:linear-gradient(135deg,#11897B,#F2B705)}
+.cv4{background:linear-gradient(135deg,#142238,#D9412B)} .cv5{background:linear-gradient(135deg,#D9412B,#F2B705)} .cv6{background:linear-gradient(135deg,#142238,#11897B)} .cv7{background:linear-gradient(135deg,#2F6FD6,#142238)}
+/* player */
+.player{display:grid;grid-template-columns:300px minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:900px){.player{grid-template-columns:minmax(0,1fr)}}
+aside.outline{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px);background:var(--sheet);border:1px solid var(--line);border-radius:16px;padding:16px;display:grid;gap:12px;max-height:calc(100vh - 100px);overflow:auto}
+@media (max-width:900px){aside.outline{position:static;max-height:none}}
+.outline .ctitle{font-family:var(--f-display);font-weight:700;font-size:18px}
+.outline .prog{font-size:14px;color:var(--ink-2)}
+.outline .mod{display:grid;gap:2px}
+.outline .mod > b{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);margin:6px 0 2px}
+.outline a{display:flex;gap:10px;align-items:center;text-decoration:none;color:var(--ink);padding:8px 10px;border-radius:10px;font-size:15px}
+.outline a:hover{background:var(--paper)}
+.outline a[aria-current="page"]{background:var(--hi);font-weight:700}
+.outline a .ck{flex:none;width:20px;height:20px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:12px;color:#fff}
+.outline a.done .ck{background:var(--teal);border-color:var(--teal)}
+.outline a .dur{margin-left:auto;font-size:12px;color:var(--ink-2);font-family:var(--f-mono)}
+#otoggle{display:none}
+@media (max-width:900px){#otoggle{display:inline-block} aside.outline.shut .mod{display:none}}
+.crumb{font-size:14px;color:var(--ink-2);display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.crumb a{color:var(--ink-2)}
+.lessonwrap section.lesson{margin-top:0}
+.lessonwrap .sbgrid{grid-template-columns:minmax(0,1fr)}
+@media (min-width:1240px){.lessonwrap .sbgrid{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}}
+.lfoot{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-top:16px;padding:14px 16px;background:var(--sheet);border:1px solid var(--line);border-radius:14px}
+.lfoot .mid{display:flex;gap:8px;align-items:center}
+button.donebtn[aria-pressed="true"]{background:var(--teal);border-color:var(--teal);color:#fff}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:12px;font-family:var(--f-display);font-weight:600;z-index:20}
+/* community */
+.comm{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px;align-items:start}
+@media (max-width:900px){.comm{grid-template-columns:minmax(0,1fr)}}
+.composer{background:var(--sheet);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;gap:12px;align-items:center}
+.composer .fake{flex:1;padding:10px 14px;border-radius:12px;background:var(--paper);color:var(--ink-2)}
+.cats{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.post{background:var(--sheet);border:1px solid var(--line);border-radius:16px;padding:16px;display:grid;gap:8px}
+.post + .post{margin-top:12px}
+.post .ph{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.post .ph .av{width:30px;height:30px;font-size:12px}
+.post .ph b{font-size:15px}
+.post .ph span.c{font-size:13px;color:var(--ink-2)}
+.post h3{font-size:19px}
+.post .acts{display:flex;gap:16px;font-size:14px;color:var(--ink-2)}
+.side{display:grid;gap:12px}
+.lb{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.lb li{display:flex;justify-content:space-between;gap:8px;font-size:15px;padding:6px 8px;border-radius:8px;background:var(--paper)}
+.lb li b{font-family:var(--f-mono);font-size:13px}
+.levels{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:15px}
+.levels li{display:flex;gap:8px;align-items:center}
+.levels li i{font-style:normal;width:24px;height:24px;border-radius:7px;background:var(--paper);display:grid;place-items:center;font-family:var(--f-display);font-weight:700;font-size:13px}
+.levels li.on i{background:var(--brick);color:var(--brick-ink)}
+/* projects */
+.btnlink{display:inline-block;text-decoration:none;font-family:var(--f-display);font-weight:600;font-size:17px;padding:10px 18px;border-radius:12px;background:var(--brick);color:var(--brick-ink);box-shadow:inset 0 -3px 0 rgba(0,0,0,.15)}
+.projs{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.proj{background:var(--sheet);border:1px solid var(--line);border-radius:16px;padding:18px;display:grid;gap:8px;align-content:start}
+.proj.feat{border:3px solid var(--brick)}
+.proj h3{font-size:21px}
+.proj .parts{display:grid;gap:4px;font-size:14px;color:var(--ink-2)}
+.proj .parts b{color:var(--ink)}
+</style>
+</head>
+<body>
+
+
+<header class="bar"><div class="in gut">
+  <a class="brand" href="#home"><svg class="logo" viewBox="0 0 100 100" aria-hidden="true"><path class="lg-ink" fill-rule="evenodd" d="M67.00,56.00 L73.93,58.13 L73.33,62.72 L66.08,62.99 L64.94,66.33 L63.38,69.50 L68.32,74.82 L65.50,78.48 L59.09,75.09 L56.44,77.42 L53.50,79.38 L55.12,86.45 L50.84,88.22 L46.99,82.08 L43.52,82.77 L40.00,83.00 L37.87,89.93 L33.28,89.33 L33.01,82.08 L29.67,80.94 L26.50,79.38 L21.18,84.32 L17.52,81.50 L20.91,75.09 L18.58,72.44 L16.62,69.50 L9.55,71.12 L7.78,66.84 L13.92,62.99 L13.23,59.52 L13.00,56.00 L6.07,53.87 L6.67,49.28 L13.92,49.01 L15.06,45.67 L16.62,42.50 L11.68,37.18 L14.50,33.52 L20.91,36.91 L23.56,34.58 L26.50,32.62 L24.88,25.55 L29.16,23.78 L33.01,29.92 L36.48,29.23 L40.00,29.00 L42.13,22.07 L46.72,22.67 L46.99,29.92 L50.33,31.06 L53.50,32.62 L58.82,27.68 L62.48,30.50 L59.09,36.91 L61.42,39.56 L63.38,42.50 L70.45,40.88 L72.22,45.16 L66.08,49.01 L66.77,52.48 Z M51.00,56.00 A11,11 0 1,0 29.00,56.00 A11,11 0 1,0 51.00,56.00 Z"/><path class="lg-yel" fill-rule="evenodd" d="M90.70,32.98 L95.14,35.80 L93.57,39.56 L88.44,38.38 L86.57,40.65 L84.29,42.50 L85.43,47.64 L81.66,49.18 L78.87,44.72 L75.95,45.00 L73.02,44.70 L70.20,49.14 L66.44,47.57 L67.62,42.44 L65.35,40.57 L63.50,38.29 L58.36,39.43 L56.82,35.66 L61.28,32.87 L61.00,29.95 L61.30,27.02 L56.86,24.20 L58.43,20.44 L63.56,21.62 L65.43,19.35 L67.71,17.50 L66.57,12.36 L70.34,10.82 L73.13,15.28 L76.05,15.00 L78.98,15.30 L81.80,10.86 L85.56,12.43 L84.38,17.56 L86.65,19.43 L88.50,21.71 L93.64,20.57 L95.18,24.34 L90.72,27.13 L91.00,30.05 Z M82.00,30.00 A6,6 0 1,0 70.00,30.00 A6,6 0 1,0 82.00,30.00 Z"/><path class="lg-teal" d="M87.96,74.80 L91.74,76.47 L90.85,79.12 L86.83,78.17 L85.73,79.59 L84.34,80.72 L85.39,84.72 L82.76,85.68 L80.99,81.94 L79.20,81.96 L77.45,81.58 L74.97,84.90 L72.59,83.44 L74.41,79.73 L73.28,78.34 L72.48,76.73 L68.35,76.87 L68.00,74.09 L72.04,73.20 L72.42,71.45 L73.17,69.83 L70.49,66.68 L72.45,64.68 L75.66,67.28 L77.27,66.48 L79.01,66.06 L79.80,62.00 L82.58,62.28 L82.55,66.42 L84.17,67.17 L85.59,68.27 L89.26,66.36 L90.77,68.71 L87.52,71.27 L87.94,73.01 Z"/><path class="lg-paper" d="M80.00,68.00 L81.56,72.44 L86.00,74.00 L81.56,75.56 L80.00,80.00 L78.44,75.56 L74.00,74.00 L78.44,72.44 Z"/></svg><span>The Engine Room</span></a>
+  <nav class="tabs" aria-label="Sections"><a href="#home" data-tab="home">Classroom</a><a href="#community" data-tab="community">Community</a><a href="#projects" data-tab="projects">Projects</a></nav>
+  <div class="me"><span class="xp" id="xp">0 XP · New builder</span><span class="av" aria-label="Your profile">YOU</span></div>
+</div></header>
+
+<main class="view gut" id="v-home">
+  <div class="welcome">
+    <div class="wcard">
+      <div class="kicker">Welcome, builders</div>
+      <h1>Build real things together, with AI</h1>
+      <p class="lede">A grown-up and a kid, no coding experience needed. The kid leads the ideas, the grown-up keeps it safe, and an AI helper writes the code. We built a real game this way, and every course here is made from what we learned.</p>
+    </div>
+    <div class="wcard cont">
+      <div class="kicker">Continue where you left off</div>
+      <h3 id="cont-title">The Engine Room</h3>
+      <div class="bar2"><i id="cont-bar"></i></div>
+      <span id="cont-text" style="font-size:15px"></span>
+      <div><a href="#l-team" id="cont-go" class="btnlink">Continue</a></div>
+    </div>
+  </div>
+  <div class="sechead"><h2>Courses</h2><span class="sqlnote">One course is open now. The rest are on the way.</span></div>
+  <div class="courses"><div class="course locked" aria-disabled="true"><div class="cover cv1"><span class="state">Coming soon</span><b>1</b></div><div class="cb"><h3>From idea to plan</h3><div class="meta">Turn a kid's idea into a one-page plan the AI helper can build from.</div></div></div><div class="course locked" aria-disabled="true"><div class="cover cv2"><span class="state">Coming soon</span><b>2</b></div><div class="cb"><h3>Your first build in an evening</h3><div class="meta">Get a very simple version online the same night.</div></div></div><div class="course locked" aria-disabled="true"><div class="cover cv3"><span class="state">Coming soon</span><b>3</b></div><div class="cb"><h3>Make it feel pro</h3><div class="meta">Look, sound and navigation that make people want to keep playing.</div></div></div><a class="course open" href="#l-team"><div class="cover cv4"><span class="state">Open now</span><b>4</b></div><div class="cb"><h3>The Engine Room</h3><div class="meta">How the backend works: servers, databases, routes, and changing them safely. 8 lessons, practice room.</div><div class="bar2"><i class="cprog"></i></div><div class="meta cprogt"></div></div></a><div class="course locked" aria-disabled="true"><div class="cover cv5"><span class="state">Coming soon</span><b>5</b></div><div class="cb"><h3>Privacy and safety by design</h3><div class="meta">Save only what you need, kid-safe names, and a delete button.</div></div></div><div class="course locked" aria-disabled="true"><div class="cover cv6"><span class="state">Coming soon</span><b>6</b></div><div class="cb"><h3>Ship it</h3><div class="meta">Domains, previews before live, and how to undo.</div></div></div><div class="course locked" aria-disabled="true"><div class="cover cv7"><span class="state">Coming soon</span><b>7</b></div><div class="cb"><h3>Listen to your players</h3><div class="meta">Idea boxes, leaderboards and sharing, done fairly.</div></div></div></div>
+</main>
+
+<main class="view gut" id="v-player" hidden>
+  <div class="player">
+    <aside class="outline" id="outline">
+      <div class="ctitle">The Engine Room</div>
+      <div class="bar2"><i id="o-bar"></i></div>
+      <div class="prog" id="o-prog"></div>
+      <button class="small" id="otoggle" type="button" aria-expanded="false">Show lessons</button>
+      <div class="mod"><b>Get started</b><a href="#l-team" data-l="team"><span class="ck" aria-hidden="true"></span><span>The team</span><span class="dur">5 min</span></a><a href="#l-parts" data-l="parts"><span class="ck" aria-hidden="true"></span><span>Three parts of anything online</span><span class="dur">8 min</span></a></div><div class="mod"><b>How it works</b><a href="#l-travel" data-l="travel"><span class="ck" aria-hidden="true"></span><span>A message's trip</span><span class="dur">6 min</span></a><a href="#l-tables" data-l="tables"><span class="ck" aria-hidden="true"></span><span>Tables: the drawers</span><span class="dur">8 min</span></a><a href="#l-routes" data-l="routes"><span class="ck" aria-hidden="true"></span><span>Routes: doors into the Worker</span><span class="dur">10 min</span></a></div><div class="mod"><b>Hands on</b><a href="#l-practice" data-l="practice"><span class="ck" aria-hidden="true"></span><span>Practice room</span><span class="dur">30 min</span></a></div><div class="mod"><b>Do it for real</b><a href="#l-real" data-l="real"><span class="ck" aria-hidden="true"></span><span>Changing the real one</span><span class="dur">10 min</span></a><a href="#l-words" data-l="words"><span class="ck" aria-hidden="true"></span><span>Word bank</span><span class="dur">5 min</span></a></div>
+    </aside>
+    <div class="lessonwrap" id="lessonwrap">
+      <div class="crumb"><a href="#home">Classroom</a><span>›</span><span>The Engine Room</span><span>›</span><span id="crumb-l"></span></div>
+      <section data-lesson="team" class="lesson" id="team">
+  <div class="lhead"><div class="stud">1</div><div><h2>The team: a kid, a grown-up and an AI helper</h2><div class="sub">You don't need to know how to code. You need to know what you want, and to ask good questions.</div></div></div>
+  <div class="grid3">
+    <div class="role"><span class="who r-kid">Kid</span><h3>The idea boss</h3><ul><li>Dreams up what to build and who it's for</li><li>Decides how it looks and feels</li><li>Tests it and tries to break it</li></ul></div>
+    <div class="role"><span class="who r-grown">Grown-up</span><h3>The safety boss</h3><ul><li>Owns the accounts, passwords and money</li><li>Says yes before anything goes live</li><li>Keeps people's information private</li></ul></div>
+    <div class="role"><span class="who r-ai">AI helper</span><h3>The builder</h3><ul><li>Writes the code from your ideas</li><li>Explains how it works, as many times as you ask</li><li>Fixes what breaks when you tell it what you saw</li></ul></div>
+  </div>
+  <div class="callout c-why"><b class="h">How a build session goes</b><p>The kid says what they want in their own words. The AI helper builds a preview. You both try it, the kid says what's wrong or what's missing, and the AI helper changes it. Repeat until it feels right. Then the grown-up puts it live.</p></div>
+</section>
+<section data-lesson="parts" class="lesson" id="parts">
+  <div class="lhead"><div class="stud">2</div><div><h2>The three parts of anything online</h2><div class="sub">Games, recipe books and team sites all have these three. Pick a project to see them.</div></div></div>
+  <div class="chips" id="pchips" role="group" aria-label="Pick a project"></div>
+  <div class="grid3">
+    <div class="part"><span class="tag t-front">Frontend</span><h3>What you see</h3><p id="p-front"></p><p class="like">Like the Minecraft world on your screen. It looks amazing, but it forgets everything if nobody saves it.</p></div>
+    <div class="part"><span class="tag t-worker">Server</span><h3>The Worker</h3><p>A small program that runs on Cloudflare's computers. The frontend sends it messages. It checks the rules, then saves or looks things up. <span id="p-worker"></span></p><p class="like">Like a redstone machine: something goes in, it checks it, and something comes out.</p></div>
+    <div class="part"><span class="tag t-db">Database</span><h3>D1</h3><p>The database keeps things saved even when everyone closes the page. Only the Worker can open it. <span id="p-db"></span></p><p class="like">Like a LEGO sorting box with labeled drawers. Each drawer is called a table.</p></div>
+  </div>
+  <div class="diagram" aria-label="Diagram: the game talks to the Worker, and the Worker talks to the database. The grown-up dashboard also reads through the Worker.">
+    <svg id="dia" viewBox="0 0 760 230" role="img">
+      <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/></marker></defs>
+      <g class="dnode" id="n-dev"><rect x="10" y="40" width="150" height="90" rx="14"/><text x="85" y="78" text-anchor="middle" font-size="18">Your tablet</text><text class="small" x="85" y="102" text-anchor="middle" font-size="13">it runs here</text></g>
+      <g class="dnode" id="n-site"><rect x="200" y="40" width="160" height="90" rx="14"/><text x="280" y="78" text-anchor="middle" font-size="18">Website</text><text class="small" x="280" y="102" text-anchor="middle" font-size="13">GitHub Pages</text></g>
+      <g class="dnode" id="n-worker"><rect x="400" y="40" width="150" height="90" rx="14"/><text x="475" y="78" text-anchor="middle" font-size="18">Worker</text><text class="small" x="475" y="102" text-anchor="middle" font-size="13">game-api</text></g>
+      <g class="dnode" id="n-db"><rect x="590" y="40" width="160" height="90" rx="14"/><text x="670" y="78" text-anchor="middle" font-size="18">D1 database</text><text class="small" x="670" y="102" text-anchor="middle" font-size="13">game-db</text></g>
+      <g class="dnode" id="n-stats"><rect x="400" y="165" width="150" height="54" rx="12"/><text x="475" y="198" text-anchor="middle" font-size="15">Grown-up dashboard</text></g>
+      <path class="darrow" id="a1" d="M200,85 L162,85" marker-end="url(#ah)"/>
+      <text class="dlabel" x="164" y="30">loads the page</text>
+      <path class="darrow" id="a2" d="M160,60 C260,0 330,0 398,60" marker-end="url(#ah)"/>
+      <text class="dlabel" x="250" y="18">messages</text>
+      <path class="darrow" id="a3" d="M550,85 L588,85" marker-end="url(#ah)"/>
+      <path class="darrow" id="a4" d="M475,165 L475,132" marker-end="url(#ah)"/>
+    </svg>
+  </div>
+  <div class="callout c-why"><b class="h">Frontend and backend</b><p>The part you see is the <b>frontend</b> because it's in front. The Worker and the database are the <b>backend</b> because they're behind, hidden away. "Making a backend change" means changing the Worker, the database, or both.</p></div>
+</section>
+<section data-lesson="travel" class="lesson" id="travel">
+  <div class="lhead"><div class="stud">3</div><div><h2>A message's trip</h2><div class="sub">Worked example: Quackers. What really happens when you find a duck. Press Next to follow it.</div></div></div>
+  <div class="stepper">
+    <ol class="steps" id="tsteps">
+      <li><span class="n">1</span><span>You tap a hidden duck. The game shows the duck in your log right away.</span></li>
+      <li><span class="n">2</span><span>The game packs a message called a <b>request</b>. It says where it's going and what's inside.<br><code>POST /api/ping {"pid":"tab-7k2q","ducks":13}</code></span></li>
+      <li><span class="n">3</span><span>The request flies over the internet to the Worker. <code>pid</code> is your device's random id. It's not your name.</span></li>
+      <li><span class="n">4</span><span>The Worker checks it. Is the id the right shape? Is this device sending too many messages this minute?</span></li>
+      <li><span class="n">5</span><span>The Worker saves it in the database with a line of <b>SQL</b>, the language databases speak.<br><code>UPDATE players SET ducks=13 WHERE pid='tab-7k2q'</code></span></li>
+      <li><span class="n">6</span><span>The Worker sends back an answer called a <b>response</b>: <code>{"ok":true}</code>. Trip complete.</span></li>
+    </ol>
+    <div class="btnrow"><button class="primary" id="tnext" type="button">Next step</button><button id="treset" type="button">Start over</button></div>
+  </div>
+  <div class="callout c-why"><b class="h">GET and POST</b><p><b>GET</b> means "please tell me something", like asking how many friends joined. <b>POST</b> means "here's something new", like a duck you found. The messages are written in <b>JSON</b>, which is just labels and values inside curly brackets.</p></div>
+</section>
+<section data-lesson="tables" class="lesson" id="tables">
+  <div class="lhead"><div class="stud">4</div><div><h2>Tables: the drawers</h2><div class="sub">Worked example: Quackers. Its friend link needed two new drawers.</div></div></div>
+  <p>A table has <b>columns</b> across the top (what kind of fact) and <b>rows</b> going down (one thing each). It's like a Minecraft chest where every slot has a label.</p>
+  <div class="grid3" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+    <div class="tblwrap"><table class="t"><caption>friends</caption><thead><tr><th>code</th><th>pid</th><th>at</th><th>joins</th></tr></thead>
+      <tbody><tr><td>q7mz4kfa</td><td>tab-7k2q</td><td>day 0</td><td>2</td></tr><tr><td>hx2p9wde</td><td>pho-3c4d</td><td>day 0</td><td>0</td></tr></tbody></table>
+      <p class="sqlnote" style="margin-top:6px">One row per player who asked for a share code. <code>joins</code> counts friends who came with it.</p></div>
+    <div class="tblwrap"><table class="t"><caption>referrals</caption><thead><tr><th>pid</th><th>at</th></tr></thead>
+      <tbody><tr><td>new-8b1c</td><td>day 0</td></tr><tr><td>new-5d7e</td><td>day 0</td></tr></tbody></table>
+      <p class="sqlnote" style="margin-top:6px">One row per device that was counted as a friend. That's all.</p></div>
+  </div>
+  <p>Here's the real SQL that builds the <code>friends</code> drawer:</p>
+<pre class="code"><span class="k">CREATE TABLE IF NOT EXISTS</span> friends(
+  code  <span class="k">TEXT PRIMARY KEY</span>,         <span class="c">-- the random share code, never two the same</span>
+  pid   <span class="k">TEXT NOT NULL UNIQUE</span>,     <span class="c">-- whose code it is, one code per player</span>
+  at    <span class="k">INTEGER NOT NULL</span>,         <span class="c">-- when it was made</span>
+  joins <span class="k">INTEGER NOT NULL DEFAULT</span> 0 <span class="c">-- how many friends joined, starts at 0</span>
+);</pre>
+  <div class="callout c-privacy"><b class="h">Save only what you need</b><p>Look at <code>referrals</code> again. It saves "this device was counted", but never who invited it. The game only needed to know "has this device been counted before?", so that's all it keeps. Every fact you don't save is a fact that can never leak. Great builders think about this first.</p></div>
+</section>
+<section data-lesson="routes" class="lesson" id="routes">
+  <div class="lhead"><div class="stud">5</div><div><h2>Routes: doors into the Worker</h2><div class="sub">Worked example: Quackers. A route is a named door, and each one does one job.</div></div></div>
+  <p>A route is a method plus an address, like <code>POST /api/friend/claim</code>. The Worker has a list near the top that says which door goes to which job. These are the lines for the friend link in Quackers, made a little simpler:</p>
+<pre class="code"><span class="k">if</span> (r === <span class="s">"/api/friend/code"</span>   &amp;&amp; req.method === <span class="s">"POST"</span>) <span class="c">// give me my share code</span>
+<span class="k">if</span> (r === <span class="s">"/api/friend/status"</span> &amp;&amp; req.method === <span class="s">"GET"</span>)  <span class="c">// how many friends joined?</span>
+<span class="k">if</span> (r === <span class="s">"/api/friend/claim"</span>  &amp;&amp; req.method === <span class="s">"POST"</span>) <span class="c">// count me as a friend</span></pre>
+  <p>The claim door has a guard with a checklist. A friend only counts when every box is true:</p>
+  <ul class="rules">
+    <li>The share code is real.</li>
+    <li>It isn't your own code. No counting yourself!</li>
+    <li>The friend has found at least one duck.</li>
+    <li>The friend is new: their first visit came after the code was made, and only a few days ago.</li>
+    <li>This device was never counted before.</li>
+    <li>The sharer hasn't hit today's limit. This stops anyone from faking hundreds of friends.</li>
+  </ul>
+  <p>When all six pass, the Worker adds a row to <code>referrals</code> and adds 1 to <code>joins</code>. When <code>joins</code> reaches 1, the game unlocks a bonus duck for the sharer.</p>
+  <div class="callout c-why"><b class="h">Why does the guard live in the Worker?</b><p>Anyone can mess with the game on their own device, the same way people use cheat mods. The Worker runs on Cloudflare's computers, so only the people who run the game can change its rules. Any rule that keeps things fair has to live in the backend.</p></div>
+</section>
+<section data-lesson="practice" class="lesson sandbox" id="practice">
+  <div class="lhead"><div class="stud">6</div><div><h2>Practice room</h2><div class="sub">A pretend Worker and database for the Quackers friend link, running inside this page. The same moves work for any project.</div></div></div>
+  <div class="warnbar">Everything here is pretend. It isn't connected to anything real, so try anything. Undo and Reset are always there.</div>
+
+  <div class="panel">
+    <h3>Missions</h3>
+    <div class="meter" aria-hidden="true"><i id="meter"></i></div>
+    <ul class="missions" id="missions"></ul>
+  </div>
+
+  <div class="sbgrid">
+    <div class="panel">
+      <h3>Players <span class="tag t-front">Frontend</span></h3>
+      <div class="btnrow"><span class="daybadge" id="day">Today is day 0</span><button class="small" id="nextday" type="button">Next day</button></div>
+      <div class="devices" id="devices"></div>
+      <div class="btnrow"><button class="small primary" id="newfriend" type="button">A friend opens your link</button></div>
+    </div>
+    <div class="panel">
+      <h3>Send a request</h3>
+      <label class="f" for="rq-route">Route<select id="rq-route"></select></label>
+      <div class="frow">
+        <label class="f" for="rq-dev">From which device<select id="rq-dev"></select></label>
+        <label class="f" for="rq-code" id="rq-code-wrap">Share code<input type="text" id="rq-code" list="codes" autocomplete="off" spellcheck="false" placeholder="like q7mz4kfa"></label>
+      </div>
+      <datalist id="codes"></datalist>
+      <div class="btnrow"><button class="primary" id="send" type="button">Send it</button></div>
+      <div class="resp">
+        <div><div class="lbl">Request</div><pre class="code" id="rq-out">Pick a route and press Send it.</pre></div>
+        <div><div class="lbl">Response</div><pre class="code" id="rs-out">…</pre></div>
+      </div>
+      <div class="lbl" style="font-size:13px;font-weight:700;color:var(--ink-2)">What the Worker checked</div>
+      <ul class="trace" id="trace"><li class="info"><span class="ic">·</span><span>Nothing sent yet.</span></li></ul>
+      <div id="unlock" hidden class="unlock">Bonus duck unlocked! This is the moment a real game would reward the sharer.</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>Database <span class="tag t-db">D1</span></h3>
+    <div class="grid3" id="dbview" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))"></div>
+  </div>
+
+  <div class="sbgrid">
+    <div class="panel">
+      <h3>Add a column</h3>
+      <p class="sqlnote">Give a table a new kind of fact. Every row gets the starting value.</p>
+      <div class="frow">
+        <label class="f" for="ac-table">Table<select id="ac-table"></select></label>
+        <label class="f" for="ac-name">Column name<input type="text" id="ac-name" placeholder="like best_world" spellcheck="false" autocomplete="off"></label>
+        <label class="f" for="ac-type">Kind<select id="ac-type"><option value="INTEGER">Number</option><option value="TEXT">Text</option></select></label>
+        <label class="f" for="ac-def">Starting value<input type="text" id="ac-def" value="0" spellcheck="false" autocomplete="off"></label>
+      </div>
+      <pre class="code" id="ac-sql"></pre>
+      <p class="sqlnote">In a real database, the grown-up pastes this as one line with no <code>--</code> notes in it.</p>
+      <div class="btnrow"><button class="primary" id="ac-run" type="button">Run it</button><span class="err" id="ac-err"></span></div>
+    </div>
+    <div class="panel">
+      <h3>Build a route <span class="tag t-worker">Worker</span></h3>
+      <p class="sqlnote">Make a new door. Pick what it does, and watch the real code appear.</p>
+      <div class="frow">
+        <label class="f" for="br-method">Method<select id="br-method"><option>GET</option><option>POST</option></select></label>
+        <label class="f" for="br-name">Address<input type="text" id="br-name" placeholder="like friend/top" spellcheck="false" autocomplete="off"></label>
+      </div>
+      <label class="f" for="br-recipe">What it does<select id="br-recipe">
+        <option value="count">Count the rows in a table</option>
+        <option value="mine">Look up my row in a table</option>
+        <option value="top">Find the biggest number in a column</option>
+        <option value="addone">Add 1 to a number on my row</option>
+      </select></label>
+      <div class="frow">
+        <label class="f" for="br-table">Table<select id="br-table"></select></label>
+        <label class="f" for="br-col" id="br-col-wrap">Column<select id="br-col"></select></label>
+      </div>
+      <pre class="code" id="br-code"></pre>
+      <div class="btnrow"><button class="primary" id="br-save" type="button">Add this door</button><span class="err" id="br-err"></span></div>
+    </div>
+  </div>
+  <div class="btnrow"><button id="undo" type="button">Undo</button><button id="reset" type="button">Reset the practice room</button><span class="sqlnote" id="resetq" hidden>Reset everything, missions too? <button class="small" id="resetyes" type="button">Yes, reset</button> <button class="small" id="resetno" type="button">Keep it</button></span></div>
+</section>
+<section data-lesson="real" class="lesson" id="real">
+  <div class="lhead"><div class="stud">7</div><div><h2>Changing the real one</h2><div class="sub">The same steps every time, with a grown-up doing the ones that touch real accounts.</div></div></div>
+  <ul class="check" id="checklist">
+    <li><input type="checkbox" id="ck1"><label for="ck1" class="ct">Say the idea in one sentence</label><span class="cd">"The game should remember which world each player likes best." If it doesn't fit in one sentence, make it smaller.</span></li>
+    <li><input type="checkbox" id="ck2"><label for="ck2" class="ct">Plan the drawers and doors</label><span class="cd">Which table, which new columns, which route? What's the smallest amount you need to save? Try it in the practice room first.</span></li>
+    <li><input type="checkbox" id="ck3"><label for="ck3" class="ct">Build a preview, never the live one</label><span class="cd">Ask your AI helper to build the change as a preview. The real project stays the same until a grown-up says yes.</span></li>
+    <li><input type="checkbox" id="ck4"><label for="ck4" class="ct">Test the tricky cases</label><span class="cd">Try to cheat it: twice in a row, your own code, no ducks found. Quackers' friend link had 57 test checks before anyone pasted anything.</span></li>
+    <li><input type="checkbox" id="ck5"><label for="ck5" class="ct">Database change first <span class="who dad">Grown-up</span></label><span class="cd">The grown-up opens the database's console in Cloudflare and pastes the SQL as one line. <code>IF NOT EXISTS</code> makes it safe to run twice. Drawers go in before the Worker tries to use them.</span></li>
+    <li><input type="checkbox" id="ck6"><label for="ck6" class="ct">Then the Worker <span class="who dad">Grown-up</span></label><span class="cd">The grown-up opens the Worker, pastes the new code and presses Deploy.</span></li>
+    <li><input type="checkbox" id="ck7"><label for="ck7" class="ct">Check it really works</label><span class="cd">Close and reopen it. Try the new thing. The grown-up checks the dashboard.</span></li>
+    <li><input type="checkbox" id="ck8"><label for="ck8" class="ct">Write down what changed</label><span class="cd">The date, what you added, and why. Future you will thank you.</span></li>
+  </ul>
+  <div class="callout c-dad"><b class="h">How to undo</b><p><b>The Worker:</b> Cloudflare keeps the older versions of the Worker, so the grown-up can switch back to the last one that worked.</p><p><b>The database:</b> adding a table or a column is easy to undo. Deleting is forever, so we never delete a table or a column with players' data in it without a backup and a grown-up's yes.</p></div>
+  <div class="callout c-why"><b class="h">Golden rules</b><p>1. Preview first, live only with a grown-up's yes. 2. One change at a time. 3. Passwords and keys never go in the code; they live in Cloudflare's secret settings, and only the grown-up in charge knows them. 4. Save as little about players as you can. Privacy comes first, always.</p></div>
+  <div class="btnrow"><button class="small" id="ckclear" type="button">Clear the checklist</button></div>
+</section>
+<section data-lesson="words" class="lesson" id="words">
+  <div class="lhead"><div class="stud">★</div><div><h2>Word bank</h2><div class="sub">Real words real engineers use.</div></div></div>
+  <div class="words">
+    <div class="word"><b>Frontend</b><span>The part people see and tap.</span></div>
+    <div class="word"><b>Backend</b><span>The hidden part: the Worker and the database.</span></div>
+    <div class="word"><b>Server</b><span>A computer program that answers messages. Ours is the Worker.</span></div>
+    <div class="word"><b>Database</b><span>Where things stay saved. Ours is D1.</span></div>
+    <div class="word"><b>Table, row, column</b><span>A drawer, one thing in it, one kind of fact.</span></div>
+    <div class="word"><b>SQL</b><span>The language for asking a database to save or find things.</span></div>
+    <div class="word"><b>Route</b><span>A named door into the Worker, like <code>GET /api/friend/status</code>.</span></div>
+    <div class="word"><b>Request and response</b><span>The message the frontend sends and the answer it gets back.</span></div>
+    <div class="word"><b>JSON</b><span>Labels and values in curly brackets, like <code>{"ok":true}</code>.</span></div>
+    <div class="word"><b>Deploy</b><span>Putting new code live so everyone gets it.</span></div>
+    <div class="word"><b>Roll back</b><span>Going back to the last version that worked.</span></div>
+    <div class="word"><b>Secret</b><span>A password the Worker uses that never goes in the code.</span></div>
+  </div>
+</section>
+      <div class="lfoot">
+        <button id="prev" type="button">← Back</button>
+        <div class="mid"><button class="donebtn" id="done" type="button" aria-pressed="false">Mark complete</button></div>
+        <button class="primary" id="next" type="button">Next →</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<main class="view gut" id="v-community" hidden>
+  <div class="comm">
+    <div>
+      <div class="composer"><span class="av">YOU</span><span class="fake">Posting opens when the course launches. These are sample posts to show the idea.</span></div>
+      <div class="cats"><button class="chip" type="button" aria-pressed="true">All</button><button class="chip" type="button" aria-pressed="false">Show and tell</button><button class="chip" type="button" aria-pressed="false">Help</button><button class="chip" type="button" aria-pressed="false">Wins</button></div>
+      <article class="post"><div class="ph"><span class="av">KD</span><b>A parent</b><span class="c">in Show and tell</span><span class="sample">Sample post</span></div><h3>We built a chore chart in one evening</h3><p>My 9-year-old wanted stars for feeding the cat. The practice room helped us understand why the stars disappeared when we closed the page: no database yet!</p><div class="acts"><span>👍 12</span><span>💬 4 comments</span></div></article><article class="post"><div class="ph"><span class="av">JR</span><b>A kid builder</b><span class="c">in Help</span><span class="sample">Sample post</span></div><h3>My route says Not found</h3><p>I added a door at /api/top but the game says Not found. Do I need to add it to the list at the top?</p><div class="acts"><span>👍 8</span><span>💬 6 comments</span></div></article><article class="post"><div class="ph"><span class="av">MT</span><b>A parent</b><span class="c">in Wins</span><span class="sample">Sample post</span></div><h3>The guard caught my kid trying to cheat</h3><p>She tried to claim her own friend code three times. The guard said no every time. She was so proud she understood why.</p><div class="acts"><span>👍 21</span><span>💬 3 comments</span></div></article>
+    </div>
+    <div class="side">
+      <div class="wcard"><h3 style="font-size:19px">Builder levels</h3><ul class="levels" id="levels"></ul><p class="sqlnote">Earn XP by finishing lessons (20 each) and practice missions (10 each).</p></div>
+      <div class="wcard"><h3 style="font-size:19px">Community rules</h3><ul class="rules" style="font-size:15px"><li>Kids post with a grown-up.</li><li>First names or nicknames only. No schools, towns or faces.</li><li>Never share passwords, codes or links to private pages.</li><li>Be kind. Everyone here is learning.</li></ul></div>
+    </div>
+  </div>
+</main>
+
+<main class="view gut" id="v-projects" hidden>
+  <div class="sechead" style="margin-top:0"><h2>Projects you can build</h2><span class="sqlnote">Every project has the same three parts.</span></div>
+  <div class="projs"><article class="proj feat"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h3>Quackers</h3><span class="rec" style="font-size:12px;font-weight:700;background:var(--brick);color:var(--brick-ink);padding:2px 8px;border-radius:999px">Worked example in the course</span></div><p>A duck-finding web game with worlds, mini games and a friend link.</p><div class="parts"><span><b>What you see:</b> Worlds, ducks and buttons</span><span><b>Server:</b> Checks a friend link is fair</span><span><b>Database:</b> Ducks found, leaderboard, friend codes</span></div></article><article class="proj"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h3>Family recipe book</h3><span class="sample">Project idea</span></div><p>Recipe cards with photos, ratings and a "who cooks tonight" picker.</p><div class="parts"><span><b>What you see:</b> Recipe cards and a search box</span><span><b>Server:</b> Checks a new recipe isn't a copy</span><span><b>Database:</b> Recipes, ratings, the cooking schedule</span></div></article><article class="proj"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h3>Pet care tracker</h3><span class="sample">Project idea</span></div><p>A checklist so the dog never gets fed dinner twice.</p><div class="parts"><span><b>What you see:</b> Fed, walked, water bowl full</span><span><b>Server:</b> Stops two people marking the same feeding</span><span><b>Database:</b> Every feeding and walk, with the time</span></div></article><article class="proj"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h3>Science fair lab</h3><span class="sample">Project idea</span></div><p>Measure something every day and watch the chart grow.</p><div class="parts"><span><b>What you see:</b> A chart of each day's measurement</span><span><b>Server:</b> Checks each number is real</span><span><b>Database:</b> Each day's measurements</span></div></article><article class="proj"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h3>Team or club site</h3><span class="sample">Project idea</span></div><p>The schedule, scores and photos for a team.</p><div class="parts"><span><b>What you see:</b> Schedule, scores, photos</span><span><b>Server:</b> Lets only the coach post scores</span><span><b>Database:</b> Games, scores and the schedule</span></div></article></div>
+</main>
+
+<script>
+(function(){
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const store = { get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } }, set(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} } };
+
+/* ---------- project picker ---------- */
+const PROJECTS = [
+  {k:'game', label:'A game', front:'Worlds, ducks and buttons you tap, on your tablet or phone.', worker:'In Quackers, it checks a friend link is fair before counting it.', db:'In Quackers, it saves ducks found, the leaderboard and friend codes.'},
+  {k:'recipes', label:'A family recipe book', front:'Recipe cards with photos and a search box.', worker:'It could check a new recipe has a name and isn\'t already there.', db:'It could save the recipes, star ratings, and who cooks which night.'},
+  {k:'pets', label:'A pet care tracker', front:'A checklist: fed, walked, water bowl full.', worker:'It could stop two people from both feeding the dog dinner.', db:'It could save every feeding and walk, with the time.'},
+  {k:'science', label:'A science fair lab', front:'A chart of how tall the plant grew each day.', worker:'It could check each measurement is a real number.', db:'It could save each day\'s measurements.'},
+  {k:'team', label:'A team or club site', front:'The schedule, scores and team photos.', worker:'It could let only the coach post scores.', db:'It could save games, scores and the schedule.'}
+];
+let pk = (store.get('qer-pub-project')||'game');
+function drawProject(){
+  const p = PROJECTS.find(x=>x.k===pk) || PROJECTS[0];
+  $('pchips').innerHTML = PROJECTS.map(x=>`<button type="button" class="chip" aria-pressed="${x.k===p.k}" data-p="${x.k}">${esc(x.label)}</button>`).join('');
+  $('p-front').textContent = p.front; $('p-worker').textContent = p.worker; $('p-db').textContent = p.db;
+}
+$('pchips').addEventListener('click', e=>{ const b=e.target.closest('[data-p]'); if(!b) return; pk=b.dataset.p; store.set('qer-pub-project', pk); drawProject(); });
+drawProject();
+
+/* ---------- lesson 2 stepper ---------- */
+const tmap = [["n-dev"],["n-dev"],["a2","n-worker"],["n-worker"],["a3","n-db"],["a2","n-dev"]];
+let tstep = -1;
+function tdraw(){
+  document.querySelectorAll('#tsteps li').forEach((li,i)=>{ li.classList.toggle('on', i===tstep); li.classList.toggle('done', i<tstep); });
+  document.querySelectorAll('#dia .on').forEach(e=>e.classList.remove('on'));
+  if (tstep>=0) tmap[tstep].forEach(id=>$(id).classList.add('on'));
+  $('tnext').textContent = tstep<0 ? 'Start the trip' : (tstep>=5 ? 'Done!' : 'Next step');
+  $('tnext').disabled = tstep>=5;
+}
+$('tnext').onclick = ()=>{ tstep=Math.min(5,tstep+1); tdraw(); };
+$('treset').onclick = ()=>{ tstep=-1; tdraw(); };
+tdraw();
+
+/* ---------- practice room state ---------- */
+const ALPH = 'abcdefghjkmnpqrstuvwxyz23456789';
+const rand = n => Array.from({length:n},()=>ALPH[Math.floor(Math.random()*ALPH.length)]).join('');
+function fresh(){
+  return {
+    day:0, friendN:0, limits:{}, events:{}, routes:[], newcols:[],
+    devices:[
+      {pid:'tab-7k2q', name:"My tablet"},
+      {pid:'lap-9x4m', name:'Laptop that played last month'}
+    ],
+    db:{
+      players:{cols:[['pid','TEXT'],['ducks','INTEGER'],['first_day','INTEGER']], rows:[
+        {pid:'tab-7k2q', ducks:12, first_day:-10},
+        {pid:'lap-9x4m', ducks:40, first_day:-30}
+      ]},
+      friends:{cols:[['code','TEXT'],['pid','TEXT'],['at','INTEGER'],['joins','INTEGER']], rows:[]},
+      referrals:{cols:[['pid','TEXT'],['at','INTEGER']], rows:[]}
+    }
+  };
+}
+let S = store.get('qer-pub-state') || fresh();
+if (!S || !S.db || !S.devices) S = fresh();
+let hist = [];
+let hi = {};   // table -> Set of row indexes changed by the last action
+function snap(){ hist.push(JSON.stringify(S)); if (hist.length>30) hist.shift(); }
+function save(){ store.set('qer-pub-state', S); }
+const T = n => S.db[n];
+const colType = (t,c) => { const x = T(t).cols.find(k=>k[0]===c); return x ? x[1] : null; };
+const findRow = (t, f) => T(t).rows.findIndex(f);
+const devName = pid => (S.devices.find(d=>d.pid===pid)||{}).name || pid;
+function mark(t, i){ (hi[t] = hi[t] || new Set()).add(i); }
+
+/* ---------- pretend Worker ---------- */
+const BUILTIN = [
+  {id:'b-code',  method:'POST', path:'/api/friend/code',   needsCode:false, about:'Give me my share code'},
+  {id:'b-claim', method:'POST', path:'/api/friend/claim',  needsCode:true,  about:'Count me as a friend'},
+  {id:'b-stat',  method:'GET',  path:'/api/friend/status', needsCode:false, about:'How many friends joined?'}
+];
+const allRoutes = () => BUILTIN.concat(S.routes);
+
+function run(route, pid, code){
+  const tr = []; const ok = t=>tr.push(['ok',t]); const bad = t=>tr.push(['bad',t]); const info = t=>tr.push(['info',t]);
+  let res;
+  const player = T('players').rows.find(r=>r.pid===pid);
+  if (route.id==='b-code'){
+    if (!player){ bad('This device has never played, so it has no player row.'); return {res:{ok:false}, tr}; }
+    ok('This device is a real player.');
+    let i = findRow('friends', r=>r.pid===pid);
+    if (i<0){ T('friends').rows.push({code:rand(8), pid, at:S.day, joins:0}); i = T('friends').rows.length-1; mark('friends', i); ok('No code yet, so the Worker made a random 8-letter code and saved a new row in friends.'); }
+    else info('This device already has a code, so the Worker gives back the same one.');
+    res = {ok:true, code:T('friends').rows[i].code};
+    S.events.code = true;
+  } else if (route.id==='b-stat'){
+    const r = T('friends').rows.find(r=>r.pid===pid);
+    info(r ? 'Found this device in friends and read its joins.' : 'This device has no share code yet, so the answer is 0.');
+    res = {ok:true, friends: r ? r.joins : 0};
+  } else if (route.id==='b-claim'){
+    code = (code||'').trim();
+    const oi = findRow('friends', r=>r.code===code);
+    if (oi<0){ bad('Is the share code real? No, there is no row in friends with that code.'); return {res:{ok:false, why:'no'}, tr}; }
+    const owner = T('friends').rows[oi];
+    ok('The share code is real. It belongs to ' + devName(owner.pid) + '.');
+    if (owner.pid===pid){ bad("Is it someone else's code? No, it's your own. No counting yourself!"); S.events.own=true; return {res:{ok:false, why:'no'}, tr}; }
+    ok("It isn't the claimer's own code.");
+    if (!player){ bad('This device has never played.'); return {res:{ok:false, why:'no'}, tr}; }
+    if (player.ducks<1){ bad('Has the friend found a duck? Not yet. The game will try again later.'); S.events.duck=true; return {res:{ok:false, retry:true, why:'duck'}, tr}; }
+    ok('The friend has found ' + player.ducks + (player.ducks===1?' duck.':' ducks.'));
+    if (player.first_day < owner.at || player.first_day < S.day-3){ bad('Is the friend new? No, this device was playing before the code was made, or more than 3 days ago.'); S.events.notnew=true; return {res:{ok:false, why:'no'}, tr}; }
+    ok('The friend is new.');
+    if (T('referrals').rows.some(r=>r.pid===pid)){ info('Was this device counted before? Yes, so it is not counted again.'); S.events.already=true; return {res:{ok:true, counted:false, why:'already'}, tr}; }
+    ok('This device was never counted before.');
+    const lk = owner.pid + ':' + S.day; const used = S.limits[lk]||0;
+    if (used>=2){ bad('Has the sharer hit the limit? Yes, 2 friends today already in this practice room. Try again tomorrow.'); S.events.later=true; return {res:{ok:false, retry:true, why:'later'}, tr}; }
+    ok('The sharer has had ' + used + ' friend' + (used===1?'':'s') + ' counted today, which is under the limit of 2.');
+    S.limits[lk] = used+1;
+    T('referrals').rows.push({pid, at:S.day}); mark('referrals', T('referrals').rows.length-1);
+    owner.joins += 1; mark('friends', oi);
+    info('Saved a row in referrals and added 1 to joins.');
+    S.events.counted = true;
+    res = {ok:true, counted:true};
+  } else {
+    S.events.custom = true;
+    const t = route.table, c = route.col;
+    if (!T(t)){ bad('The table ' + t + ' does not exist.'); return {res:{ok:false}, tr}; }
+    if (route.recipe==='count'){ info('Counted the rows in ' + t + '.'); res={ok:true, count:T(t).rows.length}; }
+    else if (route.recipe==='top'){ const v = T(t).rows.map(r=>Number(r[c])).filter(n=>!isNaN(n)); info('Looked at every ' + c + ' in ' + t + ' and kept the biggest.'); res={ok:true, top: v.length?Math.max(...v):null}; }
+    else if (route.recipe==='mine'){ const r = T(t).rows.find(r=>r.pid===pid); if (r){ ok('Found this device in ' + t + '.'); mark(t, T(t).rows.indexOf(r)); } else info('No row for this device in ' + t + '.'); res={ok:true, row:r||null}; }
+    else if (route.recipe==='addone'){ const i = findRow(t, r=>r.pid===pid); if (i<0){ bad('No row for this device in ' + t + ', so there is nothing to add to.'); return {res:{ok:false}, tr}; } T(t).rows[i][c] = (Number(T(t).rows[i][c])||0)+1; mark(t,i); ok('Added 1 to ' + c + '.'); res={ok:true}; res[c]=T(t).rows[i][c]; }
+  }
+  return {res, tr};
+}
+
+/* ---------- missions ---------- */
+const MISSIONS = [
+  ['Get a share code for my tablet', 'Route: POST /api/friend/code, from my tablet.', ()=>S.events.code],
+  ['Try to count a brand-new friend', 'Press "A friend opens your link", then send a claim from Friend 1 with the tablet\'s code. What does the guard say?', ()=>S.events.duck],
+  ['Help the friend find a duck, then claim again', 'Press "Find a duck" next to Friend 1, then send the claim again.', ()=>S.events.counted],
+  ['Try to cheat: claim the same friend twice', 'Send the same claim again from the same friend.', ()=>S.events.already],
+  ['Try to count yourself', 'Send a claim from my tablet with its own code.', ()=>S.events.own],
+  ['Try with the old laptop', 'It found lots of ducks, but is it new?', ()=>S.events.notnew],
+  ['Hit the daily limit', 'Count 2 friends today, then try a 3rd. Press "Next day" and try again.', ()=>S.events.later],
+  ['Add a column to a table', 'Use "Add a column" below. Maybe a favorite_world column on players?', ()=>S.newcols.length>0],
+  ['Build your own door and use it', 'Use "Build a route", then pick it in Send a request.', ()=>S.events.custom]
+];
+function drawMissions(){
+  let n=0;
+  $('missions').innerHTML = MISSIONS.map(([t,h,f],i)=>{ const d=!!f(); if(d) n++; return `<li class="${d?'done':''}"><span class="box" aria-hidden="true">${d?'✓':i+1}</span><span class="mt">${esc(t)}${d?' <span class="sr" style="position:absolute;left:-9999px">done</span>':''}</span><span class="mh">${esc(h)}</span></li>`; }).join('');
+  $('meter').style.width = (n/MISSIONS.length*100)+'%'; window.dispatchEvent(new CustomEvent('er-missions',{detail:n}));
+}
+
+/* ---------- drawing ---------- */
+function drawDevices(){
+  $('day').textContent = 'Today is day ' + S.day;
+  $('devices').innerHTML = S.devices.map(d=>{ const p = T('players').rows.find(r=>r.pid===d.pid)||{}; return `<div class="dev"><div><div class="nm">${esc(d.name)}</div><div class="meta">pid ${esc(d.pid)} · ${p.ducks} duck${p.ducks===1?'':'s'} · first played day ${p.first_day}</div></div><button class="small" type="button" data-duck="${esc(d.pid)}">Find a duck</button></div>`; }).join('');
+  const cur = $('rq-dev').value;
+  $('rq-dev').innerHTML = S.devices.map(d=>`<option value="${esc(d.pid)}">${esc(d.name)}</option>`).join('');
+  if (S.devices.some(d=>d.pid===cur)) $('rq-dev').value = cur;
+  $('codes').innerHTML = T('friends').rows.map(r=>`<option value="${esc(r.code)}">${esc(devName(r.pid))}</option>`).join('');
+}
+function drawDB(){
+  $('dbview').innerHTML = Object.keys(S.db).map(t=>{
+    const tb=T(t), set=hi[t]||new Set();
+    const head = tb.cols.map(([c])=>`<th class="${S.newcols.includes(t+'.'+c)?'newcol':''}">${esc(c)}</th>`).join('');
+    const body = tb.rows.length ? tb.rows.map((r,i)=>`<tr class="${set.has(i)?'hi':''}">${tb.cols.map(([c])=>`<td>${esc(r[c]===undefined||r[c]===null?'':r[c])}</td>`).join('')}</tr>`).join('')
+      : `<tr><td class="empty" colspan="${tb.cols.length}">empty drawer</td></tr>`;
+    return `<div class="tblwrap"><table class="t"><caption>${esc(t)}</caption><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
+  }).join('');
+}
+function drawRoutes(){
+  const cur = $('rq-route').value;
+  $('rq-route').innerHTML = allRoutes().map(r=>`<option value="${esc(r.id)}">${esc(r.method+' '+r.path)} · ${esc(r.about)}</option>`).join('');
+  if (allRoutes().some(r=>r.id===cur)) $('rq-route').value = cur;
+  const r = allRoutes().find(x=>x.id===$('rq-route').value);
+  $('rq-code-wrap').hidden = !(r && r.needsCode);
+}
+function drawTablesSelects(){
+  const opts = Object.keys(S.db).map(t=>`<option>${esc(t)}</option>`).join('');
+  ['ac-table','br-table'].forEach(id=>{ const v=$(id).value; $(id).innerHTML=opts; if (S.db[v]) $(id).value=v; });
+  brCols();
+}
+function all(){ drawDevices(); drawDB(); drawRoutes(); drawTablesSelects(); drawMissions(); acPreview(); brPreview(); save(); }
+
+/* ---------- player actions ---------- */
+$('devices').addEventListener('click', e=>{
+  const b = e.target.closest('[data-duck]'); if (!b) return;
+  snap(); hi={};
+  const i = findRow('players', r=>r.pid===b.dataset.duck); T('players').rows[i].ducks += 1; mark('players', i);
+  $('rq-out').textContent = 'POST /api/ping\n' + JSON.stringify({pid:b.dataset.duck, ducks:T('players').rows[i].ducks}, null, 2);
+  $('rs-out').textContent = JSON.stringify({ok:true}, null, 2);
+  setTrace([['info','The game sent a ping, and the Worker saved the new duck count in players.']]);
+  all();
+});
+$('newfriend').onclick = ()=>{
+  snap(); hi={};
+  S.friendN += 1; const pid = 'new-' + rand(4);
+  S.devices.push({pid, name:'Friend ' + S.friendN});
+  T('players').rows.push({pid, ducks:0, first_day:S.day}); mark('players', T('players').rows.length-1);
+  setTrace([['info','Friend ' + S.friendN + ' opened the game for the first time. The game made a random pid and the Worker saved a new player row.']]);
+  all();
+  $('rq-dev').value = pid;
+  const claim = BUILTIN[1]; $('rq-route').value = claim.id; drawRoutes();
+  const mine = T('friends').rows.find(r=>r.pid==='tab-7k2q'); if (mine && !$('rq-code').value) $('rq-code').value = mine.code;
+};
+$('nextday').onclick = ()=>{ snap(); hi={}; S.day += 1; setTrace([['info','A new day. Each sharer can have 2 more friends counted today.']]); all(); };
+
+function setTrace(list){ $('trace').innerHTML = list.map(([k,t])=>`<li class="${k}"><span class="ic">${k==='ok'?'✓':k==='bad'?'✗':'·'}</span><span>${esc(t)}</span></li>`).join(''); }
+
+$('rq-route').onchange = drawRoutes;
+$('send').onclick = ()=>{
+  const r = allRoutes().find(x=>x.id===$('rq-route').value); if (!r) return;
+  const pid = $('rq-dev').value, code = $('rq-code').value.trim();
+  snap(); hi={};
+  const body = r.needsCode ? {pid, code} : {pid};
+  $('rq-out').textContent = r.method==='GET' ? `GET ${r.path}?pid=${pid}` : `POST ${r.path}\n` + JSON.stringify(body, null, 2);
+  const before = (T('friends').rows.find(x=>x.pid==='tab-7k2q')||{}).joins||0;
+  const out = run(r, pid, code);
+  $('rs-out').textContent = JSON.stringify(out.res, null, 2);
+  setTrace(out.tr);
+  const after = (T('friends').rows.find(x=>x.pid==='tab-7k2q')||{}).joins||0;
+  $('unlock').hidden = !(before===0 && after>=1);
+  if (r.id==='b-code' && out.res.code) $('rq-code').value = out.res.code;
+  all();
+};
+
+/* ---------- add a column ---------- */
+const NAME = /^[a-z][a-z0-9_]{1,23}$/;
+function acPreview(){
+  const t=$('ac-table').value, n=$('ac-name').value.trim()||'new_column', ty=$('ac-type').value, d=$('ac-def').value.trim();
+  const dv = ty==='TEXT' ? `'${d.replace(/'/g,"''")}'` : (d===''?'0':d);
+  $('ac-sql').innerHTML = `<span class="k">ALTER TABLE</span> ${esc(t)} <span class="k">ADD COLUMN</span> ${esc(n)} <span class="k">${ty}</span> <span class="k">DEFAULT</span> <span class="s">${esc(dv)}</span>;`;
+}
+['ac-table','ac-name','ac-type','ac-def'].forEach(id=>$(id).addEventListener('input', ()=>{ $('ac-err').textContent=''; if(id==='ac-type'){ $('ac-def').value = $('ac-type').value==='TEXT' ? '' : '0'; } acPreview(); }));
+$('ac-run').onclick = ()=>{
+  const t=$('ac-table').value, n=$('ac-name').value.trim(), ty=$('ac-type').value, d=$('ac-def').value.trim();
+  if (!NAME.test(n)) { $('ac-err').textContent = 'Use small letters, numbers and _ only, starting with a letter, like best_world.'; return; }
+  if (colType(t,n)) { $('ac-err').textContent = t + ' already has a column called ' + n + '.'; return; }
+  if (ty==='INTEGER' && d!=='' && !/^-?\d+$/.test(d)) { $('ac-err').textContent = 'A number column needs a whole number to start with, like 0.'; return; }
+  snap(); hi={};
+  T(t).cols.push([n, ty]);
+  const v = ty==='INTEGER' ? Number(d||0) : d;
+  T(t).rows.forEach((r,i)=>{ r[n]=v; mark(t,i); });
+  S.newcols.push(t+'.'+n);
+  $('ac-name').value=''; $('ac-err').textContent='';
+  setTrace([['ok','The database ran: ALTER TABLE ' + t + ' ADD COLUMN ' + n + '. Every row got the starting value. The yellow header is your new column.']]);
+  all();
+};
+
+/* ---------- build a route ---------- */
+function brCols(){
+  const t=$('br-table').value, rec=$('br-recipe').value; if (!T(t)) return;
+  const nums = T(t).cols.filter(c=>c[1]==='INTEGER').map(c=>c[0]);
+  const v=$('br-col').value;
+  $('br-col').innerHTML = nums.map(c=>`<option>${esc(c)}</option>`).join('');
+  if (nums.includes(v)) $('br-col').value=v;
+  $('br-col-wrap').hidden = !(rec==='top'||rec==='addone');
+}
+const camel = s => s.split(/[\/_-]+/).filter(Boolean).map((w,i)=>i?w[0].toUpperCase()+w.slice(1):w).join('');
+function brPreview(){
+  const m=$('br-method').value, name=($('br-name').value.trim().replace(/^\/+|\/+$/g,'')||'my/door'), rec=$('br-recipe').value, t=$('br-table').value, c=$('br-col').value||'joins';
+  const fn = camel(name) || 'myDoor';
+  const getPid = m==='GET' ? `<span class="k">const</span> pid = <span class="k">new</span> URL(req.url).searchParams.get(<span class="s">"pid"</span>);` : `<span class="k">const</span> { pid } = <span class="k">await</span> req.json();`;
+  const usesPid = rec==='mine'||rec==='addone';
+  let lines;
+  if (rec==='count') lines = [`<span class="k">const</span> row = <span class="k">await</span> env.DB.prepare(<span class="s">"SELECT COUNT(*) n FROM ${esc(t)}"</span>).first();`, `<span class="k">return</span> { ok: <span class="k">true</span>, count: row.n };`];
+  else if (rec==='top') lines = [`<span class="k">const</span> row = <span class="k">await</span> env.DB.prepare(<span class="s">"SELECT MAX(${esc(c)}) top FROM ${esc(t)}"</span>).first();`, `<span class="k">return</span> { ok: <span class="k">true</span>, top: row.top };`];
+  else if (rec==='mine') lines = [getPid, `<span class="k">const</span> row = <span class="k">await</span> env.DB.prepare(<span class="s">"SELECT * FROM ${esc(t)} WHERE pid=?1"</span>).bind(pid).first();`, `<span class="k">return</span> { ok: <span class="k">true</span>, row };`];
+  else lines = [getPid, `<span class="k">await</span> env.DB.prepare(<span class="s">"UPDATE ${esc(t)} SET ${esc(c)}=${esc(c)}+1 WHERE pid=?1"</span>).bind(pid).run();`, `<span class="k">return</span> { ok: <span class="k">true</span> };`];
+  $('br-code').innerHTML =
+`<span class="c">// 1. Add the door to the Worker's list</span>
+<span class="k">if</span> (r === <span class="s">"/api/${esc(name)}"</span> &amp;&amp; req.method === <span class="s">"${m}"</span>) <span class="k">return</span> json(<span class="k">await</span> ${esc(fn)}(req, env));
+
+<span class="c">// 2. The job behind the door</span>
+<span class="k">async function</span> ${esc(fn)}(req, env) {
+  ${lines.join('\n  ')}
+}` + (rec==='addone' && m==='GET' ? `\n<span class="c">// Tip: a door that changes things should be POST.</span>` : '') + (usesPid ? '' : '');
+}
+['br-method','br-name','br-table','br-col'].forEach(id=>$(id).addEventListener('input', ()=>{ $('br-err').textContent=''; brPreview(); }));
+$('br-recipe').addEventListener('input', ()=>{ $('br-err').textContent=''; brCols(); brPreview(); });
+$('br-table').addEventListener('input', ()=>{ brCols(); brPreview(); });
+$('br-save').onclick = ()=>{
+  const m=$('br-method').value, name=$('br-name').value.trim().replace(/^\/+|\/+$/g,''), rec=$('br-recipe').value, t=$('br-table').value, c=$('br-col').value;
+  if (!/^[a-z][a-z0-9_\/-]{1,30}$/.test(name)) { $('br-err').textContent = 'Give it an address with small letters, like friend/top.'; return; }
+  const path = '/api/' + name;
+  if (allRoutes().some(r=>r.path===path && r.method===m)) { $('br-err').textContent = 'There is already a ' + m + ' door at ' + path + '.'; return; }
+  if ((rec==='top'||rec==='addone') && !c) { $('br-err').textContent = t + ' has no number columns. Pick another table, or add a number column first.'; return; }
+  snap(); hi={};
+  const about = {count:'Count rows in '+t, mine:'My row in '+t, top:'Biggest '+c+' in '+t, addone:'Add 1 to my '+c}[rec];
+  S.routes.push({id:'c-'+rand(6), method:m, path, recipe:rec, table:t, col:(rec==='top'||rec==='addone')?c:null, needsCode:false, about});
+  $('br-name').value=''; $('br-err').textContent='';
+  all();
+  $('rq-route').value = S.routes[S.routes.length-1].id; drawRoutes();
+  setTrace([['ok','New door added: ' + m + ' ' + path + '. It is picked in Send a request, so press Send it to try it.']]);
+};
+
+/* ---------- undo / reset ---------- */
+$('undo').onclick = ()=>{ if (!hist.length) { setTrace([['info','Nothing to undo yet.']]); return; } S = JSON.parse(hist.pop()); hi={}; setTrace([['info','Undone. The practice room went back one step.']]); $('unlock').hidden=true; all(); };
+$('reset').onclick = ()=>{ $('resetq').hidden=false; };
+$('resetno').onclick = ()=>{ $('resetq').hidden=true; };
+$('resetyes').onclick = ()=>{ S=fresh(); hist=[]; hi={}; $('resetq').hidden=true; $('rq-code').value=''; $('unlock').hidden=true; $('rq-out').textContent='Pick a route and press Send it.'; $('rs-out').textContent='…'; setTrace([['info','Fresh practice room. Mission 1 is waiting.']]); all(); };
+
+/* ---------- checklist ---------- */
+const ck = store.get('qer-pub-check') || {};
+document.querySelectorAll('#checklist input').forEach(i=>{ i.checked=!!ck[i.id]; i.onchange=()=>{ ck[i.id]=i.checked; store.set('qer-pub-check', ck); }; });
+$('ckclear').onclick = ()=>{ document.querySelectorAll('#checklist input').forEach(i=>{ i.checked=false; ck[i.id]=false; }); store.set('qer-pub-check', ck); };
+
+all();
+})();
+</script>
+<script>
+(function(){
+const $ = id => document.getElementById(id);
+const store = { get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } }, set(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} } };
+const ORDER = ['team','parts','travel','tables','routes','practice','real','words'];
+const NAMES = {team:'The team',parts:'Three parts of anything online',travel:"A message's trip",tables:'Tables: the drawers',routes:'Routes: doors into the Worker',practice:'Practice room',real:'Changing the real one',words:'Word bank'};
+let done = store.get('er-done') || {};
+let last = store.get('er-last') || 'team';
+let missions = 0;
+const LEVELS = [[0,'New builder'],[50,'Apprentice'],[150,'Builder'],[300,'Master builder']];
+function xp(){ return ORDER.filter(k=>done[k]).length*20 + missions*10; }
+function level(x){ let l=LEVELS[0]; LEVELS.forEach(v=>{ if(x>=v[0]) l=v; }); return l; }
+function drawProgress(){
+  const n = ORDER.filter(k=>done[k]).length, pct = Math.round(n/ORDER.length*100);
+  ['o-bar','cont-bar'].forEach(id=>$(id).style.width=pct+'%');
+  document.querySelectorAll('.cprog').forEach(e=>e.style.width=pct+'%');
+  document.querySelectorAll('.cprogt').forEach(e=>e.textContent = n ? `${n} of ${ORDER.length} lessons done` : 'Not started yet');
+  $('o-prog').textContent = `${n} of ${ORDER.length} lessons done · ${pct}%`;
+  $('cont-text').textContent = n ? `Next up: ${NAMES[nextUp()]}` : 'Start with lesson 1: The team';
+  $('cont-go').href = '#l-' + (n ? nextUp() : 'team');
+  document.querySelectorAll('.outline a').forEach(a=>a.classList.toggle('done', !!done[a.dataset.l]));
+  document.querySelectorAll('.outline a .ck').forEach(c=>c.textContent = c.parentElement.classList.contains('done') ? '✓' : '');
+  const x = xp(), l = level(x);
+  $('xp').textContent = `${x} XP · ${l[1]}`;
+  $('levels').innerHTML = LEVELS.map((v,i)=>`<li class="${v===l?'on':''}"><i>${i+1}</i><span>${v[1]}</span><span class="sqlnote" style="margin-left:auto">${v[0]} XP</span></li>`).join('');
+}
+function nextUp(){ return ORDER.find(k=>!done[k]) || last; }
+function toast(t){ const d=document.createElement('div'); d.className='toast'; d.textContent=t; document.body.appendChild(d); setTimeout(()=>d.remove(),1800); }
+function show(){
+  const h = (location.hash||'#home').slice(1);
+  const isL = h.startsWith('l-') && ORDER.includes(h.slice(2));
+  const view = isL ? 'player' : (['community','projects'].includes(h) ? h : 'home');
+  ['home','player','community','projects'].forEach(v=>$('v-'+v).hidden = v!==view);
+  document.querySelectorAll('.tabs a').forEach(a=>a.setAttribute('aria-current', (a.dataset.tab===view || (view==='player' && a.dataset.tab==='home')) ? 'page' : 'false'));
+  if (isL){
+    const k = h.slice(2); last = k; store.set('er-last', k);
+    document.querySelectorAll('[data-lesson]').forEach(s=>s.hidden = s.dataset.lesson!==k);
+    document.querySelectorAll('.outline a').forEach(a=>a.setAttribute('aria-current', a.dataset.l===k ? 'page' : 'false'));
+    $('crumb-l').textContent = NAMES[k];
+    const i = ORDER.indexOf(k);
+    $('prev').disabled = i===0; $('next').textContent = i===ORDER.length-1 ? 'Back to classroom' : 'Next →';
+    $('done').setAttribute('aria-pressed', !!done[k]); $('done').textContent = done[k] ? '✓ Completed' : 'Mark complete';
+    $('outline').classList.add('shut'); $('otoggle').setAttribute('aria-expanded','false'); $('otoggle').textContent='Show lessons';
+  }
+  window.scrollTo(0,0);
+}
+$('done').onclick = ()=>{ const k=last; done[k]=!done[k]; store.set('er-done', done); if(done[k]) toast('+20 XP. Lesson complete!'); drawProgress(); show(); };
+$('prev').onclick = ()=>{ const i=ORDER.indexOf(last); if(i>0) location.hash='#l-'+ORDER[i-1]; };
+$('next').onclick = ()=>{ const i=ORDER.indexOf(last); if(!done[last]){ done[last]=true; store.set('er-done',done); toast('+20 XP. Lesson complete!'); drawProgress(); } location.hash = i<ORDER.length-1 ? '#l-'+ORDER[i+1] : '#home'; };
+$('otoggle').onclick = ()=>{ const o=$('outline'); const shut=o.classList.toggle('shut'); $('otoggle').setAttribute('aria-expanded', String(!shut)); $('otoggle').textContent = shut ? 'Show lessons' : 'Hide lessons'; };
+document.querySelectorAll('.cats .chip').forEach(b=>b.onclick=()=>{ document.querySelectorAll('.cats .chip').forEach(x=>x.setAttribute('aria-pressed', String(x===b))); const c=b.textContent; document.querySelectorAll('.post').forEach(p=>p.hidden = c!=='All' && !p.querySelector('.c').textContent.includes(c)); });
+window.addEventListener('er-missions', e=>{ const before=missions; missions=e.detail; if (missions>before && before>=0 && window.__erReady) toast('+10 XP. Mission done!'); drawProgress(); });
+window.addEventListener('hashchange', show);
+drawProgress(); show(); window.__erReady = true;
+})();
+</script>
+</body>
+</html>
