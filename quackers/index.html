@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quackers by Mitchell</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Quackers, the search-and-find duck game Mitchell designed: how to play, every duck in the game, and what's coming next.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Crect width='36' height='36' fill='%2314233F'/%3E%3Cg fill='%23B8F02E'%3E%3Crect x='7' y='9' width='5' height='18'/%3E%3Crect x='24' y='9' width='5' height='18'/%3E%3Crect x='12' y='12' width='4' height='5'/%3E%3Crect x='20' y='12' width='4' height='5'/%3E%3Crect x='16' y='15' width='4' height='5'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Lexend:wght@400;600;700&family=Space+Mono:wght@400;700&family=Gochi+Hand&family=Grandstander:wght@900&display=swap">
+<style>
+/* Layout: same designer's notebook as the Game Room home page (graph paper light, blueprint dark). One phone-width column.
+   The Duck Dex is a binder of trading cards, one page per world, flipped with arrow buttons only. Ducks sit on a pond-sky window in their game style. */
+:root{
+  --paper:#F4F7FB; --grid:#D3E1EF; --grid-major:#B9CDE2; --ink:#14233F; --ink-soft:#4A5D7A;
+  --card:#FFFFFF; --card-edge:#14233F; --tape:rgba(255,233,74,.75);
+  --red:#FF5A36; --blue:#2F5BFF; --lime:#B8F02E; --hi:#FFE94A; --violet:#7A4DFF; --peach:#FFB8A6; --lav:#B9C8FF; --gold:#FFD45C;
+  --shadow:#14233F; --dash:#9FB3CB; --sky:#EAF6FF; --sky-edge:#BFE0F7; --on-chip:#14233F; --scrim:rgba(14,38,84,.55);
+  --display:"Bungee","Arial Black",Impact,system-ui,sans-serif;
+  --body:"Lexend","Segoe UI",system-ui,-apple-system,sans-serif;
+  --mono:"Space Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --hand:"Gochi Hand","Bradley Hand","Segoe Print",cursive;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0E2654; --grid:#1B3A72; --grid-major:#28508F; --ink:#EAF2FF; --ink-soft:#A9BEDF;
+  --card:#12306A; --card-edge:#CFE0FF; --tape:rgba(255,233,74,.5); --shadow:#06142F; --dash:#4D6FA8; --blue:#7C9BFF;
+  --sky:#D9ECFA; --sky-edge:#9CC6E8; --scrim:rgba(3,10,26,.72); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0E2654; --grid:#1B3A72; --grid-major:#28508F; --ink:#EAF2FF; --ink-soft:#A9BEDF;
+  --card:#12306A; --card-edge:#CFE0FF; --tape:rgba(255,233,74,.5); --shadow:#06142F; --dash:#4D6FA8; --blue:#7C9BFF;
+  --sky:#D9ECFA; --sky-edge:#9CC6E8; --scrim:rgba(3,10,26,.72); color-scheme:dark}
+*{box-sizing:border-box}
+html{background:var(--paper)}
+body{margin:0;color:var(--ink);font-family:var(--body);font-size:16.5px;line-height:1.55;
+  background-color:var(--paper);
+  background-image:
+    linear-gradient(var(--grid-major) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-major) 1px, transparent 1px),
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:120px 120px,120px 120px,24px 24px,24px 24px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+  padding-block:14px 0;-webkit-tap-highlight-color:transparent;overflow-x:hidden}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--red);outline-offset:3px}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1,h2,h3{margin:0;line-height:1.05;text-wrap:balance}
+h2{font-family:var(--display);font-weight:400;font-size:1.55rem;letter-spacing:.01em}
+h3{font-family:var(--body);font-weight:700;font-size:1.1rem}
+p{margin:0}
+.label{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
+.hand{font-family:var(--hand);font-size:1.25rem;line-height:1.15;color:var(--red)}
+.hl{background:linear-gradient(transparent 55%, var(--hi) 55% 90%, transparent 90%);color:var(--ink)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .hl{background:linear-gradient(transparent 55%, rgba(255,233,74,.35) 55% 90%, transparent 90%)}}
+:root[data-theme="dark"] .hl{background:linear-gradient(transparent 55%, rgba(255,233,74,.35) 55% 90%, transparent 90%)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* top bar */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.mark{display:flex;align-items:center;gap:10px;text-decoration:none}
+.mark svg{width:36px;height:36px}
+.mark span{font-family:var(--mono);font-weight:700;font-size:.85rem;letter-spacing:.08em}
+.jump{font-family:var(--mono);font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;
+  border:2px solid var(--card-edge);padding:6px 10px;background:var(--card);box-shadow:3px 3px 0 var(--shadow)}
+
+/* hero: the game cartridge */
+.hero{display:flex;flex-direction:column;gap:18px}
+.crumb{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.crumb a{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
+.cart{position:relative;background:var(--card);border:2.5px solid var(--card-edge);box-shadow:6px 6px 0 var(--shadow);display:flex;flex-direction:column}
+.cart::before{content:"";position:absolute;top:-12px;left:50%;width:84px;height:24px;margin-left:-42px;background:var(--tape);transform:rotate(-3deg);z-index:1}
+.strip{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 12px;border-bottom:2.5px solid var(--card-edge);
+  font-family:var(--mono);font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.status{display:inline-flex;align-items:center;gap:6px}
+.status i{width:9px;height:9px;border-radius:50%;background:var(--lime);border:1.5px solid #14233F}
+.window{margin:12px;border:2px solid var(--card-edge);background:var(--sky);display:grid;place-items:center;padding:16px 12px 10px}
+.window svg{width:min(100%,340px);height:auto;display:block}
+.cart .body{padding:2px 14px 16px;display:flex;flex-direction:column;gap:14px}
+.cart h1{font-family:var(--display);font-weight:400;font-size:2rem;letter-spacing:.01em}
+.cart h1 small{display:block;font-family:var(--hand);font-size:1.3rem;color:var(--blue);letter-spacing:0;margin-bottom:4px}
+.lede{font-size:1.06rem}
+.specs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:2px solid var(--card-edge)}
+.specs div{padding:8px 10px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.specs div+div{border-left:2px solid var(--card-edge)}
+.specs b{font-family:var(--display);font-weight:400;font-size:1.25rem;font-variant-numeric:tabular-nums}
+.go{align-self:flex-start;display:inline-flex;align-items:center;gap:10px;font-family:var(--display);font-size:1.05rem;text-decoration:none;
+  background:var(--red);color:#fff;border:2.5px solid #14233F;padding:11px 18px;box-shadow:4px 4px 0 #14233F;transition:transform .12s, box-shadow .12s}
+.go:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #14233F}
+.go svg{width:16px;height:16px}
+.playrow{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px}
+.dom{font-family:var(--mono);font-size:.8rem;color:var(--ink-soft)}
+
+/* section heads */
+.sec{display:flex;flex-direction:column;gap:16px}
+.sec-head{display:flex;flex-direction:column;gap:4px}
+.sec-head .row{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.intro{color:var(--ink-soft);max-width:44ch}
+
+/* how to play: flow */
+.flow{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.flow li{position:relative;display:grid;grid-template-columns:56px minmax(0,1fr);gap:14px;padding-bottom:22px}
+.flow li:not(:last-child)::after{content:"";position:absolute;left:27px;top:56px;bottom:0;border-left:2.5px dashed var(--ink-soft)}
+.flow .n{width:56px;height:56px;display:grid;place-items:center;font-family:var(--display);font-size:1.5rem;color:#14233F;border:2.5px solid #14233F;box-shadow:3px 3px 0 var(--shadow)}
+.flow li:nth-child(1) .n{background:var(--hi)} .flow li:nth-child(2) .n{background:var(--peach)}
+.flow li:nth-child(3) .n{background:var(--lav)} .flow li:nth-child(4) .n{background:var(--lime)}
+.flow h3{margin:6px 0 2px}
+.flow p{font-size:.95rem;color:var(--ink-soft)}
+.bonus{position:relative;background:var(--card);border:2px solid var(--card-edge);box-shadow:4px 4px 0 var(--shadow);padding:14px;display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;align-items:center;transform:rotate(-.6deg)}
+.bonus .art{width:64px;height:64px;background:var(--sky);border:2px solid var(--card-edge);display:grid;place-items:center}
+.bonus .art svg{width:58px;height:56px}
+.bonus p{font-size:.93rem;color:var(--ink-soft)}
+.bonus h3{font-size:1rem;margin-bottom:2px}
+
+/* Duck Dex */
+.dex{display:flex;flex-direction:column;gap:14px;touch-action:manipulation}
+.pager{display:grid;grid-template-columns:52px minmax(0,1fr) 52px;align-items:stretch;gap:10px}
+.arrow{display:grid;place-items:center;background:var(--hi);color:#14233F;border:2.5px solid #14233F;box-shadow:3px 3px 0 var(--shadow);min-height:56px;padding:0;transition:transform .1s, box-shadow .1s}
+.arrow:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--shadow)}
+.arrow svg{width:22px;height:22px}
+.arrow:disabled{opacity:.35;cursor:default}
+.pagecard{background:var(--ink);color:var(--paper);padding:8px 12px;display:flex;flex-direction:column;justify-content:center;gap:2px;min-width:0;text-align:center}
+.pagecard .label{color:inherit;opacity:.75}
+.pagecard b{font-family:var(--display);font-weight:400;font-size:1.15rem;line-height:1.1}
+.dots{display:flex;justify-content:center;gap:6px;flex-wrap:wrap}
+.dots i{width:10px;height:10px;border:2px solid var(--card-edge);background:transparent}
+.dots i.on{background:var(--red);border-color:var(--red)}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:380px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.dcard{display:flex;flex-direction:column;gap:0;background:var(--card);border:2px solid var(--card-edge);box-shadow:3px 3px 0 var(--shadow);padding:0;text-align:left;min-width:0;transition:transform .12s, box-shadow .12s}
+.dcard:hover{transform:translate(-1px,-2px);box-shadow:4px 5px 0 var(--shadow)}
+.dcard:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--shadow)}
+.dcard .pic{aspect-ratio:1/1;max-width:100%;background:var(--sky);border-bottom:2px solid var(--card-edge);display:grid;place-items:center;position:relative}
+.dcard .pic svg{width:92%;height:92%}
+.dcard .num{position:absolute;left:5px;top:4px;font-family:var(--mono);font-size:.62rem;font-weight:700;color:#4A5D7A;font-variant-numeric:tabular-nums}
+.dcard .txt{padding:7px 8px 9px;display:flex;flex-direction:column;gap:5px;min-width:0}
+.dcard .nm{font-weight:700;font-size:.84rem;line-height:1.2}
+.tier{align-self:flex-start;font-family:var(--mono);font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--on-chip);
+  padding:2px 6px;border:1.5px solid #14233F;background:var(--grid)}
+.t-Easy{background:var(--lime)} .t-Sneaky{background:var(--lav)} .t-Tricky{background:var(--peach)} .t-Rare{background:var(--hi)}
+.t-Legendary{background:var(--gold);box-shadow:inset 0 0 0 1.5px #fff}
+.t-Holiday{background:#FF9BB8} .t-Shop{background:#9FE3D0} .t-Star{background:#FFC772} .t-Friend{background:#A9C6FF}
+.key{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center}
+.key .tier{font-size:.62rem}
+.key .tier span{font-variant-numeric:tabular-nums;opacity:.75;margin-left:4px}
+.dexnote{font-size:.88rem;color:var(--ink-soft)}
+
+/* viewer */
+dialog.view{border:2.5px solid var(--card-edge);background:var(--card);color:var(--ink);padding:0;width:min(420px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow:auto;box-shadow:8px 8px 0 var(--shadow)}
+dialog.view::backdrop{background:var(--scrim)}
+.vtop{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 10px 8px 12px;border-bottom:2.5px solid var(--card-edge);
+  font-family:var(--mono);font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.vclose{border:2px solid var(--card-edge);background:var(--paper);width:36px;height:36px;display:grid;place-items:center;padding:0}
+.vclose svg{width:16px;height:16px}
+.vpic{margin:12px;border:2px solid var(--card-edge);background:var(--sky);aspect-ratio:4/3;max-width:100%;display:grid;place-items:center;position:relative;overflow:hidden}
+.vpic::after{content:"";position:absolute;left:12%;right:12%;bottom:9%;height:7%;border-radius:50%;background:rgba(23,58,94,.15)}
+.vpic svg{width:72%;height:86%;position:relative;z-index:1}
+.bob{animation:bob 2.4s ease-in-out infinite;transform-origin:50% 90%}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-4%) rotate(-2deg)}}
+.vbody{padding:0 14px 14px;display:flex;flex-direction:column;gap:10px}
+.vbody h3{font-family:var(--display);font-weight:400;font-size:1.45rem}
+.vfacts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border:2px solid var(--card-edge)}
+.vfacts div{padding:7px 10px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.vfacts div+div{border-left:2px solid var(--card-edge)}
+.vfacts b{font-size:.95rem;line-height:1.25}
+.vclue{font-family:var(--hand);font-size:1.35rem;line-height:1.15;color:var(--red)}
+.vnav{display:grid;grid-template-columns:52px minmax(0,1fr) 52px;gap:10px;align-items:center;padding:0 14px 16px}
+.vnav span{text-align:center;font-family:var(--mono);font-size:.78rem;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+
+/* videos */
+.vids{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media (max-width:420px){.vids{grid-template-columns:minmax(0,1fr)}}
+.vid{position:relative;margin:0;background:var(--card);border:2px solid var(--card-edge);padding:8px 8px 10px;box-shadow:4px 4px 0 var(--shadow);min-width:0;display:flex;flex-direction:column;gap:8px}
+.vid:nth-child(odd){transform:rotate(-1.2deg)} .vid:nth-child(even){transform:rotate(1deg)}
+.screen{aspect-ratio:16/9;max-width:100%;background:var(--ink);display:grid;place-items:center;position:relative;border:1.5px solid var(--card-edge);overflow:hidden;
+  background-image:repeating-linear-gradient(0deg, rgba(255,255,255,.05) 0 2px, transparent 2px 4px)}
+.screen .play{width:50px;height:50px;border-radius:50%;border:3px dashed var(--paper);display:grid;place-items:center;opacity:.8}
+.screen .play svg{width:18px;height:18px;margin-left:3px}
+.screen .soon{position:absolute;right:6px;top:6px;font-family:var(--mono);font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:var(--hi);color:#14233F;padding:2px 6px}
+.vid figcaption{display:flex;flex-direction:column;gap:2px}
+.vid figcaption b{font-size:.95rem;line-height:1.25}
+.vid figcaption span{font-size:.84rem;color:var(--ink-soft);line-height:1.35}
+
+/* now building */
+.next{background:var(--card);border:2px solid var(--card-edge);box-shadow:4px 4px 0 var(--shadow);padding:14px;display:flex;flex-direction:column;gap:10px}
+.next ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.next li{display:grid;grid-template-columns:22px minmax(0,1fr);gap:8px;align-items:start;font-size:.95rem}
+.next li::before{content:"";width:14px;height:14px;margin-top:4px;border:2px solid var(--card-edge)}
+
+/* follow */
+.socials{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.social{display:flex;align-items:center;gap:10px;padding:12px;border:2px dashed var(--dash);min-width:0}
+.social svg{width:28px;height:28px;flex:none}
+.social b{display:block;font-size:.95rem}
+.social small{font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+
+/* grown-ups */
+.grown{display:flex;flex-direction:column;gap:10px;padding:14px;border:2px solid var(--card-edge);background:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px, transparent 1px),linear-gradient(90deg, var(--grid) 1px, transparent 1px);background-size:12px 12px}
+.grown p{font-size:.93rem;color:var(--ink-soft)}
+.grown a.btn{align-self:flex-start;font-family:var(--mono);font-size:.8rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;
+  border:2px solid var(--card-edge);padding:8px 12px;background:var(--card);box-shadow:3px 3px 0 var(--shadow)}
+
+/* footer */
+.foot{margin-top:12px;border-top:2.5px solid var(--card-edge);padding-block:18px calc(28px + env(safe-area-inset-bottom, 0px));
+  display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px}
+.foot .hand{color:var(--blue)}
+
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" id="defs"></svg>
+<div class="wrap">
+  <header class="top">
+    <a class="mark" href="/" aria-label="Back to Mitchell's Game Room">
+      <svg viewBox="0 0 36 36" aria-hidden="true">
+        <rect x="1.5" y="1.5" width="33" height="33" fill="var(--ink)"/>
+        <g fill="var(--lime)"><rect x="7" y="9" width="5" height="18"/><rect x="24" y="9" width="5" height="18"/><rect x="12" y="12" width="4" height="5"/><rect x="20" y="12" width="4" height="5"/><rect x="16" y="16" width="4" height="5"/></g>
+      </svg>
+      <span>GAME ROOM</span>
+    </a>
+    <a class="jump" href="#dex">Duck Dex ↓</a>
+  </header>
+
+  <section class="hero" aria-labelledby="q-h">
+    <div class="crumb"><a href="/">Game Room</a><span class="label">/ Game 01</span></div>
+    <article class="cart">
+      <div class="strip"><span>Game 01</span><span class="status"><i></i>Playable now</span></div>
+      <div class="window" id="qLogo" role="img" aria-label="Quackers logo"></div>
+      <div class="body">
+        <h1 id="q-h"><small>a game by Mitchell</small>Quackers</h1>
+        <p class="lede">A search-and-find game. Ducks are hiding all over each world, and it's your job to find <span class="hl">every single one.</span> Some are out in the open. Some are very, very sneaky.</p>
+        <div class="specs" id="specs">
+          <div><span class="label">Worlds</span><b id="sWorlds">8</b></div>
+          <div><span class="label">Ducks</span><b id="sDucks">65</b></div>
+          <div><span class="label">Mini games</span><b id="sMini">4</b></div>
+        </div>
+        <div class="playrow">
+          <a class="go" href="https://quackersgame.com" target="_blank" rel="noopener"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 1.5 L14 8 L3 14.5 Z" fill="#fff"/></svg>PLAY QUACKERS</a>
+          <span class="dom">quackersgame.com</span>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section class="sec" aria-labelledby="how-h">
+    <div class="sec-head">
+      <span class="label">File 01</span>
+      <h2 id="how-h">How to play</h2>
+    </div>
+    <ol class="flow">
+      <li><span class="n">1</span><div><h3>Look around</h3><p>Use the arrows to move from room to room. Tap doors, boxes and bushes to peek inside and behind things.</p></div></li>
+      <li><span class="n">2</span><div><h3>Find the ducks</h3><p>Tap a duck when you spot it and it goes in your Duck Log. Easy ducks sit right out in the open. Legendary ones take real work.</p></div></li>
+      <li><span class="n">3</span><div><h3>Help the helper</h3><p>Later worlds have a helper, like the Penguin or the Usher Owl. Every duck you find gives you a token. Hand them all over and the helper joins your log too.</p></div></li>
+      <li><span class="n">4</span><div><h3>Unlock the next world</h3><p>Fill a world's Duck Log and the next world opens, from The Backyard all the way to The Spaceship.</p></div></li>
+    </ol>
+    <div class="bonus">
+      <div class="art" id="kingArt" aria-hidden="true"></div>
+      <div><h3>Bonus: Pond Points</h3><p>Play the mini games to win Pond Points, then spend them in Kingsley's shop on hats, new duck colors and special ducks.</p></div>
+    </div>
+  </section>
+
+  <section class="sec" id="dex" aria-labelledby="dex-h">
+    <div class="sec-head">
+      <span class="label">File 02</span>
+      <div class="row"><h2 id="dex-h">The Duck Dex</h2><span class="hand" id="dexCount">every duck!</span></div>
+      <p class="intro">Every duck in the game, drawn just like they look in Quackers. Flip through the worlds with the arrows and tap a duck to see its card.</p>
+    </div>
+    <div class="dex">
+      <div class="pager">
+        <button class="arrow" type="button" id="pgPrev" aria-label="Previous world"><svg viewBox="0 0 26 26" aria-hidden="true"><path d="M16 5 L8 13 L16 21" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="square"/></svg></button>
+        <div class="pagecard" aria-live="polite"><span class="label" id="pgLabel">World 1 of 8</span><b id="pgTitle">The Backyard</b><span class="label" id="pgCount">6 ducks</span></div>
+        <button class="arrow" type="button" id="pgNext" aria-label="Next world"><svg viewBox="0 0 26 26" aria-hidden="true"><path d="M10 5 L18 13 L10 21" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="square"/></svg></button>
+      </div>
+      <div class="dots" id="dots" aria-hidden="true"></div>
+      <div class="cards" id="cards"></div>
+      <div class="key" id="key" aria-label="How hard each kind of duck is to find"></div>
+      <p class="dexnote">Easy, Sneaky, Tricky, Rare and Legendary tell you how hard a duck is to find. The last page has the special ducks you win in other ways.</p>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="vid-h">
+    <div class="sec-head">
+      <span class="label">File 03</span>
+      <div class="row"><h2 id="vid-h">The Quackers story</h2><span class="hand">videos coming!</span></div>
+    </div>
+    <div class="vids">
+      <figure class="vid">
+        <div class="screen"><span class="soon">Coming soon</span><span class="play"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 1.5 L14 8 L3 14.5 Z" fill="#F4F7FB"/></svg></span></div>
+        <figcaption><b>How Quackers started</b><span>Mitchell tells the story of the very first duck.</span></figcaption>
+      </figure>
+      <figure class="vid">
+        <div class="screen"><span class="soon">Coming soon</span><span class="play"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 1.5 L14 8 L3 14.5 Z" fill="#F4F7FB"/></svg></span></div>
+        <figcaption><b>Building a new world</b><span>From a sketch to a world full of hiding spots.</span></figcaption>
+      </figure>
+    </div>
+    <div class="next">
+      <span class="label">What we're working on now</span>
+      <ul>
+        <li>Mr. Crow's giant duck-finding robot</li>
+        <li>Special ducks for the Duck Detector</li>
+        <li>More holiday ducks for Halloween, Valentine's Day, St. Patrick's Day and April Fool's Day</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="follow-h">
+    <div class="sec-head">
+      <span class="label">File 04</span>
+      <div class="row"><h2 id="follow-h">Follow along</h2><span class="hand">almost ready</span></div>
+    </div>
+    <div class="socials">
+      <div class="social">
+        <svg viewBox="0 0 28 28" aria-hidden="true"><rect x="3" y="3" width="22" height="22" rx="6.5" fill="none" stroke="var(--ink)" stroke-width="2.6"/><circle cx="14" cy="14" r="5" fill="none" stroke="var(--ink)" stroke-width="2.6"/><circle cx="20.2" cy="7.8" r="1.7" fill="var(--red)"/></svg>
+        <div><b>Instagram</b><small>Coming soon</small></div>
+      </div>
+      <div class="social">
+        <svg viewBox="0 0 28 28" aria-hidden="true"><rect x="2.5" y="6" width="23" height="16" rx="5" fill="none" stroke="var(--ink)" stroke-width="2.6"/><path d="M11.5 10.2 L18 14 L11.5 17.8 Z" fill="var(--red)"/></svg>
+        <div><b>YouTube</b><small>Coming soon</small></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="eng-h">
+    <div class="grown">
+      <span class="label">For grown-ups</span>
+      <h3 id="eng-h">How Quackers works behind the scenes</h3>
+      <p>The Engine Room shows how the game is built: the pieces it runs on, how scores and ideas travel, and how players' privacy is kept safe.</p>
+      <a class="btn" href="/engineroom/">Visit the Engine Room →</a>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <a class="label" href="/">← Mitchell's Game Room</a>
+    <span class="hand">made by me, with help from Dad</span>
+  </footer>
+</div>
+
+<dialog class="view" id="view" aria-labelledby="vName">
+  <div class="vtop"><span id="vWhere">The Backyard</span><button class="vclose" type="button" id="vClose" aria-label="Close"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3 L13 13 M13 3 L3 13" stroke="currentColor" stroke-width="2.6"/></svg></button></div>
+  <div class="vpic" id="vPic"></div>
+  <div class="vbody">
+    <h3 id="vName">Normal Duck</h3>
+    <div class="vfacts"><div><span class="label">Kind</span><b id="vTier">Easy</b></div><div><span class="label" id="vWhereL">Found in</span><b id="vWorld">The Backyard</b></div></div>
+    <p class="vclue" id="vClue">Out in the open</p>
+  </div>
+  <div class="vnav">
+    <button class="arrow" type="button" id="vPrev" aria-label="Previous duck"><svg viewBox="0 0 26 26" aria-hidden="true"><path d="M16 5 L8 13 L16 21" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="square"/></svg></button>
+    <span id="vPos" aria-live="polite">1 of 77</span>
+    <button class="arrow" type="button" id="vNext" aria-label="Next duck"><svg viewBox="0 0 26 26" aria-hidden="true"><path d="M10 5 L18 13 L10 21" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="square"/></svg></button>
+  </div>
+</dialog>
+
+<script src="ducks.js"></script>
+<script>
+/* Quackers brand art. Shared by the brand guide and the game.
+   mascot(opts) -> SVG markup for viewBox "0 0 120 100" (the explorer duck, outlined).
+   logo(opts)   -> full <svg> for the Quackers wordmark (viewBox 0 0 640 210).
+   Colours come from BRAND so the guide, game and SVG files always match. */
+var BRAND = {
+  ink:"#173A5E", duck:"#FFCB2F", duckDeep:"#F0A500", beak:"#FF8A3D", pond:"#2387D9",
+  puddle:"#8FD0FF", lily:"#3FB86A", bubble:"#FF6FA6", sky:"#EAF6FF", cloud:"#FFFFFF", cheek:"#FF8FB1"
+};
+
+function mascot(o){
+  o = o || {};
+  var B = BRAND, ink = o.ink || B.ink, body = o.body || B.duck, wing = o.wing || B.duckDeep,
+      beak = o.beak || B.beak, sw = o.stroke || 3, eye = o.eye || "open", hat = o.hat === undefined ? "boat" : o.hat;
+  var S = 'stroke="'+ink+'" stroke-width="'+sw+'" stroke-linejoin="round" stroke-linecap="round"';
+  var eyes = {
+    open: '<circle cx="89" cy="34" r="4.8" fill="'+ink+'"/><circle cx="90.7" cy="32.3" r="1.7" fill="#fff"/>',
+    happy:'<path d="M84.5 36 Q89 29.5 93.5 36" fill="none" '+S+'/>',
+    wow:  '<circle cx="89" cy="34" r="6.4" fill="#fff" '+S+'/><circle cx="89.6" cy="34.4" r="3.6" fill="'+ink+'"/><circle cx="90.8" cy="33" r="1.2" fill="#fff"/>',
+    sneaky:'<circle cx="89" cy="35" r="4.6" fill="'+ink+'"/><circle cx="90.5" cy="34.6" r="1.4" fill="#fff"/><path d="M83 34.5 Q89 26.5 95 34.5 Z" fill="'+body+'" '+S+'/>',
+    sleepy:'<path d="M84.5 34 Q89 38.5 93.5 34" fill="none" '+S+'/>',
+    none:''
+  };
+  var flat = !!o.flat;
+  var hats = {
+    boat:'<path d="M63 23 L81.5 2.5 L100 23 Z" fill="#fff" '+S+'/><rect x="61" y="19" width="41.5" height="7" rx="3.5" fill="'+B.pond+'" '+S+'/>',
+    crown:'<path d="M68 21 L69 6 L76 13 L82 3 L88 13 L95 6 L96 21 Z" fill="#FFE070" '+S+'/><circle cx="82" cy="15" r="2.4" fill="'+B.bubble+'"/>',
+    mask:'',
+    none:''
+  };
+  var extra = "";
+  if(o.mask) extra += '<path d="M66 33 Q85 25 103 31 L103.5 40 Q85 35 64 42 Z" fill="'+ink+'"/>';
+  var spots = o.spots ? '<g fill="'+o.spots+'"><circle cx="40" cy="70" r="5"/><circle cx="58" cy="78" r="4"/><circle cx="70" cy="56" r="3.5"/><circle cx="76" cy="44" r="3.2"/><circle cx="30" cy="58" r="3"/></g>' : "";
+  return ''+
+    '<path d="M27 58 Q10 52 7 34 Q21 39 34 46 Z" fill="'+body+'" '+S+'/>'+
+    '<ellipse cx="55" cy="64" rx="37" ry="25" fill="'+body+'" '+S+'/>'+
+    spots+
+    '<path d="M36 63 Q51 47 70 60 Q60 77 40 71 Z" fill="'+wing+'" '+S+'/>'+
+    '<circle cx="82" cy="39" r="21" fill="'+body+'" '+S+'/>'+
+    (flat ? '' : '<ellipse cx="73" cy="28" rx="5.5" ry="2.6" fill="#fff" opacity=".6" transform="rotate(-28 73 28)"/>'+
+    '<ellipse cx="33" cy="54" rx="9" ry="3" fill="#fff" opacity=".45" transform="rotate(-18 33 54)"/>')+
+    '<path d="M100 40 Q115 37 117 44 Q111 52 100 50 Z" fill="'+beak+'" '+S+'/>'+
+    '<path d="M102 45.6 L113.5 45" fill="none" stroke="'+ink+'" stroke-width="2" stroke-linecap="round"/>'+
+    (o.mask ? extra : flat ? '' : '<circle cx="91" cy="47.5" r="4.5" fill="'+B.cheek+'" opacity=".7"/>')+
+    (eye in eyes ? eyes[eye] : eyes.open)+
+    (hats[hat] || "")+
+    (eye==="sleepy" ? '<text x="104" y="22" font-family="Patrick Hand, cursive" font-size="14" fill="'+ink+'">z</text><text x="111" y="12" font-family="Patrick Hand, cursive" font-size="10" fill="'+ink+'">z</text>' : "");
+}
+
+function logo(o){
+  o = o || {};
+  var B = BRAND, id = o.id || "q";
+  var dy = "0 -6 10 -9 10 -9 8", rot = "-6 4 -3 5 -4 3 -5";
+  var t = 'x="204" y="150" dy="'+dy+'" rotate="'+rot+'" textLength="414" lengthAdjust="spacing"';
+  var font = 'font-family="Grandstander, \'Baloo 2\', \'Arial Rounded MT Bold\', sans-serif" font-weight="900" font-size="112"';
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 210" role="img" aria-label="Quackers"'+(o.cls?' class="'+o.cls+'"':'')+'>'+
+    '<defs><linearGradient id="'+id+'g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE066"/><stop offset=".55" stop-color="'+B.duck+'"/><stop offset="1" stop-color="#FFA91F"/></linearGradient></defs>'+
+    '<g fill="none" stroke="'+B.puddle+'" stroke-width="6" stroke-linecap="round" class="ripple">'+
+      '<path d="M34 190 q16 -9 32 0 t32 0 t32 0"/><path d="M210 194 q18 -9 36 0 t36 0 t36 0 t36 0"/><path d="M470 190 q16 -9 32 0 t32 0 t32 0"/></g>'+
+    '<g class="logo-duck"><g transform="translate(57.6 66) scale(.62)">'+mascot({eye:o.eye||"open"})+'</g></g>'+
+    '<circle cx="96" cy="100" r="58" fill="none" stroke="'+B.ink+'" stroke-width="34"/>'+
+    '<circle cx="96" cy="100" r="58" fill="none" stroke="#fff" stroke-width="26"/>'+
+    '<circle cx="96" cy="100" r="58" fill="none" stroke="'+B.beak+'" stroke-width="26" stroke-dasharray="36 55.1" stroke-dashoffset="18" transform="rotate(-45 96 100)"/>'+
+    '<path d="M136 140 Q152 166 190 172" fill="none" stroke="'+B.ink+'" stroke-width="24" stroke-linecap="round"/>'+
+    '<path d="M136 140 Q152 166 190 172" fill="none" stroke="'+B.pond+'" stroke-width="15" stroke-linecap="round"/>'+
+    '<g '+font+'>'+
+      '<text '+t+' fill="'+B.ink+'" stroke="'+B.ink+'" stroke-width="24" stroke-linejoin="round">uackers</text>'+
+      '<text '+t+' fill="#fff" stroke="#fff" stroke-width="14" stroke-linejoin="round">uackers</text>'+
+      '<text '+t+' fill="url(#'+id+'g)">uackers</text>'+
+    '</g></svg>';
+}
+if (typeof module !== "undefined") module.exports = { BRAND: BRAND, mascot: mascot, logo: logo };
+
+
+(function(){
+  var $=function(id){return document.getElementById(id);};
+  var q=$("qLogo"); if(q) q.innerHTML=logo({id:"ql"});
+  var D=window.QUACKERS_DUCKS; if(!D) return;
+  $("defs").innerHTML="<defs>"+D.defs+"</defs>";
+  var VB="-48 -58 96 92";
+  var art=function(d){ return '<svg viewBox="'+VB+'" aria-hidden="true"><g'+(d.op<1?' opacity="'+Math.max(.55,d.op)+'"':'')+'>'+d.svg+'</g></svg>'; };
+
+  /* Pages: one per world, then the special ducks. */
+  var pages=D.worlds.map(function(w){
+    return {label:"World "+w.n+" of "+D.worlds.length,title:w.name,items:w.ducks.map(function(d){
+      return {name:d.name,tier:d.tier,svg:d.svg,op:d.op,whereL:"Found in",where:w.name,clue:d.hint};})};
+  });
+  var sp=[];
+  D.holiday.forEach(function(h){ sp.push({name:h.name,tier:"Holiday",svg:h.svg,op:1,whereL:"Shows up in",where:h.month+" only",clue:h.hint}); });
+  D.shop.forEach(function(s){ sp.push({name:s.name,tier:"Shop",svg:s.svg,op:1,whereL:"Kingsley's shop",where:s.cost.toLocaleString("en-US")+" Pond Points",clue:s.cost>=1000?"Save up and he joins you":"Buy it with Pond Points"}); });
+  D.stars.forEach(function(s){ sp.push({name:s.name,tier:"Star",svg:s.svg,op:1,whereL:"Mini game",where:s.game,clue:"Beat level 10 of "+s.game+" to win"}); });
+  if(D.friend) sp.push({name:D.friend.name,tier:"Friend",svg:D.friend.svg,op:1,whereL:"Won by",where:"Your friend link",clue:"Send your link to a friend. When they find their first duck, this one joins you"});
+  pages.push({label:"Bonus page",title:"Special ducks",items:sp});
+
+  var all=[]; pages.forEach(function(p,pi){ p.items.forEach(function(d){ d.page=pi; d.i=all.length; all.push(d); }); });
+  var worldDucks=D.worlds.reduce(function(n,w){return n+w.ducks.length;},0);
+  $("sWorlds").textContent=D.worlds.length; $("sDucks").textContent=worldDucks; $("sMini").textContent=D.stars.length;
+  $("dexCount").textContent=all.length+" in all!";
+
+  var tiers=["Easy","Sneaky","Tricky","Rare","Legendary","Holiday","Shop","Star","Friend"], tc={};
+  all.forEach(function(d){ tc[d.tier]=(tc[d.tier]||0)+1; });
+  $("key").innerHTML=tiers.filter(function(t){return tc[t];}).map(function(t){return '<span class="tier t-'+t+'">'+t+'<span>'+tc[t]+'</span></span>';}).join("");
+  var k=sp.filter(function(d){return d.name==="Kingsley";})[0]; if(k) $("kingArt").innerHTML=art(k);
+
+  var cur=0, dots=$("dots");
+  dots.innerHTML=pages.map(function(){return "<i></i>";}).join("");
+  function showPage(n){
+    cur=Math.max(0,Math.min(pages.length-1,n)); var p=pages[cur];
+    $("pgLabel").textContent=p.label; $("pgTitle").textContent=p.title;
+    $("pgCount").textContent=p.items.length+(cur<pages.length-1?" ducks to find":" ducks and friends");
+    $("pgPrev").disabled=cur===0; $("pgNext").disabled=cur===pages.length-1;
+    $("pgPrev").setAttribute("aria-label",cur>0?"Previous: "+pages[cur-1].title:"Previous");
+    $("pgNext").setAttribute("aria-label",cur<pages.length-1?"Next: "+pages[cur+1].title:"Next");
+    [].forEach.call(dots.children,function(el,i){el.className=i===cur?"on":"";});
+    $("cards").innerHTML=p.items.map(function(d,j){
+      return '<button class="dcard" type="button" data-i="'+d.i+'" aria-label="'+d.name+', '+d.tier+'"><span class="pic"><span class="num">#'+String(d.i+1).padStart(2,"0")+'</span>'+art(d)+'</span><span class="txt"><span class="nm">'+d.name+'</span><span class="tier t-'+d.tier+'">'+d.tier+'</span></span></button>';
+    }).join("");
+  }
+  $("pgPrev").addEventListener("click",function(){showPage(cur-1);});
+  $("pgNext").addEventListener("click",function(){showPage(cur+1);});
+  $("cards").addEventListener("click",function(e){ var b=e.target.closest(".dcard"); if(b) openView(+b.dataset.i); });
+
+  var view=$("view"), at=0;
+  function fill(i){
+    at=(i+all.length)%all.length; var d=all[at];
+    $("vWhere").textContent=pages[d.page].title; $("vName").textContent=d.name;
+    $("vTier").textContent=d.tier; $("vWhereL").textContent=d.whereL; $("vWorld").textContent=d.where;
+    $("vClue").textContent="“"+d.clue+"”";
+    $("vPic").innerHTML='<svg viewBox="'+VB+'" aria-hidden="true"><g class="bob"><g'+(d.op<1?' opacity="'+Math.max(.55,d.op)+'"':'')+'>'+d.svg+'</g></g></svg>';
+    $("vPos").textContent="#"+(at+1)+" of "+all.length;
+  }
+  function openView(i){ fill(i); if(view.showModal){ if(!view.open) view.showModal(); } else view.setAttribute("open",""); }
+  function closeView(){ var p=all[at].page; if(view.close) view.close(); else view.removeAttribute("open"); if(p!==cur) showPage(p); }
+  $("vPrev").addEventListener("click",function(){fill(at-1);});
+  $("vNext").addEventListener("click",function(){fill(at+1);});
+  $("vClose").addEventListener("click",closeView);
+  view.addEventListener("click",function(e){ if(e.target===view) closeView(); });
+  view.addEventListener("close",function(){ var p=all[at].page; if(p!==cur) showPage(p); });
+  document.addEventListener("keydown",function(e){
+    if(view.open){ if(e.key==="ArrowLeft"){fill(at-1);e.preventDefault();} else if(e.key==="ArrowRight"){fill(at+1);e.preventDefault();} }
+  });
+  showPage(0);
+})();
+</script>
+</body>
+</html>
