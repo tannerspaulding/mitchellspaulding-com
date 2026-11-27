@@ -287,6 +287,62 @@ button.donebtn[aria-pressed="true"]{background:var(--teal);border-color:var(--te
 .proj h3{font-size:21px}
 .proj .parts{display:grid;gap:4px;font-size:14px;color:var(--ink-2)}
 .proj .parts b{color:var(--ink)}
+
+/* ---- Skool-style community layer ---- */
+.tabs a{border-radius:0;border-bottom:3px solid transparent;padding:10px 12px}
+.tabs a[aria-current="page"]{background:none;border-bottom-color:var(--ink)}
+.avw{position:relative;flex:none;display:inline-grid}
+.avw .av{width:38px;height:38px}
+.lvl{position:absolute;right:-4px;bottom:-4px;min-width:18px;height:18px;padding:0 4px;border-radius:999px;background:var(--sky);color:#fff;font-family:var(--f-display);font-weight:700;font-size:11px;display:grid;place-items:center;border:2px solid var(--sheet)}
+.av.t1{background:#2F6FD6}.av.t2{background:#11897B}.av.t3{background:#D9412B}.av.t4{background:#7A4FD0}.av.t5{background:#C77700}.av.t6{background:#142238}
+.feed{display:grid;gap:12px}
+.post{margin:0}
+.post + .post{margin-top:0}
+.post.pin{border:2px solid var(--brick)}
+.pinned{font-size:12px;font-weight:700;color:var(--brick-ink);background:var(--brick);border-radius:999px;padding:2px 8px}
+.post .who2{display:grid;line-height:1.25}
+.post .who2 small{font-size:13px;color:var(--ink-2)}
+.post .acts{align-items:center;flex-wrap:wrap}
+.post .last{font-size:13px;color:var(--ink-2);margin-left:auto}
+.group{padding:0;overflow:hidden}
+.group .gcover{height:110px;background:linear-gradient(135deg,#142238,#2F6FD6 55%,#11897B);display:grid;place-items:center}
+.group .gcover .logo{width:64px;height:64px}
+.group .gcover .lg-ink{fill:#fff}.group .gcover .lg-paper{fill:#142238}
+.group .gb{padding:16px;display:grid;gap:10px}
+.group .gb h3{font-size:20px}
+.gstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));text-align:center;border-block:1px solid var(--line);padding-block:10px}
+.gstats b{display:block;font-family:var(--f-display);font-size:18px}
+.gstats span{font-size:12px;color:var(--ink-2)}
+.lbrow{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:10px;font-size:15px}
+.lbrow:nth-child(odd){background:var(--paper)}
+.lbrow .rk{width:22px;text-align:center;font-family:var(--f-display);font-weight:700}
+.lbrow .pts{margin-left:auto;font-family:var(--f-mono);font-size:13px;color:var(--teal);font-weight:600}
+.lbrow.me{outline:2px solid var(--brick)}
+.lbrow .avw .av{width:28px;height:28px;font-size:11px}
+.lbrow .lvl{min-width:15px;height:15px;font-size:9px;right:-5px;bottom:-5px}
+.mylvl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center}
+.ring{--p:0;width:96px;height:96px;border-radius:50%;background:conic-gradient(var(--teal) calc(var(--p)*1%),var(--line) 0);display:grid;place-items:center}
+.ring > div{width:76px;height:76px;border-radius:50%;background:var(--sheet);display:grid;place-items:center;text-align:center;line-height:1.1}
+.ring b{font-family:var(--f-display);font-size:26px}
+.ring small{font-size:11px;color:var(--ink-2)}
+.ladder{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;list-style:none;margin:0;padding:0}
+.ladder li{display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:12px;background:var(--paper);font-size:15px}
+.ladder li i{font-style:normal;width:28px;height:28px;border-radius:50%;background:var(--line);color:var(--ink);display:grid;place-items:center;font-family:var(--f-display);font-weight:700;font-size:13px;flex:none}
+.ladder li.got i{background:var(--sky);color:#fff}
+.ladder li.on{outline:2px solid var(--brick)}
+.ladder li small{display:block;font-size:12px;color:var(--ink-2)}
+.boards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media (max-width:900px){.boards{grid-template-columns:minmax(0,1fr)}}
+.events{display:grid;gap:12px}
+.event{display:grid;grid-template-columns:72px minmax(0,1fr);gap:14px;align-items:center}
+.event .day{border-radius:12px;background:var(--paper);text-align:center;padding:10px 4px;font-family:var(--f-display);font-weight:700;line-height:1.1}
+.event .day small{display:block;font-size:12px;color:var(--ink-2);font-weight:600}
+.about{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px;align-items:start}
+@media (max-width:900px){.about{grid-template-columns:minmax(0,1fr)}}
+.roles3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:640px){.roles3{grid-template-columns:minmax(0,1fr)}}
+.roles3 div{background:var(--paper);border-radius:12px;padding:12px;font-size:15px}
+.roles3 b{display:block;font-family:var(--f-display);font-size:17px}
 </style>
 </head>
 <body>
@@ -294,27 +350,36 @@ button.donebtn[aria-pressed="true"]{background:var(--teal);border-color:var(--te
 
 <header class="bar"><div class="in gut">
   <a class="brand" href="#home"><svg class="logo" viewBox="0 0 100 100" aria-hidden="true"><path class="lg-ink" fill-rule="evenodd" d="M67.00,56.00 L73.93,58.13 L73.33,62.72 L66.08,62.99 L64.94,66.33 L63.38,69.50 L68.32,74.82 L65.50,78.48 L59.09,75.09 L56.44,77.42 L53.50,79.38 L55.12,86.45 L50.84,88.22 L46.99,82.08 L43.52,82.77 L40.00,83.00 L37.87,89.93 L33.28,89.33 L33.01,82.08 L29.67,80.94 L26.50,79.38 L21.18,84.32 L17.52,81.50 L20.91,75.09 L18.58,72.44 L16.62,69.50 L9.55,71.12 L7.78,66.84 L13.92,62.99 L13.23,59.52 L13.00,56.00 L6.07,53.87 L6.67,49.28 L13.92,49.01 L15.06,45.67 L16.62,42.50 L11.68,37.18 L14.50,33.52 L20.91,36.91 L23.56,34.58 L26.50,32.62 L24.88,25.55 L29.16,23.78 L33.01,29.92 L36.48,29.23 L40.00,29.00 L42.13,22.07 L46.72,22.67 L46.99,29.92 L50.33,31.06 L53.50,32.62 L58.82,27.68 L62.48,30.50 L59.09,36.91 L61.42,39.56 L63.38,42.50 L70.45,40.88 L72.22,45.16 L66.08,49.01 L66.77,52.48 Z M51.00,56.00 A11,11 0 1,0 29.00,56.00 A11,11 0 1,0 51.00,56.00 Z"/><path class="lg-yel" fill-rule="evenodd" d="M90.70,32.98 L95.14,35.80 L93.57,39.56 L88.44,38.38 L86.57,40.65 L84.29,42.50 L85.43,47.64 L81.66,49.18 L78.87,44.72 L75.95,45.00 L73.02,44.70 L70.20,49.14 L66.44,47.57 L67.62,42.44 L65.35,40.57 L63.50,38.29 L58.36,39.43 L56.82,35.66 L61.28,32.87 L61.00,29.95 L61.30,27.02 L56.86,24.20 L58.43,20.44 L63.56,21.62 L65.43,19.35 L67.71,17.50 L66.57,12.36 L70.34,10.82 L73.13,15.28 L76.05,15.00 L78.98,15.30 L81.80,10.86 L85.56,12.43 L84.38,17.56 L86.65,19.43 L88.50,21.71 L93.64,20.57 L95.18,24.34 L90.72,27.13 L91.00,30.05 Z M82.00,30.00 A6,6 0 1,0 70.00,30.00 A6,6 0 1,0 82.00,30.00 Z"/><path class="lg-teal" d="M87.96,74.80 L91.74,76.47 L90.85,79.12 L86.83,78.17 L85.73,79.59 L84.34,80.72 L85.39,84.72 L82.76,85.68 L80.99,81.94 L79.20,81.96 L77.45,81.58 L74.97,84.90 L72.59,83.44 L74.41,79.73 L73.28,78.34 L72.48,76.73 L68.35,76.87 L68.00,74.09 L72.04,73.20 L72.42,71.45 L73.17,69.83 L70.49,66.68 L72.45,64.68 L75.66,67.28 L77.27,66.48 L79.01,66.06 L79.80,62.00 L82.58,62.28 L82.55,66.42 L84.17,67.17 L85.59,68.27 L89.26,66.36 L90.77,68.71 L87.52,71.27 L87.94,73.01 Z"/><path class="lg-paper" d="M80.00,68.00 L81.56,72.44 L86.00,74.00 L81.56,75.56 L80.00,80.00 L78.44,75.56 L74.00,74.00 L78.44,72.44 Z"/></svg><span>The Engine Room</span></a>
-  <nav class="tabs" aria-label="Sections"><a href="#home" data-tab="home">Classroom</a><a href="#community" data-tab="community">Community</a><a href="#projects" data-tab="projects">Projects</a></nav>
-  <div class="me"><span class="xp" id="xp">0 XP · New builder</span><span class="av" aria-label="Your profile">YOU</span></div>
+  <nav class="tabs" aria-label="Sections"><a href="#home" data-tab="home">Community</a><a href="#classroom" data-tab="classroom">Classroom</a><a href="#calendar" data-tab="calendar">Calendar</a><a href="#leaderboards" data-tab="leaderboards">Leaderboards</a><a href="#about" data-tab="about">About</a></nav>
+  <div class="me"><span class="xp" id="xp">0 points</span><span class="avw" title="Your team"><span class="av">YOU</span><span class="lvl lvl-me">1</span></span></div>
 </div></header>
 
 <main class="view gut" id="v-home">
-  <div class="welcome">
-    <div class="wcard">
-      <div class="kicker">Welcome, builders</div>
-      <h1>Build real things together, with AI</h1>
-      <p class="lede">A grown-up and a kid, no coding experience needed. The kid leads the ideas, the grown-up keeps it safe, and an AI helper writes the code. We built a real game this way, and every course here is made from what we learned.</p>
+  <div class="comm">
+    <div class="feed">
+      <div class="composer"><span class="avw"><span class="av">YOU</span><span class="lvl lvl-me">1</span></span><span class="fake">Write something… (posting opens when the course launches)</span></div>
+      <div class="cats" style="margin:0"><button class="chip" type="button" aria-pressed="true" data-cat="All">All</button><button class="chip" type="button" aria-pressed="false" data-cat="Start here">Start here</button><button class="chip" type="button" aria-pressed="false" data-cat="Show and tell">Show and tell</button><button class="chip" type="button" aria-pressed="false" data-cat="Help">Help</button><button class="chip" type="button" aria-pressed="false" data-cat="Wins">Wins</button><button class="chip" type="button" aria-pressed="false" data-cat="Ideas">Ideas</button></div>
+      <article class="post wcard pin" data-cat="Start here"><div class="ph"><span class="avw"><span class="av t6">ER</span><span class="lvl">9</span></span><div class="who2"><b>The Engine Room team</b><small>Start here</small></div><span class="pinned">Pinned</span><span class="sample">Sample post</span></div><h3>Welcome! Read this first</h3><p>Every account here is a team: one grown-up and one kid. Say hi with your team name and what you want to build. First names or nicknames only. Then open the Classroom and start with lesson 1, The team.</p><div class="acts"><span>👍 34</span><span>💬 18</span><span class="last">Posting opens at launch</span></div></article><article class="post wcard" data-cat="Show and tell"><div class="ph"><span class="avw"><span class="av t1">OT</span><span class="lvl">5</span></span><div class="who2"><b>Team Otter</b><small>Show and tell</small></div><span class="sample">Sample post</span></div><h3>We built a chore chart in one evening</h3><p>We used the three-parts lesson to plan it: stars on the screen, a Worker that checks the chore is really done, and a drawer for each day. The stars stopped disappearing once we added the database!</p><div class="acts"><span>👍 12</span><span>💬 4</span><span class="last">Posting opens at launch</span></div></article><article class="post wcard" data-cat="Help"><div class="ph"><span class="avw"><span class="av t4">PX</span><span class="lvl">3</span></span><div class="who2"><b>Team Pixel</b><small>Help</small></div><span class="sample">Sample post</span></div><h3>My new door says Not found</h3><p>We built a route at /api/top in the practice room but it says Not found. Do we need to add it to the list near the top of the Worker?</p><div class="acts"><span>👍 8</span><span>💬 6</span><span class="last">Posting opens at launch</span></div></article><article class="post wcard" data-cat="Wins"><div class="ph"><span class="avw"><span class="av t2">CO</span><span class="lvl">4</span></span><div class="who2"><b>Team Comet</b><small>Wins</small></div><span class="sample">Sample post</span></div><h3>The guard caught every cheat</h3><p>My kid tried to claim their own friend code three times. The guard said no every time, and they explained why to me. Best moment of the week.</p><div class="acts"><span>👍 21</span><span>💬 3</span><span class="last">Posting opens at launch</span></div></article><article class="post wcard" data-cat="Ideas"><div class="ph"><span class="avw"><span class="av t3">MA</span><span class="lvl">4</span></span><div class="who2"><b>Team Maple</b><small>Ideas</small></div><span class="sample">Sample post</span></div><h3>Idea: a lesson on saving photos</h3><p>Our recipe book needs pictures. Could there be a lesson on where photos live and who can see them?</p><div class="acts"><span>👍 15</span><span>💬 9</span><span class="last">Posting opens at launch</span></div></article>
     </div>
-    <div class="wcard cont">
-      <div class="kicker">Continue where you left off</div>
-      <h3 id="cont-title">The Engine Room</h3>
-      <div class="bar2"><i id="cont-bar"></i></div>
-      <span id="cont-text" style="font-size:15px"></span>
-      <div><a href="#l-team" id="cont-go" class="btnlink">Continue</a></div>
+    <div class="side">
+      <div class="wcard group"><div class="gcover"><svg class="logo" viewBox="0 0 100 100" aria-hidden="true"><path class="lg-ink" fill-rule="evenodd" d="M67.00,56.00 L73.93,58.13 L73.33,62.72 L66.08,62.99 L64.94,66.33 L63.38,69.50 L68.32,74.82 L65.50,78.48 L59.09,75.09 L56.44,77.42 L53.50,79.38 L55.12,86.45 L50.84,88.22 L46.99,82.08 L43.52,82.77 L40.00,83.00 L37.87,89.93 L33.28,89.33 L33.01,82.08 L29.67,80.94 L26.50,79.38 L21.18,84.32 L17.52,81.50 L20.91,75.09 L18.58,72.44 L16.62,69.50 L9.55,71.12 L7.78,66.84 L13.92,62.99 L13.23,59.52 L13.00,56.00 L6.07,53.87 L6.67,49.28 L13.92,49.01 L15.06,45.67 L16.62,42.50 L11.68,37.18 L14.50,33.52 L20.91,36.91 L23.56,34.58 L26.50,32.62 L24.88,25.55 L29.16,23.78 L33.01,29.92 L36.48,29.23 L40.00,29.00 L42.13,22.07 L46.72,22.67 L46.99,29.92 L50.33,31.06 L53.50,32.62 L58.82,27.68 L62.48,30.50 L59.09,36.91 L61.42,39.56 L63.38,42.50 L70.45,40.88 L72.22,45.16 L66.08,49.01 L66.77,52.48 Z M51.00,56.00 A11,11 0 1,0 29.00,56.00 A11,11 0 1,0 51.00,56.00 Z"/><path class="lg-yel" fill-rule="evenodd" d="M90.70,32.98 L95.14,35.80 L93.57,39.56 L88.44,38.38 L86.57,40.65 L84.29,42.50 L85.43,47.64 L81.66,49.18 L78.87,44.72 L75.95,45.00 L73.02,44.70 L70.20,49.14 L66.44,47.57 L67.62,42.44 L65.35,40.57 L63.50,38.29 L58.36,39.43 L56.82,35.66 L61.28,32.87 L61.00,29.95 L61.30,27.02 L56.86,24.20 L58.43,20.44 L63.56,21.62 L65.43,19.35 L67.71,17.50 L66.57,12.36 L70.34,10.82 L73.13,15.28 L76.05,15.00 L78.98,15.30 L81.80,10.86 L85.56,12.43 L84.38,17.56 L86.65,19.43 L88.50,21.71 L93.64,20.57 L95.18,24.34 L90.72,27.13 L91.00,30.05 Z M82.00,30.00 A6,6 0 1,0 70.00,30.00 A6,6 0 1,0 82.00,30.00 Z"/><path class="lg-teal" d="M87.96,74.80 L91.74,76.47 L90.85,79.12 L86.83,78.17 L85.73,79.59 L84.34,80.72 L85.39,84.72 L82.76,85.68 L80.99,81.94 L79.20,81.96 L77.45,81.58 L74.97,84.90 L72.59,83.44 L74.41,79.73 L73.28,78.34 L72.48,76.73 L68.35,76.87 L68.00,74.09 L72.04,73.20 L72.42,71.45 L73.17,69.83 L70.49,66.68 L72.45,64.68 L75.66,67.28 L77.27,66.48 L79.01,66.06 L79.80,62.00 L82.58,62.28 L82.55,66.42 L84.17,67.17 L85.59,68.27 L89.26,66.36 L90.77,68.71 L87.52,71.27 L87.94,73.01 Z"/><path class="lg-paper" d="M80.00,68.00 L81.56,72.44 L86.00,74.00 L81.56,75.56 L80.00,80.00 L78.44,75.56 L74.00,74.00 L78.44,72.44 Z"/></svg></div><div class="gb"><h3>The Engine Room</h3><p class="sqlnote">A grown-up and a kid, building real things together with AI. No coding experience needed.</p><div class="gstats"><div><b>Teams</b><span>Opening soon</span></div><div><b>Courses</b><span>1 open, 6 coming</span></div><div><b>Price</b><span>To be set</span></div></div><a class="btnlink" href="#about" style="text-align:center">How it works</a></div></div>
+      <div class="wcard"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><h3 style="font-size:19px">Leaderboard (30 days)</h3><span class="sample">Samples</span></div><div class="lbwrap"><div class="lbrow"><span class="rk">1</span><span class="avw"><span class="av t1">OT</span><span class="lvl">5</span></span><span>Team Otter</span><span class="pts">+212</span></div><div class="lbrow"><span class="rk">2</span><span class="avw"><span class="av t3">MA</span><span class="lvl">4</span></span><span>Team Maple</span><span class="pts">+180</span></div><div class="lbrow"><span class="rk">3</span><span class="avw"><span class="av t2">CO</span><span class="lvl">4</span></span><span>Team Comet</span><span class="pts">+164</span></div><div class="lbrow me"><span class="rk">·</span><span class="avw"><span class="av">YOU</span><span class="lvl lvl-me">1</span></span><span>Your team</span><span class="pts me-pts">+0</span></div></div><a href="#leaderboards" style="font-size:14px;color:var(--ink-2)">See all leaderboards</a></div>
     </div>
   </div>
-  <div class="sechead"><h2>Courses</h2><span class="sqlnote">One course is open now. The rest are on the way.</span></div>
+</main>
+
+<main class="view gut" id="v-classroom" hidden>
+  <div class="wcard cont" style="margin-bottom:18px">
+    <div class="kicker">Continue where you left off</div>
+    <h3 id="cont-title">The Engine Room</h3>
+    <div class="bar2"><i id="cont-bar"></i></div>
+    <span id="cont-text" style="font-size:15px"></span>
+    <div><a href="#l-team" id="cont-go" class="btnlink">Continue</a></div>
+  </div>
+  <div class="sechead" style="margin-top:0"><h2>Courses</h2><span class="sqlnote">One course is open now. The rest are on the way.</span></div>
   <div class="courses"><div class="course locked" aria-disabled="true"><div class="cover cv1"><span class="state">Coming soon</span><b>1</b></div><div class="cb"><h3>From idea to plan</h3><div class="meta">Turn a kid's idea into a one-page plan the AI helper can build from.</div></div></div><div class="course locked" aria-disabled="true"><div class="cover cv2"><span class="state">Coming soon</span><b>2</b></div><div class="cb"><h3>Your first build in an evening</h3><div class="meta">Get a very simple version online the same night.</div></div></div><div class="course locked" aria-disabled="true"><div class="cover cv3"><span class="state">Coming soon</span><b>3</b></div><div class="cb"><h3>Make it feel pro</h3><div class="meta">Look, sound and navigation that make people want to keep playing.</div></div></div><a class="course open" href="#l-team"><div class="cover cv4"><span class="state">Open now</span><b>4</b></div><div class="cb"><h3>The Engine Room</h3><div class="meta">How the backend works: servers, databases, routes, and changing them safely. 8 lessons, practice room.</div><div class="bar2"><i class="cprog"></i></div><div class="meta cprogt"></div></div></a><div class="course locked" aria-disabled="true"><div class="cover cv5"><span class="state">Coming soon</span><b>5</b></div><div class="cb"><h3>Privacy and safety by design</h3><div class="meta">Save only what you need, kid-safe names, and a delete button.</div></div></div><div class="course locked" aria-disabled="true"><div class="cover cv6"><span class="state">Coming soon</span><b>6</b></div><div class="cb"><h3>Ship it</h3><div class="meta">Domains, previews before live, and how to undo.</div></div></div><div class="course locked" aria-disabled="true"><div class="cover cv7"><span class="state">Coming soon</span><b>7</b></div><div class="cb"><h3>Listen to your players</h3><div class="meta">Idea boxes, leaderboards and sharing, done fairly.</div></div></div></div>
+  <div class="sechead"><h2>Projects you can build</h2><span class="sqlnote">Every project has the same three parts.</span></div>
+  <div class="projs"><article class="proj feat"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h3>Quackers</h3><span class="rec" style="font-size:12px;font-weight:700;background:var(--brick);color:var(--brick-ink);padding:2px 8px;border-radius:999px">Worked example in the course</span></div><p>A duck-finding web game with worlds, mini games and a friend link.</p><div class="parts"><span><b>What you see:</b> Worlds, ducks and buttons</span><span><b>Server:</b> Checks a friend link is fair</span><span><b>Database:</b> Ducks found, leaderboard, friend codes</span></div></article><article class="proj"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h3>Family recipe book</h3><span class="sample">Project idea</span></div><p>Recipe cards with photos, ratings and a "who cooks tonight" picker.</p><div class="parts"><span><b>What you see:</b> Recipe cards and a search box</span><span><b>Server:</b> Checks a new recipe isn't a copy</span><span><b>Database:</b> Recipes, ratings, the cooking schedule</span></div></article><article class="proj"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h3>Pet care tracker</h3><span class="sample">Project idea</span></div><p>A checklist so the dog never gets fed dinner twice.</p><div class="parts"><span><b>What you see:</b> Fed, walked, water bowl full</span><span><b>Server:</b> Stops two people marking the same feeding</span><span><b>Database:</b> Every feeding and walk, with the time</span></div></article><article class="proj"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h3>Science fair lab</h3><span class="sample">Project idea</span></div><p>Measure something every day and watch the chart grow.</p><div class="parts"><span><b>What you see:</b> A chart of each day's measurement</span><span><b>Server:</b> Checks each number is real</span><span><b>Database:</b> Each day's measurements</span></div></article><article class="proj"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h3>Team or club site</h3><span class="sample">Project idea</span></div><p>The schedule, scores and photos for a team.</p><div class="parts"><span><b>What you see:</b> Schedule, scores, photos</span><span><b>Server:</b> Lets only the coach post scores</span><span><b>Database:</b> Games, scores and the schedule</span></div></article></div>
 </main>
 
 <main class="view gut" id="v-player" hidden>
@@ -327,7 +392,7 @@ button.donebtn[aria-pressed="true"]{background:var(--teal);border-color:var(--te
       <div class="mod"><b>Get started</b><a href="#l-team" data-l="team"><span class="ck" aria-hidden="true"></span><span>The team</span><span class="dur">5 min</span></a><a href="#l-parts" data-l="parts"><span class="ck" aria-hidden="true"></span><span>Three parts of anything online</span><span class="dur">8 min</span></a></div><div class="mod"><b>How it works</b><a href="#l-travel" data-l="travel"><span class="ck" aria-hidden="true"></span><span>A message's trip</span><span class="dur">6 min</span></a><a href="#l-tables" data-l="tables"><span class="ck" aria-hidden="true"></span><span>Tables: the drawers</span><span class="dur">8 min</span></a><a href="#l-routes" data-l="routes"><span class="ck" aria-hidden="true"></span><span>Routes: doors into the Worker</span><span class="dur">10 min</span></a></div><div class="mod"><b>Hands on</b><a href="#l-practice" data-l="practice"><span class="ck" aria-hidden="true"></span><span>Practice room</span><span class="dur">30 min</span></a></div><div class="mod"><b>Do it for real</b><a href="#l-real" data-l="real"><span class="ck" aria-hidden="true"></span><span>Changing the real one</span><span class="dur">10 min</span></a><a href="#l-words" data-l="words"><span class="ck" aria-hidden="true"></span><span>Word bank</span><span class="dur">5 min</span></a></div>
     </aside>
     <div class="lessonwrap" id="lessonwrap">
-      <div class="crumb"><a href="#home">Classroom</a><span>›</span><span>The Engine Room</span><span>›</span><span id="crumb-l"></span></div>
+      <div class="crumb"><a href="#classroom">Classroom</a><span>›</span><span>The Engine Room</span><span>›</span><span id="crumb-l"></span></div>
       <section data-lesson="team" class="lesson" id="team">
   <div class="lhead"><div class="stud">1</div><div><h2>The team: a kid, a grown-up and an AI helper</h2><div class="sub">You don't need to know how to code. You need to know what you want, and to ask good questions.</div></div></div>
   <div class="grid3">
@@ -536,23 +601,42 @@ button.donebtn[aria-pressed="true"]{background:var(--teal);border-color:var(--te
   </div>
 </main>
 
-<main class="view gut" id="v-community" hidden>
-  <div class="comm">
-    <div>
-      <div class="composer"><span class="av">YOU</span><span class="fake">Posting opens when the course launches. These are sample posts to show the idea.</span></div>
-      <div class="cats"><button class="chip" type="button" aria-pressed="true">All</button><button class="chip" type="button" aria-pressed="false">Show and tell</button><button class="chip" type="button" aria-pressed="false">Help</button><button class="chip" type="button" aria-pressed="false">Wins</button></div>
-      <article class="post"><div class="ph"><span class="av">KD</span><b>A parent</b><span class="c">in Show and tell</span><span class="sample">Sample post</span></div><h3>We built a chore chart in one evening</h3><p>My 9-year-old wanted stars for feeding the cat. The practice room helped us understand why the stars disappeared when we closed the page: no database yet!</p><div class="acts"><span>👍 12</span><span>💬 4 comments</span></div></article><article class="post"><div class="ph"><span class="av">JR</span><b>A kid builder</b><span class="c">in Help</span><span class="sample">Sample post</span></div><h3>My route says Not found</h3><p>I added a door at /api/top but the game says Not found. Do I need to add it to the list at the top?</p><div class="acts"><span>👍 8</span><span>💬 6 comments</span></div></article><article class="post"><div class="ph"><span class="av">MT</span><b>A parent</b><span class="c">in Wins</span><span class="sample">Sample post</span></div><h3>The guard caught my kid trying to cheat</h3><p>She tried to claim her own friend code three times. The guard said no every time. She was so proud she understood why.</p><div class="acts"><span>👍 21</span><span>💬 3 comments</span></div></article>
-    </div>
-    <div class="side">
-      <div class="wcard"><h3 style="font-size:19px">Builder levels</h3><ul class="levels" id="levels"></ul><p class="sqlnote">Earn XP by finishing lessons (20 each) and practice missions (10 each).</p></div>
-      <div class="wcard"><h3 style="font-size:19px">Community rules</h3><ul class="rules" style="font-size:15px"><li>Kids post with a grown-up.</li><li>First names or nicknames only. No schools, towns or faces.</li><li>Never share passwords, codes or links to private pages.</li><li>Be kind. Everyone here is learning.</li></ul></div>
-    </div>
+<main class="view gut" id="v-calendar" hidden>
+  <div class="sechead" style="margin-top:0"><h2>Calendar</h2><span class="sample">Planned, no dates yet</span></div>
+  <div class="events">
+    <div class="wcard event"><div class="day">Weekly<small>evening</small></div><div><h3 style="font-size:19px">Live build night</h3><p>Teams build along with a real project, step by step, and ask questions as they go.</p></div></div>
+    <div class="wcard event"><div class="day">Monthly<small>weekend</small></div><div><h3 style="font-size:19px">Show and tell</h3><p>Teams show what they made. Kids present, grown-ups cheer.</p></div></div>
+    <div class="wcard event"><div class="day">Monthly<small>evening</small></div><div><h3 style="font-size:19px">Grown-ups' safety hour</h3><p>Accounts, privacy and going live, just for the grown-ups.</p></div></div>
   </div>
 </main>
 
-<main class="view gut" id="v-projects" hidden>
-  <div class="sechead" style="margin-top:0"><h2>Projects you can build</h2><span class="sqlnote">Every project has the same three parts.</span></div>
-  <div class="projs"><article class="proj feat"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h3>Quackers</h3><span class="rec" style="font-size:12px;font-weight:700;background:var(--brick);color:var(--brick-ink);padding:2px 8px;border-radius:999px">Worked example in the course</span></div><p>A duck-finding web game with worlds, mini games and a friend link.</p><div class="parts"><span><b>What you see:</b> Worlds, ducks and buttons</span><span><b>Server:</b> Checks a friend link is fair</span><span><b>Database:</b> Ducks found, leaderboard, friend codes</span></div></article><article class="proj"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h3>Family recipe book</h3><span class="sample">Project idea</span></div><p>Recipe cards with photos, ratings and a "who cooks tonight" picker.</p><div class="parts"><span><b>What you see:</b> Recipe cards and a search box</span><span><b>Server:</b> Checks a new recipe isn't a copy</span><span><b>Database:</b> Recipes, ratings, the cooking schedule</span></div></article><article class="proj"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h3>Pet care tracker</h3><span class="sample">Project idea</span></div><p>A checklist so the dog never gets fed dinner twice.</p><div class="parts"><span><b>What you see:</b> Fed, walked, water bowl full</span><span><b>Server:</b> Stops two people marking the same feeding</span><span><b>Database:</b> Every feeding and walk, with the time</span></div></article><article class="proj"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h3>Science fair lab</h3><span class="sample">Project idea</span></div><p>Measure something every day and watch the chart grow.</p><div class="parts"><span><b>What you see:</b> A chart of each day's measurement</span><span><b>Server:</b> Checks each number is real</span><span><b>Database:</b> Each day's measurements</span></div></article><article class="proj"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h3>Team or club site</h3><span class="sample">Project idea</span></div><p>The schedule, scores and photos for a team.</p><div class="parts"><span><b>What you see:</b> Schedule, scores, photos</span><span><b>Server:</b> Lets only the coach post scores</span><span><b>Database:</b> Games, scores and the schedule</span></div></article></div>
+<main class="view gut" id="v-leaderboards" hidden>
+  <div class="wcard mylvl"><div class="ring" id="ring"><div><b id="ring-l">1</b><small>Level</small></div></div><div><h3 style="font-size:22px" id="lvl-name">New builder</h3><p id="lvl-next" class="sqlnote"></p><p class="sqlnote">Earn points by finishing lessons (20 each) and practice missions (10 each). Your points stay on this device.</p></div></div>
+  <div class="sechead"><h2>Levels</h2></div>
+  <ul class="ladder" id="ladder"></ul>
+  <div class="sechead"><h2>Leaderboards</h2><span class="sample">Sample teams</span></div>
+  <div class="boards">
+    <div class="wcard"><h3 style="font-size:19px">Last 7 days</h3><div class="lbwrap"><div class="lbrow"><span class="rk">1</span><span class="avw"><span class="av t1">OT</span><span class="lvl">5</span></span><span>Team Otter</span><span class="pts">+64</span></div><div class="lbrow"><span class="rk">2</span><span class="avw"><span class="av t2">CO</span><span class="lvl">4</span></span><span>Team Comet</span><span class="pts">+51</span></div><div class="lbrow"><span class="rk">3</span><span class="avw"><span class="av t4">PX</span><span class="lvl">3</span></span><span>Team Pixel</span><span class="pts">+40</span></div><div class="lbrow"><span class="rk">4</span><span class="avw"><span class="av t3">MA</span><span class="lvl">4</span></span><span>Team Maple</span><span class="pts">+33</span></div><div class="lbrow"><span class="rk">5</span><span class="avw"><span class="av t5">PB</span><span class="lvl">2</span></span><span>Team Pebble</span><span class="pts">+18</span></div><div class="lbrow me"><span class="rk">·</span><span class="avw"><span class="av">YOU</span><span class="lvl lvl-me">1</span></span><span>Your team</span><span class="pts me-pts">+0</span></div></div></div>
+    <div class="wcard"><h3 style="font-size:19px">Last 30 days</h3><div class="lbwrap"><div class="lbrow"><span class="rk">1</span><span class="avw"><span class="av t1">OT</span><span class="lvl">5</span></span><span>Team Otter</span><span class="pts">+212</span></div><div class="lbrow"><span class="rk">2</span><span class="avw"><span class="av t3">MA</span><span class="lvl">4</span></span><span>Team Maple</span><span class="pts">+180</span></div><div class="lbrow"><span class="rk">3</span><span class="avw"><span class="av t2">CO</span><span class="lvl">4</span></span><span>Team Comet</span><span class="pts">+164</span></div><div class="lbrow"><span class="rk">4</span><span class="avw"><span class="av t4">PX</span><span class="lvl">3</span></span><span>Team Pixel</span><span class="pts">+120</span></div><div class="lbrow"><span class="rk">5</span><span class="avw"><span class="av t5">PB</span><span class="lvl">2</span></span><span>Team Pebble</span><span class="pts">+75</span></div><div class="lbrow me"><span class="rk">·</span><span class="avw"><span class="av">YOU</span><span class="lvl lvl-me">1</span></span><span>Your team</span><span class="pts me-pts">+0</span></div></div></div>
+    <div class="wcard"><h3 style="font-size:19px">All time</h3><div class="lbwrap"><div class="lbrow"><span class="rk">1</span><span class="avw"><span class="av t1">OT</span><span class="lvl">5</span></span><span>Team Otter</span><span class="pts">+410</span></div><div class="lbrow"><span class="rk">2</span><span class="avw"><span class="av t2">CO</span><span class="lvl">4</span></span><span>Team Comet</span><span class="pts">+356</span></div><div class="lbrow"><span class="rk">3</span><span class="avw"><span class="av t3">MA</span><span class="lvl">4</span></span><span>Team Maple</span><span class="pts">+301</span></div><div class="lbrow"><span class="rk">4</span><span class="avw"><span class="av t4">PX</span><span class="lvl">3</span></span><span>Team Pixel</span><span class="pts">+190</span></div><div class="lbrow"><span class="rk">5</span><span class="avw"><span class="av t5">PB</span><span class="lvl">2</span></span><span>Team Pebble</span><span class="pts">+95</span></div><div class="lbrow me"><span class="rk">·</span><span class="avw"><span class="av">YOU</span><span class="lvl lvl-me">1</span></span><span>Your team</span><span class="pts me-pts">+0</span></div></div></div>
+  </div>
+</main>
+
+<main class="view gut" id="v-about" hidden>
+  <div class="about">
+    <div class="wcard">
+      <div class="kicker">About</div>
+      <h1 style="font-size:clamp(28px,5vw,40px)">Build real things together, with AI</h1>
+      <p class="lede" style="font-size:18px">A grown-up and a kid, no coding experience needed. We built a real game this way, and every course here comes from what we learned.</p>
+      <div class="roles3"><div><b>Kid</b>The idea boss: dreams it up, decides how it looks, tests it.</div><div><b>Grown-up</b>The safety boss: owns the accounts and money, says yes before anything goes live.</div><div><b>AI helper</b>The builder: writes the code and explains it as often as you ask.</div></div>
+      <h3 style="font-size:19px;margin-top:8px">Our privacy promise</h3>
+      <ul class="rules" style="font-size:15px"><li>Teams use a team name. No kid's full name, school, town or face.</li><li>Points and progress stay on your own device until accounts open.</li><li>We save as little as we can, and you can delete it.</li></ul>
+    </div>
+    <div class="side">
+      <div class="wcard group"><div class="gcover"><svg class="logo" viewBox="0 0 100 100" aria-hidden="true"><path class="lg-ink" fill-rule="evenodd" d="M67.00,56.00 L73.93,58.13 L73.33,62.72 L66.08,62.99 L64.94,66.33 L63.38,69.50 L68.32,74.82 L65.50,78.48 L59.09,75.09 L56.44,77.42 L53.50,79.38 L55.12,86.45 L50.84,88.22 L46.99,82.08 L43.52,82.77 L40.00,83.00 L37.87,89.93 L33.28,89.33 L33.01,82.08 L29.67,80.94 L26.50,79.38 L21.18,84.32 L17.52,81.50 L20.91,75.09 L18.58,72.44 L16.62,69.50 L9.55,71.12 L7.78,66.84 L13.92,62.99 L13.23,59.52 L13.00,56.00 L6.07,53.87 L6.67,49.28 L13.92,49.01 L15.06,45.67 L16.62,42.50 L11.68,37.18 L14.50,33.52 L20.91,36.91 L23.56,34.58 L26.50,32.62 L24.88,25.55 L29.16,23.78 L33.01,29.92 L36.48,29.23 L40.00,29.00 L42.13,22.07 L46.72,22.67 L46.99,29.92 L50.33,31.06 L53.50,32.62 L58.82,27.68 L62.48,30.50 L59.09,36.91 L61.42,39.56 L63.38,42.50 L70.45,40.88 L72.22,45.16 L66.08,49.01 L66.77,52.48 Z M51.00,56.00 A11,11 0 1,0 29.00,56.00 A11,11 0 1,0 51.00,56.00 Z"/><path class="lg-yel" fill-rule="evenodd" d="M90.70,32.98 L95.14,35.80 L93.57,39.56 L88.44,38.38 L86.57,40.65 L84.29,42.50 L85.43,47.64 L81.66,49.18 L78.87,44.72 L75.95,45.00 L73.02,44.70 L70.20,49.14 L66.44,47.57 L67.62,42.44 L65.35,40.57 L63.50,38.29 L58.36,39.43 L56.82,35.66 L61.28,32.87 L61.00,29.95 L61.30,27.02 L56.86,24.20 L58.43,20.44 L63.56,21.62 L65.43,19.35 L67.71,17.50 L66.57,12.36 L70.34,10.82 L73.13,15.28 L76.05,15.00 L78.98,15.30 L81.80,10.86 L85.56,12.43 L84.38,17.56 L86.65,19.43 L88.50,21.71 L93.64,20.57 L95.18,24.34 L90.72,27.13 L91.00,30.05 Z M82.00,30.00 A6,6 0 1,0 70.00,30.00 A6,6 0 1,0 82.00,30.00 Z"/><path class="lg-teal" d="M87.96,74.80 L91.74,76.47 L90.85,79.12 L86.83,78.17 L85.73,79.59 L84.34,80.72 L85.39,84.72 L82.76,85.68 L80.99,81.94 L79.20,81.96 L77.45,81.58 L74.97,84.90 L72.59,83.44 L74.41,79.73 L73.28,78.34 L72.48,76.73 L68.35,76.87 L68.00,74.09 L72.04,73.20 L72.42,71.45 L73.17,69.83 L70.49,66.68 L72.45,64.68 L75.66,67.28 L77.27,66.48 L79.01,66.06 L79.80,62.00 L82.58,62.28 L82.55,66.42 L84.17,67.17 L85.59,68.27 L89.26,66.36 L90.77,68.71 L87.52,71.27 L87.94,73.01 Z"/><path class="lg-paper" d="M80.00,68.00 L81.56,72.44 L86.00,74.00 L81.56,75.56 L80.00,80.00 L78.44,75.56 L74.00,74.00 L78.44,72.44 Z"/></svg></div><div class="gb"><h3>The Engine Room</h3><p class="sqlnote">A grown-up and a kid, building real things together with AI. No coding experience needed.</p><div class="gstats"><div><b>Teams</b><span>Opening soon</span></div><div><b>Courses</b><span>1 open, 6 coming</span></div><div><b>Price</b><span>To be set</span></div></div><a class="btnlink" href="#about" style="text-align:center">How it works</a></div></div>
+      <div class="wcard"><h3 style="font-size:19px">Community rules</h3><ul class="rules" style="font-size:15px"><li>Kids post with their grown-up.</li><li>First names or nicknames only. No schools, towns or faces.</li><li>Never share passwords, codes or links to private pages.</li><li>Be kind. Everyone here is learning.</li></ul></div>
+    </div>
+  </div>
 </main>
 
 <script>
@@ -866,34 +950,42 @@ const $ = id => document.getElementById(id);
 const store = { get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } }, set(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} } };
 const ORDER = ['team','parts','travel','tables','routes','practice','real','words'];
 const NAMES = {team:'The team',parts:'Three parts of anything online',travel:"A message's trip",tables:'Tables: the drawers',routes:'Routes: doors into the Worker',practice:'Practice room',real:'Changing the real one',words:'Word bank'};
+const VIEWS = ['home','classroom','calendar','leaderboards','about'];
 let done = store.get('er-done') || {};
 let last = store.get('er-last') || 'team';
 let missions = 0;
-const LEVELS = [[0,'New builder'],[50,'Apprentice'],[150,'Builder'],[300,'Master builder']];
-function xp(){ return ORDER.filter(k=>done[k]).length*20 + missions*10; }
-function level(x){ let l=LEVELS[0]; LEVELS.forEach(v=>{ if(x>=v[0]) l=v; }); return l; }
-function drawProgress(){
+const LEVELS = [[0,'New builder'],[20,'Tinkerer'],[50,'Apprentice'],[90,'Builder'],[140,'Engineer'],[200,'Architect'],[270,'Inventor'],[350,'Master builder'],[440,'Legend']];
+function pts(){ return ORDER.filter(k=>done[k]).length*20 + missions*10; }
+function lvlIdx(x){ let i=0; LEVELS.forEach((v,j)=>{ if(x>=v[0]) i=j; }); return i; }
+function nextUp(){ return ORDER.find(k=>!done[k]) || last; }
+function draw(){
   const n = ORDER.filter(k=>done[k]).length, pct = Math.round(n/ORDER.length*100);
   ['o-bar','cont-bar'].forEach(id=>$(id).style.width=pct+'%');
   document.querySelectorAll('.cprog').forEach(e=>e.style.width=pct+'%');
-  document.querySelectorAll('.cprogt').forEach(e=>e.textContent = n ? `${n} of ${ORDER.length} lessons done` : 'Not started yet');
+  document.querySelectorAll('.cprogt').forEach(e=>e.textContent = n ? `${pct}% complete` : 'Not started yet');
   $('o-prog').textContent = `${n} of ${ORDER.length} lessons done · ${pct}%`;
   $('cont-text').textContent = n ? `Next up: ${NAMES[nextUp()]}` : 'Start with lesson 1: The team';
   $('cont-go').href = '#l-' + (n ? nextUp() : 'team');
   document.querySelectorAll('.outline a').forEach(a=>a.classList.toggle('done', !!done[a.dataset.l]));
   document.querySelectorAll('.outline a .ck').forEach(c=>c.textContent = c.parentElement.classList.contains('done') ? '✓' : '');
-  const x = xp(), l = level(x);
-  $('xp').textContent = `${x} XP · ${l[1]}`;
-  $('levels').innerHTML = LEVELS.map((v,i)=>`<li class="${v===l?'on':''}"><i>${i+1}</i><span>${v[1]}</span><span class="sqlnote" style="margin-left:auto">${v[0]} XP</span></li>`).join('');
+  const x = pts(), li = lvlIdx(x), nx = LEVELS[li+1];
+  $('xp').textContent = `${x} points`;
+  document.querySelectorAll('.lvl-me').forEach(e=>e.textContent = li+1);
+  document.querySelectorAll('.me-pts').forEach(e=>e.textContent = '+'+x);
+  $('ring-l').textContent = li+1; $('lvl-name').textContent = LEVELS[li][1];
+  const p = nx ? Math.round((x-LEVELS[li][0])/(nx[0]-LEVELS[li][0])*100) : 100;
+  $('ring').style.setProperty('--p', p);
+  $('lvl-next').textContent = nx ? `${nx[0]-x} points to Level ${li+2}, ${nx[1]}` : 'Top level reached!';
+  $('ladder').innerHTML = LEVELS.map((v,i)=>`<li class="${i<=li?'got':''} ${i===li?'on':''}"><i>${i+1}</i><span>${v[1]}<small>${v[0]} points</small></span></li>`).join('');
 }
-function nextUp(){ return ORDER.find(k=>!done[k]) || last; }
 function toast(t){ const d=document.createElement('div'); d.className='toast'; d.textContent=t; document.body.appendChild(d); setTimeout(()=>d.remove(),1800); }
 function show(){
   const h = (location.hash||'#home').slice(1);
   const isL = h.startsWith('l-') && ORDER.includes(h.slice(2));
-  const view = isL ? 'player' : (['community','projects'].includes(h) ? h : 'home');
-  ['home','player','community','projects'].forEach(v=>$('v-'+v).hidden = v!==view);
-  document.querySelectorAll('.tabs a').forEach(a=>a.setAttribute('aria-current', (a.dataset.tab===view || (view==='player' && a.dataset.tab==='home')) ? 'page' : 'false'));
+  const view = isL ? 'player' : (VIEWS.includes(h) ? h : 'home');
+  ['player',...VIEWS].forEach(v=>$('v-'+v).hidden = v!==view);
+  const tab = view==='player' ? 'classroom' : view;
+  document.querySelectorAll('.tabs a').forEach(a=>a.setAttribute('aria-current', a.dataset.tab===tab ? 'page' : 'false'));
   if (isL){
     const k = h.slice(2); last = k; store.set('er-last', k);
     document.querySelectorAll('[data-lesson]').forEach(s=>s.hidden = s.dataset.lesson!==k);
@@ -906,14 +998,15 @@ function show(){
   }
   window.scrollTo(0,0);
 }
-$('done').onclick = ()=>{ const k=last; done[k]=!done[k]; store.set('er-done', done); if(done[k]) toast('+20 XP. Lesson complete!'); drawProgress(); show(); };
+function complete(k){ const before=lvlIdx(pts()); done[k]=true; store.set('er-done',done); const after=lvlIdx(pts()); toast(after>before ? `Level up! You're Level ${after+1}, ${LEVELS[after][1]}` : '+20 points. Lesson complete!'); draw(); }
+$('done').onclick = ()=>{ const k=last; if(done[k]){ done[k]=false; store.set('er-done',done); draw(); } else complete(k); show(); };
 $('prev').onclick = ()=>{ const i=ORDER.indexOf(last); if(i>0) location.hash='#l-'+ORDER[i-1]; };
-$('next').onclick = ()=>{ const i=ORDER.indexOf(last); if(!done[last]){ done[last]=true; store.set('er-done',done); toast('+20 XP. Lesson complete!'); drawProgress(); } location.hash = i<ORDER.length-1 ? '#l-'+ORDER[i+1] : '#home'; };
+$('next').onclick = ()=>{ const i=ORDER.indexOf(last); if(!done[last]) complete(last); location.hash = i<ORDER.length-1 ? '#l-'+ORDER[i+1] : '#classroom'; };
 $('otoggle').onclick = ()=>{ const o=$('outline'); const shut=o.classList.toggle('shut'); $('otoggle').setAttribute('aria-expanded', String(!shut)); $('otoggle').textContent = shut ? 'Show lessons' : 'Hide lessons'; };
-document.querySelectorAll('.cats .chip').forEach(b=>b.onclick=()=>{ document.querySelectorAll('.cats .chip').forEach(x=>x.setAttribute('aria-pressed', String(x===b))); const c=b.textContent; document.querySelectorAll('.post').forEach(p=>p.hidden = c!=='All' && !p.querySelector('.c').textContent.includes(c)); });
-window.addEventListener('er-missions', e=>{ const before=missions; missions=e.detail; if (missions>before && before>=0 && window.__erReady) toast('+10 XP. Mission done!'); drawProgress(); });
+document.querySelectorAll('.cats .chip').forEach(b=>b.onclick=()=>{ document.querySelectorAll('.cats .chip').forEach(x=>x.setAttribute('aria-pressed', String(x===b))); const c=b.dataset.cat; document.querySelectorAll('.post').forEach(p=>p.hidden = c!=='All' && p.dataset.cat!==c); });
+window.addEventListener('er-missions', e=>{ const before=missions, bl=lvlIdx(pts()); missions=e.detail; if (missions>before && window.__erReady){ const al=lvlIdx(pts()); toast(al>bl ? `Level up! You're Level ${al+1}, ${LEVELS[al][1]}` : '+10 points. Mission done!'); } draw(); });
 window.addEventListener('hashchange', show);
-drawProgress(); show(); window.__erReady = true;
+draw(); show(); window.__erReady = true;
 })();
 </script>
 </body>
