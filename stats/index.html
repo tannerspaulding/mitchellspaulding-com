@@ -174,6 +174,25 @@ td.r,th.r{text-align:right}
 @media (max-width:540px){.two{grid-template-columns:minmax(0,1fr)}}
 .sub{font-family:var(--body);font-weight:700;font-size:.95rem;margin:0 0 6px}
 .empty{font-size:.86rem;color:var(--ink-soft);border:2px dashed var(--dash);padding:12px;text-align:center}
+/* v3: idea box + friend links */
+.ideas{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.ideas li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--rule)}
+.ideas li:last-child{border-bottom:0}
+.ideas .txt{min-width:0}
+.ideas .txt b{display:block;font-weight:600;overflow-wrap:anywhere}
+.ideas .txt small{font-family:var(--mono);font-size:.7rem;color:var(--ink-soft)}
+.ideas .acts{display:flex;gap:6px}
+.kind{font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border:2px solid var(--card-edge);padding:2px 6px;background:var(--blue-soft);color:#14233F}
+.kind.world{background:var(--lime)}
+.pill.ok{background:var(--okbg)} .pill.no{background:var(--card)}
+.rows .nm .kind{margin-right:6px;font-size:.56rem;padding:1px 4px;vertical-align:1px}
+.winbox{border:2.5px solid var(--card-edge);background:var(--hi);color:#14233F;padding:14px;display:flex;flex-direction:column;gap:8px;box-shadow:4px 4px 0 var(--shadow)}
+.winbox b{font-family:var(--display);font-weight:400;font-size:1.25rem;line-height:1.1}
+.winbox .meta{font-family:var(--mono);font-size:.74rem}
+.winbox .pill{align-self:flex-start}
+.winbox.made{background:var(--okbg)}
+.runner{font-size:.86rem;color:var(--ink-soft);margin:10px 0 0}
+@media (max-width:440px){.ideas li{grid-template-columns:auto minmax(0,1fr)}.ideas .acts{grid-column:1/-1;justify-content:flex-end}}
 </style>
 </head>
 <body>
@@ -312,9 +331,36 @@ td.r,th.r{text-align:right}
       <ul class="names" id="names"></ul>
     </section>
 
+
+    <div class="sec"><span>IDEA BOX</span></div>
+
+    <section class="card" aria-labelledby="c13">
+      <div class="card-head"><h2 id="c13">Ideas waiting for you</h2><p>New duck and world ideas from players. Nobody else sees an idea until you approve it. Reject deletes it.</p></div>
+      <ul class="ideas" id="pending"></ul>
+    </section>
+
+    <section class="card" aria-labelledby="c14">
+      <div class="card-head"><h2 id="c14">This month's vote</h2><p id="monthNote">Approved ideas players can vote on. One vote per device per idea, and nobody can vote for their own. Starts fresh on the 1st.</p></div>
+      <p class="hand" id="leader"></p>
+      <ol class="rows" id="voteRows"></ol>
+    </section>
+
+    <section class="card win" aria-labelledby="c15">
+      <div class="card-head"><h2 id="c15">Last month's winner</h2><p>The idea with the most votes last month. Mark it as made once it's in the game, and players see that it happened.</p></div>
+      <div id="winner"></div>
+    </section>
+
+    <div class="sec"><span>FRIEND LINKS</span></div>
+
+    <section class="card" aria-labelledby="c16">
+      <div class="card-head"><h2 id="c16">Friends who joined</h2><p>A friend counts when a new device opens a player's link and finds its first duck. Who invited whom isn't kept.</p></div>
+      <div class="stats3" id="friendStats"></div>
+      <p class="small" id="friendNote"></p>
+    </section>
+
     <div class="foot">
       <p id="stamp"></p>
-      <p>Players are counted by a random code saved on their device, so one person on two devices counts as two, and clearing the browser starts a new player. IP addresses are never saved. Cities are kept only as a count per city per day, and play sessions aren't linked to players.</p>
+      <p>Players are counted by a random code saved on their device, so one person on two devices counts as two, and clearing the browser starts a new player. IP addresses are never saved. Cities are kept only as a count per city per day, and play sessions aren't linked to players. Any player can delete their data from the game, and players who stop playing are deleted after 12 months.</p>
     </div>
   </div>
 </div>
@@ -473,6 +519,7 @@ function draw(){
   $("modeNote").textContent=known?`${plural(modes.app||0,"player")} use the home-screen app and ${modes.browser||0} play in a browser.${modes.unknown?` ${modes.unknown} played before this was tracked.`:""}`:"Not tracked yet.";
 
   drawNames();
+  drawIdeas(); drawFriends();
   if(!PREVIEW&&!S.sessions) $("stamp").textContent="The stats server is still running the older Worker code, so the newer sections stay empty until the new code is deployed. "; else $("stamp").textContent="";
   $("stamp").textContent+=`Numbers as of ${new Date(now).toLocaleString("en-US",{weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})}. Reload to refresh.`;
 }
@@ -513,6 +560,44 @@ function drawNames(){
   $("names").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{ const n=S.names.find(x=>x.pid===b.dataset.pid), want=n.hidden?0:1;
     if(PREVIEW){ n.hidden=want; drawNames(); return; }
     b.disabled=true; api("/v1/admin/hide",{method:"POST",body:JSON.stringify({pid:n.pid,hidden:!!want})}).then(j=>{ if(j.ok){ n.hidden=want; drawNames(); } else { b.disabled=false; if(j.status===401) load(); } }).catch(()=>{ b.disabled=false; }); }));
+}
+
+// ---- idea box ----
+const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
+const mName=m=>m?MONTHS[+m.slice(5,7)-1]:"";
+const kindTag=k=>`<span class="kind ${k==="world"?"world":""}">${k==="world"?"World":"Duck"}</span>`;
+const V3_MSG="Run the newest database update in Cloudflare to turn this on.";
+function review(id,action){
+  const I=S.ideas, find=l=>l.find(x=>x.id===id);
+  const apply=()=>{ const p=find(I.pending);
+    if(action==="approve"&&p){ I.pending=I.pending.filter(x=>x.id!==id); I.now.push({id,kind:p.kind,text:p.text,votes:0,status:"approved"}); }
+    if(action==="reject") I.pending=I.pending.filter(x=>x.id!==id);
+    for(const l of [I.now,I.prev]){ const x=find(l); if(x&&action==="made"){ x.status="done"; I.made++; } if(x&&action==="unmade"){ x.status="approved"; I.made=Math.max(0,I.made-1); } }
+    drawIdeas(); };
+  if(PREVIEW){ apply(); return Promise.resolve(); }
+  return api("/v1/admin/idea",{method:"POST",body:JSON.stringify({id,action})}).then(j=>{ if(j.ok) apply(); else if(j.status===401) load(); else throw 0; });
+}
+function drawIdeas(){
+  const I=S.ideas;
+  if(!I){ ["pending","voteRows"].forEach(k=>$(k).innerHTML=`<li><span class="small">${V3_MSG}</span></li>`); $("leader").textContent=""; $("winner").innerHTML=`<p class="small">${V3_MSG}</p>`; return; }
+  $("c14").textContent=`${mName(I.month)}'s vote`;
+  $("pending").innerHTML=I.pending.length?I.pending.map(x=>`<li>${kindTag(x.kind)}<span class="txt"><b>${esc(x.text)}</b><small>${ago(x.at)}</small></span><span class="acts"><button type="button" class="pill ok" data-id="${x.id}" data-a="approve" aria-label="Approve: ${esc(x.text)}">Approve</button><button type="button" class="pill no" data-id="${x.id}" data-a="reject" aria-label="Reject: ${esc(x.text)}">Reject</button></span></li>`).join(""):`<li><span class="small">No ideas waiting. You're all caught up.</span></li>`;
+  $("pending").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{ b.parentNode.querySelectorAll("button").forEach(x=>x.disabled=true);
+    review(+b.dataset.id,b.dataset.a).catch(()=>b.parentNode.querySelectorAll("button").forEach(x=>x.disabled=false)); }));
+  const now=I.now.slice().sort((a,b)=>b.votes-a.votes), top=now[0];
+  $("leader").textContent=top&&top.votes?`Leading: ${top.text} (${plural(top.votes,"vote")})`:now.length?"No votes yet this month.":"";
+  rows($("voteRows"),now,{name:x=>x.text,sub:x=>x.kind==="world"?"New world":"New duck",value:x=>x.votes,text:x=>plural(x.votes,"vote"),empty:"No approved ideas yet this month."});
+  const prev=I.prev.slice().sort((a,b)=>b.votes-a.votes), w=prev.find(x=>x.votes>0);
+  if(!w){ $("winner").innerHTML=`<p class="small">No winner for ${mName(I.last)}. Ideas need at least one vote to win.</p>`; return; }
+  const made=w.status==="done", rest=prev.filter(x=>x!==w&&x.votes>0);
+  $("winner").innerHTML=`<div class="winbox${made?" made":""}">${kindTag(w.kind)}<b>${esc(w.text)}</b><span class="meta">${mName(I.last)} · ${plural(w.votes,"vote")}${made?" · made!":""}</span><button type="button" class="pill ${made?"no":"ok"}" id="madeBtn">${made?"Undo made":"Mark as made"}</button></div>`+(rest.length?`<p class="runner">Runners-up: ${rest.map(x=>`${esc(x.text)} (${x.votes})`).join(", ")}</p>`:"")+(I.made?`<p class="small">${plural(I.made,"player idea")} made so far.</p>`:"");
+  $("madeBtn").addEventListener("click",e=>{ e.target.disabled=true; review(w.id,made?"unmade":"made").catch(()=>{ e.target.disabled=false; }); });
+}
+function drawFriends(){
+  const F=S.friends;
+  if(!F){ $("friendStats").innerHTML=""; $("friendNote").textContent=V3_MSG; return; }
+  $("friendStats").innerHTML=[["Links made",fmtN(F.links)],["Friends joined",fmtN(F.joins)],["Last 30 days",fmtN(F.recent)]].map(([l,v])=>`<div class="dev"><span class="label">${l}</span><b>${v}</b></div>`).join("");
+  $("friendNote").textContent=F.links?`${plural(F.sharers,"player")} brought at least one friend.`:"Nobody has made a friend link yet.";
 }
 </script>
 </body>
