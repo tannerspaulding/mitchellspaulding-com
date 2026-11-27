@@ -5,1009 +5,633 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <meta name="referrer" content="no-referrer">
-<title>The Engine Room</title>
+<title>The Engine Room · How Quackers works</title>
+<meta name="description" content="A look behind the curtain at how the Quackers game is built: the front end, the Worker, the database, and the privacy and safety rules around them.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: a builder's manual. One column of numbered lessons, studs mark each step, the practice room opens wide. */
+/* Layout: a technical field guide. A sticky section index, then numbered chapters; each pairs prose with one diagram. */
 :root{
-  --paper:#EDF2F7; --sheet:#FFFFFF; --ink:#142238; --ink-2:#4A5B74; --line:#CBD6E3;
-  --brick:#F2B705; --brick-ink:#3A2C00; --red:#D9412B; --teal:#11897B; --sky:#2F6FD6;
-  --code-bg:#14223A; --code-fg:#E5EEF9; --code-key:#FFC94D; --code-str:#7FE0C9; --code-com:#8FA3BF;
-  --ok-bg:#DDF3EE; --bad-bg:#FBE3DE; --warn-bg:#FFF1C7; --hi:#FFF4B8;
-  --f-display:"Fredoka","Trebuchet MS",system-ui,sans-serif;
-  --f-body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
-  --f-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+  --bg:#F5F6F8; --panel:#FFFFFF; --panel-2:#EEF0F4; --ink:#151A23; --ink-2:#4B5566; --ink-3:#6E7889; --line:#D9DDE5;
+  --accent:#A87300; --accent-soft:#FBF1D9; --edge:#2F6FD6; --edge-soft:#E3ECFB; --data:#0C7A65; --data-soft:#DDF2EC;
+  --warn:#B4532A; --warn-soft:#F8E6DD;
+  --code-bg:#11161F; --code-fg:#DCE3EE; --code-key:#F2C14E; --code-str:#7FD6BE; --code-com:#8996AD;
+  --sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  color-scheme:light;
 }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
-  --paper:#0C1524; --sheet:#142035; --ink:#E6EEF8; --ink-2:#A4B3C9; --line:#2A3A55;
-  --brick:#F5C02A; --brick-ink:#2A1F00; --red:#FF7A63; --teal:#3CC9B4; --sky:#7FA9FF;
-  --code-bg:#081120; --code-fg:#E5EEF9; --code-key:#FFC94D; --code-str:#7FE0C9; --code-com:#7F93B0;
-  --ok-bg:#123A35; --bad-bg:#46211C; --warn-bg:#3D3210; --hi:#3B3615; color-scheme:dark }}
+  --bg:#0E1117; --panel:#161B24; --panel-2:#1D2430; --ink:#E7EBF2; --ink-2:#A6AFBF; --ink-3:#8A94A6; --line:#2A3241;
+  --accent:#F0B53C; --accent-soft:#3A2F16; --edge:#78A6FF; --edge-soft:#1C2A45; --data:#43C9A9; --data-soft:#14332D;
+  --warn:#F08A5D; --warn-soft:#3A2219;
+  --code-bg:#0A0D13; color-scheme:dark }}
 :root[data-theme="dark"]{
-  --paper:#0C1524; --sheet:#142035; --ink:#E6EEF8; --ink-2:#A4B3C9; --line:#2A3A55;
-  --brick:#F5C02A; --brick-ink:#2A1F00; --red:#FF7A63; --teal:#3CC9B4; --sky:#7FA9FF;
-  --code-bg:#081120; --code-fg:#E5EEF9; --code-key:#FFC94D; --code-str:#7FE0C9; --code-com:#7F93B0;
-  --ok-bg:#123A35; --bad-bg:#46211C; --warn-bg:#3D3210; --hi:#3B3615; color-scheme:dark }
+  --bg:#0E1117; --panel:#161B24; --panel-2:#1D2430; --ink:#E7EBF2; --ink-2:#A6AFBF; --ink-3:#8A94A6; --line:#2A3241;
+  --accent:#F0B53C; --accent-soft:#3A2F16; --edge:#78A6FF; --edge-soft:#1C2A45; --data:#43C9A9; --data-soft:#14332D;
+  --warn:#F08A5D; --warn-soft:#3A2219;
+  --code-bg:#0A0D13; color-scheme:dark }
 
 *{box-sizing:border-box}
-body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.55;
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
-.wrap{max-width:980px;margin:0 auto}
-h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+html{scroll-behavior:smooth;scroll-padding-top:72px;background:var(--bg)}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-bottom:72px;
+  -webkit-text-size-adjust:100%}
+.wrap{max-width:1040px;margin:0 auto}
+h1,h2,h3{line-height:1.2;margin:0;text-wrap:balance;letter-spacing:-.01em}
 p{margin:0}
-a{color:var(--sky)}
-code,.mono{font-family:var(--f-mono);font-size:.86em}
-:focus-visible{outline:3px solid var(--sky);outline-offset:2px;border-radius:6px}
-@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+a{color:var(--edge)}
+code{font-family:var(--mono);font-size:.84em;background:var(--panel-2);border:1px solid var(--line);border-radius:5px;padding:.05em .35em;white-space:nowrap}
+pre code{background:none;border:0;padding:0;white-space:pre;font-size:inherit}
+:focus-visible{outline:3px solid var(--edge);outline-offset:2px;border-radius:6px}
 
-/* top nav */
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
-nav.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);border-bottom:1px solid var(--line);
+/* sticky index */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:11}
+nav.idx{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--bg);border-bottom:1px solid var(--line);
   margin:0 calc(-1*max(16px,env(safe-area-inset-left,0px)));padding:10px max(16px,env(safe-area-inset-left,0px))}
-nav.top .wrap{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
-nav.top a{flex:none;text-decoration:none;color:var(--ink);font-family:var(--f-display);font-weight:600;font-size:15px;
-  padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--sheet)}
-nav.top a:hover{border-color:var(--ink-2)}
+nav.idx .wrap{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+nav.idx .wrap::-webkit-scrollbar{display:none}
+nav.idx a{flex:none;text-decoration:none;color:var(--ink-2);font-size:14px;font-weight:500;padding:6px 11px;border-radius:8px}
+nav.idx a:hover{background:var(--panel-2);color:var(--ink)}
+nav.idx a b{font-family:var(--mono);font-weight:500;color:var(--ink-3);margin-right:6px;font-size:12px}
 
 /* hero */
-.hero{padding-block:48px 28px;display:grid;gap:18px}
-.kicker{font-family:var(--f-display);font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:14px;color:var(--ink-2)}
-.hero h1{font-size:clamp(40px,7vw,68px);font-weight:700}
-.hero h1 span{background:var(--brick);color:var(--brick-ink);padding:0 .18em;border-radius:10px}
-.hero p.lede{font-size:20px;max-width:60ch;color:var(--ink)}
-.pillrow{display:flex;flex-wrap:wrap;gap:8px}
-.pill{font-size:14px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--sheet);border:1px solid var(--line);color:var(--ink-2)}
+header.hero{padding:56px 0 36px;display:grid;gap:18px;border-bottom:1px solid var(--line)}
+.eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.hero h1{font-size:clamp(36px,6.4vw,60px);font-weight:700;letter-spacing:-.025em}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.lede{font-size:19px;color:var(--ink-2);max-width:62ch}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:8px 0 0}
+.facts div{background:var(--panel);padding:14px 16px}
+.facts dt{font-size:13px;color:var(--ink-3)}
+.facts dd{margin:2px 0 0;font-weight:600;font-size:16px}
 
-/* lessons */
-section.lesson{margin-top:40px;background:var(--sheet);border:1px solid var(--line);border-radius:18px;padding:28px clamp(16px,4vw,36px);display:grid;gap:18px}
-.lhead{display:flex;gap:16px;align-items:center}
-.stud{flex:none;width:52px;height:52px;border-radius:12px;background:var(--brick);color:var(--brick-ink);display:grid;place-items:center;
-  font-family:var(--f-display);font-weight:700;font-size:24px;position:relative;box-shadow:inset 0 -4px 0 rgba(0,0,0,.14)}
-.stud::before,.stud::after{content:"";position:absolute;top:-7px;width:14px;height:8px;border-radius:4px 4px 0 0;background:var(--brick)}
-.stud::before{left:9px}.stud::after{right:9px}
-.lhead h2{font-size:clamp(26px,4vw,34px)}
-.lhead .sub{color:var(--ink-2);font-size:15px}
-.lesson > p, .lesson .prose{max-width:66ch}
-.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
-.part{border:2px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:8px;align-content:start}
-.part h3{font-size:21px}
-.part .like{font-size:15px;color:var(--ink-2);border-top:1px dashed var(--line);padding-top:8px}
-.part .tag{justify-self:start;font-size:13px;font-weight:700;padding:2px 8px;border-radius:6px;color:#fff}
-.t-front{background:var(--sky)} .t-worker{background:var(--red)} .t-db{background:var(--teal)}
+/* chapters */
+section.ch{padding:56px 0 8px;display:grid;gap:22px;min-width:0}
+.ch-head{display:grid;gap:8px;max-width:70ch}
+.num{font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:500}
+.ch h2{font-size:clamp(26px,3.6vw,34px);font-weight:700}
+.ch-head p{color:var(--ink-2);font-size:18px}
+.prose{display:grid;gap:14px;max-width:68ch;min-width:0}
+.split{display:grid;gap:28px;align-items:start;min-width:0}
+@media (min-width:860px){.split{grid-template-columns:minmax(0,1fr) minmax(0,1.05fr)}.split.flip>:first-child{order:2}}
+figure{margin:0;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:10px;min-width:0}
+figcaption{font-size:14px;color:var(--ink-3)}
+svg{display:block;width:100%;height:auto;max-width:520px;margin:0 auto}
 
-.callout{border-radius:12px;padding:14px 16px;display:grid;gap:6px;max-width:72ch}
-.callout b.h{font-family:var(--f-display);font-size:17px}
-.c-privacy{background:var(--ok-bg)} .c-why{background:var(--warn-bg)} .c-dad{background:var(--bad-bg)}
+/* svg styles */
+.n-box{fill:var(--panel-2);stroke:var(--line);stroke-width:1.2}
+.n-edge{fill:var(--edge-soft);stroke:var(--edge);stroke-width:1.2}
+.n-data{fill:var(--data-soft);stroke:var(--data);stroke-width:1.2}
+.n-acc{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.2}
+.n-warn{fill:var(--warn-soft);stroke:var(--warn);stroke-width:1.2}
+.t1{fill:var(--ink);font:600 14px var(--sans)}
+.t2{fill:var(--ink-2);font:400 12.5px var(--sans)}
+.t3{fill:var(--ink-3);font:500 11px var(--mono);letter-spacing:.04em}
+.tm{fill:var(--ink-2);font:400 11.5px var(--mono)}
+.wire{stroke:var(--ink-3);stroke-width:1.4;fill:none}
+.wire.e{stroke:var(--edge)}.wire.d{stroke:var(--data)}.wire.a{stroke:var(--accent)}.wire.w{stroke:var(--warn)}
+.dash{stroke-dasharray:4 4}
+.lane{stroke:var(--line);stroke-width:1;stroke-dasharray:3 5;fill:none}
+.ah{fill:var(--ink-3)}.ah.e{fill:var(--edge)}.ah.d{fill:var(--data)}.ah.a{fill:var(--accent)}.ah.w{fill:var(--warn)}
+.dot-a{fill:var(--accent)}.dot-e{fill:var(--edge)}
+.bar{fill:var(--edge)}.bar.l{fill:var(--warn)}
 
-pre.code{background:var(--code-bg);color:var(--code-fg);border-radius:12px;padding:14px 16px;margin:0;overflow-x:auto;font-family:var(--f-mono);font-size:14px;line-height:1.6;min-width:0}
-pre.code .k{color:var(--code-key)} pre.code .s{color:var(--code-str)} pre.code .c{color:var(--code-com);font-style:italic}
+/* code */
+pre{margin:0;background:var(--code-bg);color:var(--code-fg);border-radius:12px;padding:16px 18px;overflow-x:auto;font:13px/1.6 var(--mono)}
+pre .k{color:var(--code-key)}pre .s{color:var(--code-str)}pre .c{color:var(--code-com)}
+.codecap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 12px;font:12px var(--mono);color:var(--ink-3);margin-bottom:-4px}
 
-.diagram{overflow-x:auto}
-.diagram svg{display:block;min-width:620px;width:100%;height:auto}
-.dnode rect{fill:var(--sheet);stroke:var(--line);stroke-width:2}
-.dnode text{fill:var(--ink);font-family:var(--f-display);font-weight:600}
-.dnode text.small{font-family:var(--f-body);font-weight:400;fill:var(--ink-2)}
-.dnode.on rect{stroke:var(--brick);stroke-width:4;fill:var(--hi)}
-.darrow{stroke:var(--ink-2);stroke-width:2.5;fill:none}
-.darrow.on{stroke:var(--brick);stroke-width:4}
-.dlabel{fill:var(--ink-2);font-family:var(--f-mono);font-size:12px}
+/* cards & tables */
+.grid3{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:8px;align-content:start}
+.card h3{font-size:17px}
+.card p{color:var(--ink-2);font-size:15.5px}
+.tag{justify-self:start;font:500 11.5px var(--mono);text-transform:uppercase;letter-spacing:.05em;padding:3px 8px;border-radius:6px}
+.tag.e{background:var(--edge-soft);color:var(--edge)}.tag.d{background:var(--data-soft);color:var(--data)}.tag.a{background:var(--accent-soft);color:var(--accent)}.tag.w{background:var(--warn-soft);color:var(--warn)}
+.zone .tag{background:var(--panel)}
+.tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+.tbl{width:100%;border-collapse:collapse;font-size:15px}
+.tbl th,.tbl td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl tr:last-child td{border-bottom:0}
+.tbl th{font-size:12.5px;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em;background:var(--panel-2)}
+.tbl td{color:var(--ink-2)}
+.tbl td:first-child{color:var(--ink);font-weight:500}
+.tbl td.m{font-family:var(--mono);font-size:13.5px;white-space:nowrap}
 
-/* stepper */
-.stepper{display:grid;gap:12px}
-.steps{display:grid;gap:6px;padding:0;margin:0;list-style:none}
-.steps li{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;border-radius:10px;border:1px solid transparent;color:var(--ink-2)}
-.steps li .n{flex:none;width:28px;height:28px;border-radius:8px;background:var(--line);color:var(--ink);display:grid;place-items:center;font-family:var(--f-display);font-weight:700}
-.steps li.on{background:var(--hi);border-color:var(--brick);color:var(--ink)}
-.steps li.on .n{background:var(--brick);color:var(--brick-ink)}
-.steps li.done{color:var(--ink)}
-.steps li.done .n{background:var(--teal);color:#fff}
-.btnrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-button{font:inherit;font-family:var(--f-display);font-weight:600;font-size:16px;cursor:pointer;border-radius:10px;border:2px solid var(--ink);background:var(--sheet);color:var(--ink);padding:8px 14px}
-button.primary{background:var(--brick);color:var(--brick-ink);border-color:var(--brick);box-shadow:inset 0 -3px 0 rgba(0,0,0,.15)}
-button.small{font-size:14px;padding:5px 10px;border-width:1.5px}
-button:disabled{opacity:.45;cursor:not-allowed}
-button:hover:not(:disabled){filter:brightness(1.05)}
+/* tables of the database */
+.vault{display:grid;gap:14px}
+@media (min-width:760px){.vault{grid-template-columns:1.25fr 1fr 0.8fr}}
+.zone{border-radius:14px;padding:16px;display:grid;gap:10px;align-content:start;border:1px solid}
+.zone.p{background:var(--edge-soft);border-color:color-mix(in srgb,var(--edge) 40%,transparent)}
+.zone.t{background:var(--data-soft);border-color:color-mix(in srgb,var(--data) 40%,transparent)}
+.zone.h{background:var(--panel-2);border-color:var(--line)}
+.zone h3{font-size:15px}
+.zone > p{font-size:14px;color:var(--ink-2)}
+.chips{display:grid;gap:8px}
+.chip{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 12px;display:grid;gap:2px}
+.chip b{font-family:var(--mono);font-weight:500;font-size:13.5px}
+.chip span{font-size:13.5px;color:var(--ink-2);line-height:1.45}
 
-/* tables */
-.tblwrap{overflow-x:auto;min-width:0}
-table.t{border-collapse:separate;border-spacing:0;font-size:14px;min-width:100%}
-table.t caption{caption-side:top;text-align:left;font-family:var(--f-display);font-weight:600;font-size:17px;padding-bottom:6px}
-table.t th,table.t td{padding:6px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
-table.t th{background:var(--paper);font-weight:600;color:var(--ink-2)}
-table.t th:first-child{border-top-left-radius:8px} table.t th:last-child{border-top-right-radius:8px}
-table.t tr.hi td{background:var(--hi)}
-table.t th.newcol{background:var(--brick);color:var(--brick-ink)}
-table.t td.empty{color:var(--ink-2);font-family:var(--f-body);font-style:italic}
+/* timeline */
+.tl{list-style:none;margin:0 0 0 8px;padding:0;display:grid;border-left:2px solid var(--line)}
+.tl li{position:relative;padding:0 0 20px 22px}
+.tl li::before{content:"";position:absolute;left:-7px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--panel);border:2px solid var(--data)}
+.tl li:last-child{padding-bottom:0}
+.tl .when{font:500 13px var(--mono);color:var(--data)}
+.tl p{font-size:15.5px;color:var(--ink-2)}
 
-/* rules list */
-.rules{list-style:none;padding:0;margin:0;display:grid;gap:8px;max-width:70ch}
-.rules li{display:flex;gap:10px;align-items:flex-start}
-.rules li::before{content:"";flex:none;width:18px;height:18px;margin-top:4px;border-radius:5px;border:2px solid var(--red)}
+.callout{border-left:3px solid var(--accent);background:var(--panel);border-radius:0 12px 12px 0;padding:14px 18px;color:var(--ink-2);font-size:15.5px;max-width:72ch}
+.callout b{color:var(--ink)}
 
-/* sandbox */
-.sandbox{border:3px dashed var(--brick)}
-.warnbar{background:var(--warn-bg);border-radius:10px;padding:10px 14px;font-weight:700}
-.sbgrid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px}
-@media (max-width:820px){.sbgrid{grid-template-columns:minmax(0,1fr)}}
-.panel{border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;gap:12px;align-content:start;min-width:0;background:var(--sheet)}
-.panel h3{font-size:19px;display:flex;gap:8px;align-items:center}
-.panel h3 .tag{font-family:var(--f-body);font-size:12px;font-weight:700;padding:2px 7px;border-radius:6px;color:#fff}
-label.f{display:grid;gap:4px;font-size:14px;font-weight:700;color:var(--ink-2)}
-select,input[type=text]{font:inherit;font-size:15px;padding:8px 10px;border-radius:8px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);width:100%;min-width:0}
-.frow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
-.devices{display:grid;gap:8px}
-.dev{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:10px;background:var(--paper)}
-.dev .nm{font-weight:700}
-.dev .meta{font-size:13px;color:var(--ink-2);font-family:var(--f-mono)}
-.daybadge{font-family:var(--f-display);font-weight:600;background:var(--ink);color:var(--paper);padding:3px 10px;border-radius:8px}
-.trace{list-style:none;padding:0;margin:0;display:grid;gap:4px;font-size:15px}
-.trace li{padding:6px 10px;border-radius:8px;display:flex;gap:8px}
-.trace li.ok{background:var(--ok-bg)} .trace li.bad{background:var(--bad-bg)} .trace li.info{background:var(--paper)}
-.trace li .ic{flex:none;font-weight:700;width:1.2em}
-.resp{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
-@media (max-width:560px){.resp{grid-template-columns:minmax(0,1fr)}}
-.resp .lbl{font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:4px}
-.unlock{background:var(--brick);color:var(--brick-ink);border-radius:10px;padding:10px 14px;font-family:var(--f-display);font-weight:600}
-.err{color:var(--red);font-weight:700;font-size:14px}
-.sqlnote{font-size:14px;color:var(--ink-2)}
-
-/* missions */
-.missions{list-style:none;padding:0;margin:0;display:grid;gap:8px}
-.missions li{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;padding:10px 12px;border-radius:10px;background:var(--paper)}
-.missions li .box{grid-row:span 2;width:26px;height:26px;border-radius:7px;border:2px solid var(--ink-2);display:grid;place-items:center;font-weight:700}
-.missions li.done .box{background:var(--teal);border-color:var(--teal);color:#fff}
-.missions li .mt{font-weight:700}
-.missions li .mh{font-size:14px;color:var(--ink-2)}
-.missions li.done .mt{text-decoration:line-through;text-decoration-thickness:2px}
-.meter{height:12px;border-radius:999px;background:var(--line);overflow:hidden}
-.meter i{display:block;height:100%;background:var(--teal);width:0;transition:width .4s}
-
-/* checklist */
-.check{list-style:none;padding:0;margin:0;display:grid;gap:10px;max-width:74ch}
-.check li{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:start;padding:12px 14px;border:1px solid var(--line);border-radius:12px}
-.check input{width:22px;height:22px;margin-top:3px;accent-color:var(--teal);grid-row:span 2}
-.check .who{justify-self:start;font-size:12px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--paper);color:var(--ink-2)}
-.check .who.dad{background:var(--red);color:#fff}
-.check .ct{font-weight:700}
-.check .cd{font-size:15px;color:var(--ink-2)}
-.check .cd code{color:var(--ink)}
-
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{font-size:15px;padding:6px 12px;border-radius:999px;border:1.5px solid var(--line);background:var(--paper)}
-.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-.role{border:2px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:8px;align-content:start}
-.role h3{font-size:21px}
-.role ul{margin:0;padding-left:1.1em;display:grid;gap:4px}
-.role .who{justify-self:start;font-size:13px;font-weight:700;padding:2px 8px;border-radius:6px;color:#fff}
-.r-kid{background:var(--sky)} .r-grown{background:var(--red)} .r-ai{background:var(--teal)}
-.words{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
-.word{padding:10px 12px;border-radius:10px;background:var(--paper)}
-.word b{font-family:var(--f-display);font-size:17px;display:block}
-.word span{font-size:15px;color:var(--ink-2)}
-footer{margin-top:40px;color:var(--ink-2);font-size:14px;text-align:center}
-
-/* ---- course platform shell ---- */
-[hidden]{display:none!important}
-body{padding-left:0;padding-right:0}
-.gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.logo{width:34px;height:34px;flex:none}
-.lg-ink{fill:var(--ink)} .lg-yel{fill:var(--brick)} .lg-teal{fill:var(--teal)} .lg-paper{fill:var(--sheet)}
-header.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;background:var(--sheet);border-bottom:1px solid var(--line)}
-header.bar .in{max-width:1240px;margin:0 auto;display:flex;align-items:center;gap:16px;padding-block:10px;flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);font-family:var(--f-display);font-weight:700;font-size:20px}
-.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
-.tabs a{flex:none;text-decoration:none;color:var(--ink-2);font-family:var(--f-display);font-weight:600;font-size:16px;padding:8px 12px;border-radius:10px}
-.tabs a[aria-current="page"]{color:var(--ink);background:var(--paper)}
-.tabs a:hover{color:var(--ink)}
-.me{display:flex;align-items:center;gap:10px}
-.xp{font-family:var(--f-display);font-weight:600;font-size:14px;padding:5px 10px;border-radius:999px;background:var(--brick);color:var(--brick-ink);white-space:nowrap}
-.av{width:34px;height:34px;border-radius:50%;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-family:var(--f-display);font-weight:700;font-size:14px}
-main.view{max-width:1240px;margin:0 auto;padding-block:24px 64px}
-.sample{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);background:var(--paper);border:1px dashed var(--line);border-radius:6px;padding:2px 7px}
-/* classroom */
-.welcome{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,340px);gap:18px;align-items:stretch}
-@media (max-width:860px){.welcome{grid-template-columns:minmax(0,1fr)}}
-.wcard{background:var(--sheet);border:1px solid var(--line);border-radius:18px;padding:24px;display:grid;gap:12px;align-content:start}
-.wcard h1{font-size:clamp(30px,5vw,44px)}
-.wcard .lede{font-size:18px;max-width:58ch}
-.cont{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-.cont .kicker{color:color-mix(in srgb,var(--paper) 70%,transparent)}
-.cont h3{font-size:22px}
-.bar2{height:10px;border-radius:999px;background:color-mix(in srgb,var(--line) 60%,transparent);overflow:hidden}
-.bar2 i{display:block;height:100%;background:var(--teal);width:0;transition:width .4s}
-.cont .bar2{background:rgba(255,255,255,.18)}
-.sechead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-top:32px;margin-bottom:12px}
-.sechead h2{font-size:26px}
-.courses{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
-.course{background:var(--sheet);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:grid;grid-template-rows:auto 1fr;text-decoration:none;color:var(--ink)}
-.course .cover{height:112px;display:grid;place-items:center;position:relative}
-.course .cover b{font-family:var(--f-display);font-size:44px;font-weight:700;color:rgba(255,255,255,.92)}
-.course .cover .state{position:absolute;top:10px;left:10px;font-size:12px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--sheet);color:var(--ink)}
-.course .cb{padding:14px 16px;display:grid;gap:8px;align-content:start}
-.course h3{font-size:19px}
-.course .meta{font-size:14px;color:var(--ink-2)}
-.course.locked{opacity:.78}
-.course.open:hover{border-color:var(--ink-2)}
-.cv1{background:linear-gradient(135deg,#142238,#2F6FD6)} .cv2{background:linear-gradient(135deg,#2F6FD6,#11897B)} .cv3{background:linear-gradient(135deg,#11897B,#F2B705)}
-.cv4{background:linear-gradient(135deg,#142238,#D9412B)} .cv5{background:linear-gradient(135deg,#D9412B,#F2B705)} .cv6{background:linear-gradient(135deg,#142238,#11897B)} .cv7{background:linear-gradient(135deg,#2F6FD6,#142238)}
-/* player */
-.player{display:grid;grid-template-columns:300px minmax(0,1fr);gap:24px;align-items:start}
-@media (max-width:900px){.player{grid-template-columns:minmax(0,1fr)}}
-aside.outline{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px);background:var(--sheet);border:1px solid var(--line);border-radius:16px;padding:16px;display:grid;gap:12px;max-height:calc(100vh - 100px);overflow:auto}
-@media (max-width:900px){aside.outline{position:static;max-height:none}}
-.outline .ctitle{font-family:var(--f-display);font-weight:700;font-size:18px}
-.outline .prog{font-size:14px;color:var(--ink-2)}
-.outline .mod{display:grid;gap:2px}
-.outline .mod > b{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);margin:6px 0 2px}
-.outline a{display:flex;gap:10px;align-items:center;text-decoration:none;color:var(--ink);padding:8px 10px;border-radius:10px;font-size:15px}
-.outline a:hover{background:var(--paper)}
-.outline a[aria-current="page"]{background:var(--hi);font-weight:700}
-.outline a .ck{flex:none;width:20px;height:20px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:12px;color:#fff}
-.outline a.done .ck{background:var(--teal);border-color:var(--teal)}
-.outline a .dur{margin-left:auto;white-space:nowrap;font-size:12px;color:var(--ink-2);font-family:var(--f-mono)}
-#otoggle{display:none}
-@media (max-width:900px){#otoggle{display:inline-block} aside.outline.shut .mod{display:none}}
-.crumb{font-size:14px;color:var(--ink-2);display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
-.crumb a{color:var(--ink-2)}
-.lessonwrap section.lesson{margin-top:0}
-.lessonwrap .sbgrid{grid-template-columns:minmax(0,1fr)}
-@media (min-width:1240px){.lessonwrap .sbgrid{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}}
-.lfoot{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-top:16px;padding:14px 16px;background:var(--sheet);border:1px solid var(--line);border-radius:14px}
-.lfoot .mid{display:flex;gap:8px;align-items:center}
-button.donebtn[aria-pressed="true"]{background:var(--teal);border-color:var(--teal);color:#fff}
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:12px;font-family:var(--f-display);font-weight:600;z-index:20}
-/* community */
-.comm{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px;align-items:start}
-@media (max-width:900px){.comm{grid-template-columns:minmax(0,1fr)}}
-.composer{background:var(--sheet);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;gap:12px;align-items:center}
-.composer .fake{flex:1;padding:10px 14px;border-radius:12px;background:var(--paper);color:var(--ink-2)}
-.cats{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
-.post{background:var(--sheet);border:1px solid var(--line);border-radius:16px;padding:16px;display:grid;gap:8px}
-.post + .post{margin-top:12px}
-.post .ph{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.post .ph .av{width:30px;height:30px;font-size:12px}
-.post .ph b{font-size:15px}
-.post .ph span.c{font-size:13px;color:var(--ink-2)}
-.post h3{font-size:19px}
-.post .acts{display:flex;gap:16px;font-size:14px;color:var(--ink-2)}
-.side{display:grid;gap:12px}
-.lb{list-style:none;margin:0;padding:0;display:grid;gap:6px}
-.lb li{display:flex;justify-content:space-between;gap:8px;font-size:15px;padding:6px 8px;border-radius:8px;background:var(--paper)}
-.lb li b{font-family:var(--f-mono);font-size:13px}
-.levels{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:15px}
-.levels li{display:flex;gap:8px;align-items:center}
-.levels li i{font-style:normal;width:24px;height:24px;border-radius:7px;background:var(--paper);display:grid;place-items:center;font-family:var(--f-display);font-weight:700;font-size:13px}
-.levels li.on i{background:var(--brick);color:var(--brick-ink)}
-/* projects */
-.btnlink{display:inline-block;text-decoration:none;font-family:var(--f-display);font-weight:600;font-size:17px;padding:10px 18px;border-radius:12px;background:var(--brick);color:var(--brick-ink);box-shadow:inset 0 -3px 0 rgba(0,0,0,.15)}
-.projs{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
-.proj{background:var(--sheet);border:1px solid var(--line);border-radius:16px;padding:18px;display:grid;gap:8px;align-content:start}
-.proj.feat{border:3px solid var(--brick)}
-.proj h3{font-size:21px}
-.proj .parts{display:grid;gap:4px;font-size:14px;color:var(--ink-2)}
-.proj .parts b{color:var(--ink)}
-
-/* ---- Skool-style community layer ---- */
-.tabs a{border-radius:0;border-bottom:3px solid transparent;padding:10px 12px}
-.tabs a[aria-current="page"]{background:none;border-bottom-color:var(--ink)}
-.avw{position:relative;flex:none;display:inline-grid}
-.avw .av{width:38px;height:38px}
-.lvl{position:absolute;right:-4px;bottom:-4px;min-width:18px;height:18px;padding:0 4px;border-radius:999px;background:var(--sky);color:#fff;font-family:var(--f-display);font-weight:700;font-size:11px;display:grid;place-items:center;border:2px solid var(--sheet)}
-.av.t1{background:#2F6FD6}.av.t2{background:#11897B}.av.t3{background:#D9412B}.av.t4{background:#7A4FD0}.av.t5{background:#C77700}.av.t6{background:#142238}
-.feed{display:grid;gap:12px}
-.post{margin:0}
-.post + .post{margin-top:0}
-.post.pin{border:2px solid var(--brick)}
-.pinned{font-size:12px;font-weight:700;color:var(--brick-ink);background:var(--brick);border-radius:999px;padding:2px 8px}
-.post .who2{display:grid;line-height:1.25}
-.post .who2 small{font-size:13px;color:var(--ink-2)}
-.post .acts{align-items:center;flex-wrap:wrap}
-.post .last{font-size:13px;color:var(--ink-2);margin-left:auto}
-.group{padding:0;overflow:hidden}
-.group .gcover{height:110px;background:linear-gradient(135deg,#142238,#2F6FD6 55%,#11897B);display:grid;place-items:center}
-.group .gcover .logo{width:64px;height:64px}
-.group .gcover .lg-ink{fill:#fff}.group .gcover .lg-paper{fill:#142238}
-.group .gb{padding:16px;display:grid;gap:10px}
-.group .gb h3{font-size:20px}
-.gstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));text-align:center;border-block:1px solid var(--line);padding-block:10px}
-.gstats b{display:block;font-family:var(--f-display);font-size:18px}
-.gstats span{font-size:12px;color:var(--ink-2)}
-.lbrow{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:10px;font-size:15px}
-.lbrow:nth-child(odd){background:var(--paper)}
-.lbrow .rk{width:22px;text-align:center;font-family:var(--f-display);font-weight:700}
-.lbrow .pts{margin-left:auto;font-family:var(--f-mono);font-size:13px;color:var(--teal);font-weight:600}
-.lbrow.me{outline:2px solid var(--brick)}
-.lbrow .avw .av{width:28px;height:28px;font-size:11px}
-.lbrow .lvl{min-width:15px;height:15px;font-size:9px;right:-5px;bottom:-5px}
-.mylvl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center}
-.ring{--p:0;width:96px;height:96px;border-radius:50%;background:conic-gradient(var(--teal) calc(var(--p)*1%),var(--line) 0);display:grid;place-items:center}
-.ring > div{width:76px;height:76px;border-radius:50%;background:var(--sheet);display:grid;place-items:center;text-align:center;line-height:1.1}
-.ring b{font-family:var(--f-display);font-size:26px}
-.ring small{font-size:11px;color:var(--ink-2)}
-.ladder{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;list-style:none;margin:0;padding:0}
-.ladder li{display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:12px;background:var(--paper);font-size:15px}
-.ladder li i{font-style:normal;width:28px;height:28px;border-radius:50%;background:var(--line);color:var(--ink);display:grid;place-items:center;font-family:var(--f-display);font-weight:700;font-size:13px;flex:none}
-.ladder li.got i{background:var(--sky);color:#fff}
-.ladder li.on{outline:2px solid var(--brick)}
-.ladder li small{display:block;font-size:12px;color:var(--ink-2)}
-.boards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
-@media (max-width:900px){.boards{grid-template-columns:minmax(0,1fr)}}
-.events{display:grid;gap:12px}
-.event{display:grid;grid-template-columns:72px minmax(0,1fr);gap:14px;align-items:center}
-.event .day{border-radius:12px;background:var(--paper);text-align:center;padding:10px 4px;font-family:var(--f-display);font-weight:700;line-height:1.1}
-.event .day small{display:block;font-size:12px;color:var(--ink-2);font-weight:600}
-.about{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px;align-items:start}
-@media (max-width:900px){.about{grid-template-columns:minmax(0,1fr)}}
-.roles3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-@media (max-width:640px){.roles3{grid-template-columns:minmax(0,1fr)}}
-.roles3 div{background:var(--paper);border-radius:12px;padding:12px;font-size:15px}
-.roles3 b{display:block;font-family:var(--f-display);font-size:17px}
+footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--line);color:var(--ink-3);font-size:14px;display:grid;gap:6px}
 </style>
 </head>
 <body>
 
+<nav class="idx" aria-label="Sections">
+  <div class="wrap">
+    <a href="#map"><b>01</b>The map</a>
+    <a href="#front"><b>02</b>Front end</a>
+    <a href="#trip"><b>03</b>A request's trip</a>
+    <a href="#worker"><b>04</b>The Worker</a>
+    <a href="#data"><b>05</b>The database</a>
+    <a href="#privacy"><b>06</b>Privacy</a>
+    <a href="#limits"><b>07</b>Limits</a>
+    <a href="#cleanup"><b>08</b>Cleanup</a>
+    <a href="#health"><b>09</b>Health</a>
+  </div>
+</nav>
 
-<header class="bar"><div class="in gut">
-  <a class="brand" href="#home"><svg class="logo" viewBox="0 0 100 100" aria-hidden="true"><path class="lg-ink" fill-rule="evenodd" d="M67.00,56.00 L73.93,58.13 L73.33,62.72 L66.08,62.99 L64.94,66.33 L63.38,69.50 L68.32,74.82 L65.50,78.48 L59.09,75.09 L56.44,77.42 L53.50,79.38 L55.12,86.45 L50.84,88.22 L46.99,82.08 L43.52,82.77 L40.00,83.00 L37.87,89.93 L33.28,89.33 L33.01,82.08 L29.67,80.94 L26.50,79.38 L21.18,84.32 L17.52,81.50 L20.91,75.09 L18.58,72.44 L16.62,69.50 L9.55,71.12 L7.78,66.84 L13.92,62.99 L13.23,59.52 L13.00,56.00 L6.07,53.87 L6.67,49.28 L13.92,49.01 L15.06,45.67 L16.62,42.50 L11.68,37.18 L14.50,33.52 L20.91,36.91 L23.56,34.58 L26.50,32.62 L24.88,25.55 L29.16,23.78 L33.01,29.92 L36.48,29.23 L40.00,29.00 L42.13,22.07 L46.72,22.67 L46.99,29.92 L50.33,31.06 L53.50,32.62 L58.82,27.68 L62.48,30.50 L59.09,36.91 L61.42,39.56 L63.38,42.50 L70.45,40.88 L72.22,45.16 L66.08,49.01 L66.77,52.48 Z M51.00,56.00 A11,11 0 1,0 29.00,56.00 A11,11 0 1,0 51.00,56.00 Z"/><path class="lg-yel" fill-rule="evenodd" d="M90.70,32.98 L95.14,35.80 L93.57,39.56 L88.44,38.38 L86.57,40.65 L84.29,42.50 L85.43,47.64 L81.66,49.18 L78.87,44.72 L75.95,45.00 L73.02,44.70 L70.20,49.14 L66.44,47.57 L67.62,42.44 L65.35,40.57 L63.50,38.29 L58.36,39.43 L56.82,35.66 L61.28,32.87 L61.00,29.95 L61.30,27.02 L56.86,24.20 L58.43,20.44 L63.56,21.62 L65.43,19.35 L67.71,17.50 L66.57,12.36 L70.34,10.82 L73.13,15.28 L76.05,15.00 L78.98,15.30 L81.80,10.86 L85.56,12.43 L84.38,17.56 L86.65,19.43 L88.50,21.71 L93.64,20.57 L95.18,24.34 L90.72,27.13 L91.00,30.05 Z M82.00,30.00 A6,6 0 1,0 70.00,30.00 A6,6 0 1,0 82.00,30.00 Z"/><path class="lg-teal" d="M87.96,74.80 L91.74,76.47 L90.85,79.12 L86.83,78.17 L85.73,79.59 L84.34,80.72 L85.39,84.72 L82.76,85.68 L80.99,81.94 L79.20,81.96 L77.45,81.58 L74.97,84.90 L72.59,83.44 L74.41,79.73 L73.28,78.34 L72.48,76.73 L68.35,76.87 L68.00,74.09 L72.04,73.20 L72.42,71.45 L73.17,69.83 L70.49,66.68 L72.45,64.68 L75.66,67.28 L77.27,66.48 L79.01,66.06 L79.80,62.00 L82.58,62.28 L82.55,66.42 L84.17,67.17 L85.59,68.27 L89.26,66.36 L90.77,68.71 L87.52,71.27 L87.94,73.01 Z"/><path class="lg-paper" d="M80.00,68.00 L81.56,72.44 L86.00,74.00 L81.56,75.56 L80.00,80.00 L78.44,75.56 L74.00,74.00 L78.44,72.44 Z"/></svg><span>The Engine Room</span></a>
-  <nav class="tabs" aria-label="Sections"><a href="#home" data-tab="home">Community</a><a href="#classroom" data-tab="classroom">Classroom</a><a href="#calendar" data-tab="calendar">Calendar</a><a href="#leaderboards" data-tab="leaderboards">Leaderboards</a><a href="#about" data-tab="about">About</a></nav>
-  <div class="me"><span class="xp" id="xp">0 points</span><span class="avw" title="Your team"><span class="av">YOU</span><span class="lvl lvl-me">1</span></span></div>
-</div></header>
+<main class="wrap">
 
-<main class="view gut" id="v-home">
-  <div class="comm">
-    <div class="feed">
-      <div class="composer"><span class="avw"><span class="av">YOU</span><span class="lvl lvl-me">1</span></span><span class="fake">Write something… (posting opens when the course launches)</span></div>
-      <div class="cats" style="margin:0"><button class="chip" type="button" aria-pressed="true" data-cat="All">All</button><button class="chip" type="button" aria-pressed="false" data-cat="Start here">Start here</button><button class="chip" type="button" aria-pressed="false" data-cat="Show and tell">Show and tell</button><button class="chip" type="button" aria-pressed="false" data-cat="Help">Help</button><button class="chip" type="button" aria-pressed="false" data-cat="Wins">Wins</button><button class="chip" type="button" aria-pressed="false" data-cat="Ideas">Ideas</button></div>
-      <article class="post wcard pin" data-cat="Start here"><div class="ph"><span class="avw"><span class="av t6">ER</span><span class="lvl">9</span></span><div class="who2"><b>The Engine Room team</b><small>Start here</small></div><span class="pinned">Pinned</span><span class="sample">Sample post</span></div><h3>Welcome! Read this first</h3><p>Every account here is a team: one grown-up and one kid. Say hi with your team name and what you want to build. First names or nicknames only. Then open the Classroom and start with lesson 1, The team.</p><div class="acts"><span>👍 34</span><span>💬 18</span><span class="last">Posting opens at launch</span></div></article><article class="post wcard" data-cat="Show and tell"><div class="ph"><span class="avw"><span class="av t1">OT</span><span class="lvl">5</span></span><div class="who2"><b>Team Otter</b><small>Show and tell</small></div><span class="sample">Sample post</span></div><h3>We built a chore chart in one evening</h3><p>We used the three-parts lesson to plan it: stars on the screen, a Worker that checks the chore is really done, and a drawer for each day. The stars stopped disappearing once we added the database!</p><div class="acts"><span>👍 12</span><span>💬 4</span><span class="last">Posting opens at launch</span></div></article><article class="post wcard" data-cat="Help"><div class="ph"><span class="avw"><span class="av t4">PX</span><span class="lvl">3</span></span><div class="who2"><b>Team Pixel</b><small>Help</small></div><span class="sample">Sample post</span></div><h3>My new door says Not found</h3><p>We built a route at /api/top in the practice room but it says Not found. Do we need to add it to the list near the top of the Worker?</p><div class="acts"><span>👍 8</span><span>💬 6</span><span class="last">Posting opens at launch</span></div></article><article class="post wcard" data-cat="Wins"><div class="ph"><span class="avw"><span class="av t2">CO</span><span class="lvl">4</span></span><div class="who2"><b>Team Comet</b><small>Wins</small></div><span class="sample">Sample post</span></div><h3>The guard caught every cheat</h3><p>My kid tried to claim their own friend code three times. The guard said no every time, and they explained why to me. Best moment of the week.</p><div class="acts"><span>👍 21</span><span>💬 3</span><span class="last">Posting opens at launch</span></div></article><article class="post wcard" data-cat="Ideas"><div class="ph"><span class="avw"><span class="av t3">MA</span><span class="lvl">4</span></span><div class="who2"><b>Team Maple</b><small>Ideas</small></div><span class="sample">Sample post</span></div><h3>Idea: a lesson on saving photos</h3><p>Our recipe book needs pictures. Could there be a lesson on where photos live and who can see them?</p><div class="acts"><span>👍 15</span><span>💬 9</span><span class="last">Posting opens at launch</span></div></article>
+<header class="hero">
+  <div class="eyebrow">The Engine Room</div>
+  <h1>How <em>Quackers</em> works, behind the curtain</h1>
+  <p class="lede">Quackers is a duck-finding game that Mitchell designs and builds with his dad. On the surface it's hidden ducks, worlds and mini games. Underneath, it's a small but real web system: a static front end, a serverless API, and a database with strict rules about what it keeps. This page walks through all of it.</p>
+  <dl class="facts">
+    <div><dt>Front end</dt><dd>Plain HTML, CSS, JS</dd></div>
+    <div><dt>Hosting</dt><dd>GitHub Pages</dd></div>
+    <div><dt>API</dt><dd>Cloudflare Worker</dd></div>
+    <div><dt>Database</dt><dd>Cloudflare D1 (SQLite)</dd></div>
+    <div><dt>Cost to run</dt><dd>Free plan</dd></div>
+  </dl>
+</header>
+
+<!-- 01 MAP -->
+<section class="ch" id="map">
+  <div class="ch-head">
+    <span class="num">01</span>
+    <h2>The map: three parts, two jobs</h2>
+    <p>Almost every app online splits into the same pieces: what you see, the code that answers questions, and the place where answers are stored.</p>
+  </div>
+  <div class="split">
+    <div class="prose">
+      <p><b>The front end</b> is the game itself. GitHub Pages hands your browser a set of files once, and from then on the game runs entirely on your device. Your progress is saved right there too, in the browser's local storage.</p>
+      <p><b>The Worker</b> is a small program that runs on Cloudflare's network, close to wherever the player is. It only wakes up when the game sends it a request, does its job in a few milliseconds, and goes back to sleep. That's what "serverless" means: no computer of ours sitting there waiting.</p>
+      <p><b>D1</b> is the database the Worker talks to. It's SQLite, the same database engine that's inside most phones, run by Cloudflare. Only the Worker can reach it. The game never touches the database directly.</p>
+      <p>Notice the two separate jobs. Delivering the game is one job (GitHub). Shared things like the leaderboard and the Idea Box are another (Cloudflare). If the second one is down, the game still plays.</p>
     </div>
-    <div class="side">
-      <div class="wcard group"><div class="gcover"><svg class="logo" viewBox="0 0 100 100" aria-hidden="true"><path class="lg-ink" fill-rule="evenodd" d="M67.00,56.00 L73.93,58.13 L73.33,62.72 L66.08,62.99 L64.94,66.33 L63.38,69.50 L68.32,74.82 L65.50,78.48 L59.09,75.09 L56.44,77.42 L53.50,79.38 L55.12,86.45 L50.84,88.22 L46.99,82.08 L43.52,82.77 L40.00,83.00 L37.87,89.93 L33.28,89.33 L33.01,82.08 L29.67,80.94 L26.50,79.38 L21.18,84.32 L17.52,81.50 L20.91,75.09 L18.58,72.44 L16.62,69.50 L9.55,71.12 L7.78,66.84 L13.92,62.99 L13.23,59.52 L13.00,56.00 L6.07,53.87 L6.67,49.28 L13.92,49.01 L15.06,45.67 L16.62,42.50 L11.68,37.18 L14.50,33.52 L20.91,36.91 L23.56,34.58 L26.50,32.62 L24.88,25.55 L29.16,23.78 L33.01,29.92 L36.48,29.23 L40.00,29.00 L42.13,22.07 L46.72,22.67 L46.99,29.92 L50.33,31.06 L53.50,32.62 L58.82,27.68 L62.48,30.50 L59.09,36.91 L61.42,39.56 L63.38,42.50 L70.45,40.88 L72.22,45.16 L66.08,49.01 L66.77,52.48 Z M51.00,56.00 A11,11 0 1,0 29.00,56.00 A11,11 0 1,0 51.00,56.00 Z"/><path class="lg-yel" fill-rule="evenodd" d="M90.70,32.98 L95.14,35.80 L93.57,39.56 L88.44,38.38 L86.57,40.65 L84.29,42.50 L85.43,47.64 L81.66,49.18 L78.87,44.72 L75.95,45.00 L73.02,44.70 L70.20,49.14 L66.44,47.57 L67.62,42.44 L65.35,40.57 L63.50,38.29 L58.36,39.43 L56.82,35.66 L61.28,32.87 L61.00,29.95 L61.30,27.02 L56.86,24.20 L58.43,20.44 L63.56,21.62 L65.43,19.35 L67.71,17.50 L66.57,12.36 L70.34,10.82 L73.13,15.28 L76.05,15.00 L78.98,15.30 L81.80,10.86 L85.56,12.43 L84.38,17.56 L86.65,19.43 L88.50,21.71 L93.64,20.57 L95.18,24.34 L90.72,27.13 L91.00,30.05 Z M82.00,30.00 A6,6 0 1,0 70.00,30.00 A6,6 0 1,0 82.00,30.00 Z"/><path class="lg-teal" d="M87.96,74.80 L91.74,76.47 L90.85,79.12 L86.83,78.17 L85.73,79.59 L84.34,80.72 L85.39,84.72 L82.76,85.68 L80.99,81.94 L79.20,81.96 L77.45,81.58 L74.97,84.90 L72.59,83.44 L74.41,79.73 L73.28,78.34 L72.48,76.73 L68.35,76.87 L68.00,74.09 L72.04,73.20 L72.42,71.45 L73.17,69.83 L70.49,66.68 L72.45,64.68 L75.66,67.28 L77.27,66.48 L79.01,66.06 L79.80,62.00 L82.58,62.28 L82.55,66.42 L84.17,67.17 L85.59,68.27 L89.26,66.36 L90.77,68.71 L87.52,71.27 L87.94,73.01 Z"/><path class="lg-paper" d="M80.00,68.00 L81.56,72.44 L86.00,74.00 L81.56,75.56 L80.00,80.00 L78.44,75.56 L74.00,74.00 L78.44,72.44 Z"/></svg></div><div class="gb"><h3>The Engine Room</h3><p class="sqlnote">A grown-up and a kid, building real things together with AI. No coding experience needed.</p><div class="gstats"><div><b>Teams</b><span>Opening soon</span></div><div><b>Courses</b><span>1 open, 6 coming</span></div><div><b>Price</b><span>To be set</span></div></div><a class="btnlink" href="#about" style="text-align:center">How it works</a></div></div>
-      <div class="wcard"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><h3 style="font-size:19px">Leaderboard (30 days)</h3><span class="sample">Samples</span></div><div class="lbwrap"><div class="lbrow"><span class="rk">1</span><span class="avw"><span class="av t1">OT</span><span class="lvl">5</span></span><span>Team Otter</span><span class="pts">+212</span></div><div class="lbrow"><span class="rk">2</span><span class="avw"><span class="av t3">MA</span><span class="lvl">4</span></span><span>Team Maple</span><span class="pts">+180</span></div><div class="lbrow"><span class="rk">3</span><span class="avw"><span class="av t2">CO</span><span class="lvl">4</span></span><span>Team Comet</span><span class="pts">+164</span></div><div class="lbrow me"><span class="rk">·</span><span class="avw"><span class="av">YOU</span><span class="lvl lvl-me">1</span></span><span>Your team</span><span class="pts me-pts">+0</span></div></div><a href="#leaderboards" style="font-size:14px;color:var(--ink-2)">See all leaderboards</a></div>
+    <figure>
+      <svg viewBox="0 0 420 520" role="img" aria-labelledby="map-t">
+        <title id="map-t">System map. The code repository publishes to GitHub Pages, which sends the game to the browser. The browser sends requests to the Cloudflare Worker, which reads and writes the D1 database.</title>
+        <defs>
+          <marker id="m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ah" d="M0 0L10 5L0 10z"/></marker>
+          <marker id="me" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ah e" d="M0 0L10 5L0 10z"/></marker>
+          <marker id="md" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ah d" d="M0 0L10 5L0 10z"/></marker>
+        </defs>
+        <text class="t3" x="20" y="22">DELIVERY</text>
+        <rect class="n-box" x="20" y="34" width="175" height="76" rx="10"/>
+        <text class="t1" x="36" y="62">Code repository</text>
+        <text class="t2" x="36" y="82">src/ + build script</text>
+        <text class="t2" x="36" y="99">open source on GitHub</text>
+        <rect class="n-box" x="225" y="34" width="175" height="76" rx="10"/>
+        <text class="t1" x="241" y="62">GitHub Pages</text>
+        <text class="t2" x="241" y="82">serves the built game</text>
+        <text class="t2" x="241" y="99">at quackersgame.com</text>
+        <path class="wire" d="M195 72H222" marker-end="url(#m)"/>
+        <path class="wire dash" d="M312 110V179" marker-end="url(#m)"/>
+        <text class="t2" x="322" y="150">files, once</text>
+
+        <text class="t3" x="20" y="170">ON YOUR DEVICE</text>
+        <rect class="n-acc" x="20" y="182" width="380" height="96" rx="12"/>
+        <text class="t1" x="38" y="211">Browser: the game</text>
+        <text class="t2" x="38" y="232">worlds, ducks, mini games, shop</text>
+        <text class="t2" x="38" y="250">saves your progress in local storage</text>
+        <text class="t2" x="38" y="268">keeps a small queue of stats to send</text>
+
+        <path class="wire e" d="M130 278V351" marker-end="url(#me)"/>
+        <path class="wire e dash" d="M160 354V281" marker-end="url(#me)"/>
+        <text class="t2" x="174" y="311">HTTPS + JSON</text>
+        <text class="t2" x="174" y="328">request, then reply</text>
+
+        <text class="t3" x="300" y="344">CLOUDFLARE</text>
+        <rect class="n-edge" x="20" y="354" width="380" height="64" rx="12"/>
+        <text class="t1" x="38" y="381">Worker: quackers-api</text>
+        <text class="t2" x="38" y="401">checks every request, then answers</text>
+
+        <path class="wire d" d="M130 418V453" marker-end="url(#md)"/>
+        <path class="wire d dash" d="M160 456V421" marker-end="url(#md)"/>
+        <rect class="n-data" x="20" y="456" width="380" height="56" rx="12"/>
+        <text class="t1" x="38" y="481">D1 database: quackers</text>
+        <text class="t2" x="38" y="500">15 tables, reachable only by the Worker</text>
+      </svg>
+      <figcaption>Solid arrows are requests. Dashed arrows are what comes back.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 02 FRONT END -->
+<section class="ch" id="front">
+  <div class="ch-head">
+    <span class="num">02</span>
+    <h2>The front end: one file, built from many</h2>
+    <p>No framework, no app store, no install step. The whole game ships as a single web page.</p>
+  </div>
+  <div class="split flip">
+    <div class="prose">
+      <p>While it's being built, the game lives in about 30 small source files: one per world (yard, manor, sea, snow, theater, city, mall, space), one for the mini games, one for the leaderboard and Idea Box, the art, the styles, and so on. Small files are easier to change without breaking something else.</p>
+      <p>A short Python script, <code>build.py</code>, stitches them into one <code>index.html</code> of roughly 350 KB. That's the file GitHub Pages serves. One file means one download, and the game is ready.</p>
+      <p>Because it's a web app with a manifest, you can add it to a phone's home screen and it opens full screen like a real app.</p>
+      <p>Your save game never leaves your device. The browser keeps which ducks you found, your Pond Points and your settings in local storage. The server only gets a summary for stats and the leaderboard, and the game never waits for it. If the network is gone, you keep playing.</p>
+    </div>
+    <figure>
+      <svg viewBox="0 0 420 310" role="img" aria-labelledby="build-t">
+        <title id="build-t">Build step. Many source files go into build.py, which outputs a single index.html.</title>
+        <defs><marker id="m2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ah a" d="M0 0L10 5L0 10z"/></marker></defs>
+        <text class="t3" x="20" y="22">src/</text>
+        <rect class="n-box" x="20" y="34" width="120" height="28" rx="6"/><text class="tm" x="32" y="53">yard.js</text>
+        <rect class="n-box" x="20" y="68" width="120" height="28" rx="6"/><text class="tm" x="32" y="87">sea.js</text>
+        <rect class="n-box" x="20" y="102" width="120" height="28" rx="6"/><text class="tm" x="32" y="121">space.js</text>
+        <rect class="n-box" x="20" y="136" width="120" height="28" rx="6"/><text class="tm" x="32" y="155">mini.js</text>
+        <rect class="n-box" x="20" y="170" width="120" height="28" rx="6"/><text class="tm" x="32" y="189">social.js</text>
+        <rect class="n-box" x="20" y="204" width="120" height="28" rx="6"/><text class="tm" x="32" y="223">name-check.js</text>
+        <rect class="n-box" x="20" y="238" width="120" height="28" rx="6"/><text class="tm" x="32" y="257">*.css</text>
+        <text class="t2" x="20" y="290">+ more worlds, art, shell</text>
+        <path class="wire a" d="M140 48C175 48 175 150 196 150"/>
+        <path class="wire a" d="M140 252C175 252 175 150 196 150"/>
+        <path class="wire a" d="M140 150H196"/>
+        <rect class="n-acc" x="198" y="122" width="96" height="56" rx="10"/>
+        <text class="t1" x="214" y="147">build.py</text>
+        <text class="t2" x="214" y="166">stitches</text>
+        <path class="wire a" d="M294 150H319" marker-end="url(#m2)"/>
+        <rect class="n-box" x="322" y="110" width="84" height="80" rx="10"/>
+        <text class="tm" x="334" y="140">index</text>
+        <text class="tm" x="334" y="156">.html</text>
+        <text class="t2" x="334" y="178">~350 KB</text>
+      </svg>
+      <figcaption>Change a small file, run the build, push. GitHub Pages publishes the new version within a minute or two.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 03 TRIP -->
+<section class="ch" id="trip">
+  <div class="ch-head">
+    <span class="num">03</span>
+    <h2>A request's trip</h2>
+    <p>Here's what happens, step by step, after you find a duck.</p>
+  </div>
+  <div class="split">
+    <figure>
+      <svg viewBox="0 0 420 560" role="img" aria-labelledby="seq-t">
+        <title id="seq-t">Sequence of one ping. The game saves locally, waits twenty seconds to bundle changes, and posts a ping to the Worker. The Worker checks the data and the rate limit, writes a batch to D1, and replies ok.</title>
+        <defs>
+          <marker id="s1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ah e" d="M0 0L10 5L0 10z"/></marker>
+          <marker id="s2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ah d" d="M0 0L10 5L0 10z"/></marker>
+          <marker id="s3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ah" d="M0 0L10 5L0 10z"/></marker>
+        </defs>
+        <rect class="n-acc" x="10" y="10" width="110" height="34" rx="8"/><text class="t1" x="44" y="32">Game</text>
+        <rect class="n-edge" x="155" y="10" width="110" height="34" rx="8"/><text class="t1" x="186" y="32">Worker</text>
+        <rect class="n-data" x="300" y="10" width="110" height="34" rx="8"/><text class="t1" x="344" y="32">D1</text>
+        <path class="lane" d="M65 44V550M210 44V550M355 44V550"/>
+
+        <circle class="dot-a" cx="65" cy="78" r="5"/>
+        <text class="t2" x="78" y="74">You find a duck.</text>
+        <text class="t2" x="78" y="91">Saved on device.</text>
+
+        <circle class="dot-a" cx="65" cy="132" r="5"/>
+        <text class="t2" x="78" y="120">Wait 20 s, so finds</text>
+        <text class="t2" x="78" y="136">close together go</text>
+        <text class="t2" x="78" y="152">as one ping.</text>
+
+        <path class="wire e" d="M65 178H207" marker-end="url(#s1)"/>
+        <text class="tm" x="74" y="170">POST /v1/ping</text>
+        <text class="t2" x="74" y="196">JSON, 6 s timeout</text>
+
+        <circle class="dot-e" cx="210" cy="234" r="5"/>
+        <text class="t2" x="222" y="230">Check the data:</text>
+        <text class="t2" x="222" y="247">ID format, allowed words,</text>
+        <text class="t2" x="222" y="264">numbers in safe ranges.</text>
+
+        <circle class="dot-e" cx="210" cy="302" r="5"/>
+        <text class="t2" x="222" y="298">Rate limit: under 30</text>
+        <text class="t2" x="222" y="315">pings a minute?</text>
+
+        <path class="wire d" d="M210 352H352" marker-end="url(#s2)"/>
+        <text class="t2" x="222" y="344">one batch of SQL writes</text>
+        <text class="t2" x="222" y="370">players, daily, totals</text>
+
+        <path class="wire dash" d="M355 404H213" marker-end="url(#s3)"/>
+        <text class="t2" x="236" y="398">done</text>
+
+        <path class="wire dash" d="M210 450H68" marker-end="url(#s3)"/>
+        <text class="tm" x="80" y="442">{ "ok": true }</text>
+
+        <circle class="dot-a" cx="65" cy="494" r="5"/>
+        <text class="t2" x="78" y="490">Clear sent stats</text>
+        <text class="t2" x="78" y="506">from the queue.</text>
+        <text class="t2" x="78" y="522">On failure, keep</text>
+        <text class="t2" x="78" y="538">them for later.</text>
+      </svg>
+      <figcaption>The whole round trip usually takes well under a second.</figcaption>
+    </figure>
+    <div class="prose">
+      <p>A <b>request</b> is a message from the game to the Worker. It goes to an address called an <b>endpoint</b>, like <code>/v1/ping</code>, and carries data in <b>JSON</b>, a simple text format for lists and labelled values. Every request travels over HTTPS, so it's encrypted on the way.</p>
+      <p>This is roughly what a ping looks like. The ID is random letters and numbers the game makes the first time it runs. Nothing in it says who you are.</p>
+      <div class="codecap"><span>request body (example values)</span><span>POST /v1/ping</span></div>
+<pre><code>{
+  <span class="k">"pid"</span>: <span class="s">"r7k2…random…m9qx"</span>,  <span class="c">// random device ID</span>
+  <span class="k">"device"</span>: <span class="s">"tablet"</span>,         <span class="c">// phone, tablet or computer</span>
+  <span class="k">"mode"</span>: <span class="s">"app"</span>,              <span class="c">// home-screen app or browser</span>
+  <span class="k">"ducks"</span>: 42,
+  <span class="k">"worlds"</span>: 3,
+  <span class="k">"points"</span>: 1280,
+  <span class="k">"games"</span>: { <span class="k">"egg"</span>: 6, <span class="k">"jump"</span>: 4 },  <span class="c">// best level</span>
+  <span class="k">"where"</span>: { <span class="k">"world"</span>: <span class="s">"sea"</span>, <span class="k">"screen"</span>: <span class="s">"reef"</span> },
+  <span class="k">"ev"</span>: [ { <span class="k">"t"</span>: <span class="s">"try"</span>, <span class="k">"g"</span>: <span class="s">"egg"</span>, <span class="k">"l"</span>: 6, <span class="k">"win"</span>: true } ]
+}</code></pre>
+      <p>The rule every backend follows: <b>never trust the client</b>. Anyone can send anything to a public endpoint, so the Worker re-checks every field. An ID that isn't 16 to 40 letters and numbers is turned away. A device that isn't one of the three allowed words is dropped. Duck counts are capped at 500 and levels at 10, and long lists are cut short. Bad data never reaches the database.</p>
     </div>
   </div>
-</main>
+</section>
 
-<main class="view gut" id="v-classroom" hidden>
-  <div class="wcard cont" style="margin-bottom:18px">
-    <div class="kicker">Continue where you left off</div>
-    <h3 id="cont-title">The Engine Room</h3>
-    <div class="bar2"><i id="cont-bar"></i></div>
-    <span id="cont-text" style="font-size:15px"></span>
-    <div><a href="#l-team" id="cont-go" class="btnlink">Continue</a></div>
+<!-- 04 WORKER -->
+<section class="ch" id="worker">
+  <div class="ch-head">
+    <span class="num">04</span>
+    <h2>The Worker: one program, many doors</h2>
+    <p>The Worker is a single JavaScript program. It looks at which endpoint a request came to and runs the matching function. These are the doors the game uses.</p>
   </div>
-  <div class="sechead" style="margin-top:0"><h2>Courses</h2><span class="sqlnote">One course is open now. The rest are on the way.</span></div>
-  <div class="courses"><div class="course locked" aria-disabled="true"><div class="cover cv1"><span class="state">Coming soon</span><b>1</b></div><div class="cb"><h3>From idea to plan</h3><div class="meta">Turn a kid's idea into a one-page plan the AI helper can build from.</div></div></div><div class="course locked" aria-disabled="true"><div class="cover cv2"><span class="state">Coming soon</span><b>2</b></div><div class="cb"><h3>Your first build in an evening</h3><div class="meta">Get a very simple version online the same night.</div></div></div><div class="course locked" aria-disabled="true"><div class="cover cv3"><span class="state">Coming soon</span><b>3</b></div><div class="cb"><h3>Make it feel pro</h3><div class="meta">Look, sound and navigation that make people want to keep playing.</div></div></div><a class="course open" href="#l-team"><div class="cover cv4"><span class="state">Open now</span><b>4</b></div><div class="cb"><h3>The Engine Room</h3><div class="meta">How the backend works: servers, databases, routes, and changing them safely. 8 lessons, practice room.</div><div class="bar2"><i class="cprog"></i></div><div class="meta cprogt"></div></div></a><div class="course locked" aria-disabled="true"><div class="cover cv5"><span class="state">Coming soon</span><b>5</b></div><div class="cb"><h3>Privacy and safety by design</h3><div class="meta">Save only what you need, kid-safe names, and a delete button.</div></div></div><div class="course locked" aria-disabled="true"><div class="cover cv6"><span class="state">Coming soon</span><b>6</b></div><div class="cb"><h3>Ship it</h3><div class="meta">Domains, previews before live, and how to undo.</div></div></div><div class="course locked" aria-disabled="true"><div class="cover cv7"><span class="state">Coming soon</span><b>7</b></div><div class="cb"><h3>Listen to your players</h3><div class="meta">Idea boxes, leaderboards and sharing, done fairly.</div></div></div></div>
-  <div class="sechead"><h2>Projects you can build</h2><span class="sqlnote">Every project has the same three parts.</span></div>
-  <div class="projs"><article class="proj feat"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h3>Quackers</h3><span class="rec" style="font-size:12px;font-weight:700;background:var(--brick);color:var(--brick-ink);padding:2px 8px;border-radius:999px">Worked example in the course</span></div><p>A duck-finding web game with worlds, mini games and a friend link.</p><div class="parts"><span><b>What you see:</b> Worlds, ducks and buttons</span><span><b>Server:</b> Checks a friend link is fair</span><span><b>Database:</b> Ducks found, leaderboard, friend codes</span></div></article><article class="proj"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h3>Family recipe book</h3><span class="sample">Project idea</span></div><p>Recipe cards with photos, ratings and a "who cooks tonight" picker.</p><div class="parts"><span><b>What you see:</b> Recipe cards and a search box</span><span><b>Server:</b> Checks a new recipe isn't a copy</span><span><b>Database:</b> Recipes, ratings, the cooking schedule</span></div></article><article class="proj"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h3>Pet care tracker</h3><span class="sample">Project idea</span></div><p>A checklist so the dog never gets fed dinner twice.</p><div class="parts"><span><b>What you see:</b> Fed, walked, water bowl full</span><span><b>Server:</b> Stops two people marking the same feeding</span><span><b>Database:</b> Every feeding and walk, with the time</span></div></article><article class="proj"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h3>Science fair lab</h3><span class="sample">Project idea</span></div><p>Measure something every day and watch the chart grow.</p><div class="parts"><span><b>What you see:</b> A chart of each day's measurement</span><span><b>Server:</b> Checks each number is real</span><span><b>Database:</b> Each day's measurements</span></div></article><article class="proj"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h3>Team or club site</h3><span class="sample">Project idea</span></div><p>The schedule, scores and photos for a team.</p><div class="parts"><span><b>What you see:</b> Schedule, scores, photos</span><span><b>Server:</b> Lets only the coach post scores</span><span><b>Database:</b> Games, scores and the schedule</span></div></article></div>
-</main>
-
-<main class="view gut" id="v-player" hidden>
-  <div class="player">
-    <aside class="outline" id="outline">
-      <div class="ctitle">The Engine Room</div>
-      <div class="bar2"><i id="o-bar"></i></div>
-      <div class="prog" id="o-prog"></div>
-      <button class="small" id="otoggle" type="button" aria-expanded="false">Show lessons</button>
-      <div class="mod"><b>Get started</b><a href="#l-team" data-l="team"><span class="ck" aria-hidden="true"></span><span>The team</span><span class="dur">5 min</span></a><a href="#l-parts" data-l="parts"><span class="ck" aria-hidden="true"></span><span>Three parts of anything online</span><span class="dur">8 min</span></a></div><div class="mod"><b>How it works</b><a href="#l-travel" data-l="travel"><span class="ck" aria-hidden="true"></span><span>A message's trip</span><span class="dur">6 min</span></a><a href="#l-tables" data-l="tables"><span class="ck" aria-hidden="true"></span><span>Tables: the drawers</span><span class="dur">8 min</span></a><a href="#l-routes" data-l="routes"><span class="ck" aria-hidden="true"></span><span>Routes: doors into the Worker</span><span class="dur">10 min</span></a></div><div class="mod"><b>Hands on</b><a href="#l-practice" data-l="practice"><span class="ck" aria-hidden="true"></span><span>Practice room</span><span class="dur">30 min</span></a></div><div class="mod"><b>Do it for real</b><a href="#l-real" data-l="real"><span class="ck" aria-hidden="true"></span><span>Changing the real one</span><span class="dur">10 min</span></a><a href="#l-words" data-l="words"><span class="ck" aria-hidden="true"></span><span>Word bank</span><span class="dur">5 min</span></a></div>
-    </aside>
-    <div class="lessonwrap" id="lessonwrap">
-      <div class="crumb"><a href="#classroom">Classroom</a><span>›</span><span>The Engine Room</span><span>›</span><span id="crumb-l"></span></div>
-      <section data-lesson="team" class="lesson" id="team">
-  <div class="lhead"><div class="stud">1</div><div><h2>The team: a kid, a grown-up and an AI helper</h2><div class="sub">You don't need to know how to code. You need to know what you want, and to ask good questions.</div></div></div>
+  <div class="tblwrap">
+  <table class="tbl">
+    <thead><tr><th>Endpoint</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td class="m">POST /v1/ping</td><td>Takes the game's progress summary and events. Updates the player's row, the players-per-day list and the shared totals.</td></tr>
+      <tr><td class="m">GET /v1/board</td><td>Returns the Top Ducks leaderboard: the top 25 by ducks found, then worlds finished, then who joined the board first. Also your own rank if you're further down.</td></tr>
+      <tr><td class="m">POST /v1/board</td><td>Sets your leaderboard nickname, once it passes the name check and nobody else has it.</td></tr>
+      <tr><td class="m">GET /v1/ideas</td><td>This month's approved ideas with their hearts, your own ideas and their status, and last month's winner.</td></tr>
+      <tr><td class="m">POST /v1/ideas</td><td>Suggests a new duck or world. It goes into a waiting line, not onto the board.</td></tr>
+      <tr><td class="m">POST /v1/ideas/vote</td><td>Adds or removes your one heart on an idea.</td></tr>
+      <tr><td class="m">/v1/friend/…</td><td>Makes your friend-link code, counts friends who joined, and credits the link when a new player finds their first duck.</td></tr>
+      <tr><td class="m">POST /v1/forget</td><td>Deletes everything stored for your device.</td></tr>
+    </tbody>
+  </table>
+  </div>
   <div class="grid3">
-    <div class="role"><span class="who r-kid">Kid</span><h3>The idea boss</h3><ul><li>Dreams up what to build and who it's for</li><li>Decides how it looks and feels</li><li>Tests it and tries to break it</li></ul></div>
-    <div class="role"><span class="who r-grown">Grown-up</span><h3>The safety boss</h3><ul><li>Owns the accounts, passwords and money</li><li>Says yes before anything goes live</li><li>Keeps people's information private</li></ul></div>
-    <div class="role"><span class="who r-ai">AI helper</span><h3>The builder</h3><ul><li>Writes the code from your ideas</li><li>Explains how it works, as many times as you ask</li><li>Fixes what breaks when you tell it what you saw</li></ul></div>
+    <div class="card">
+      <span class="tag e">Leaderboard</span>
+      <h3>Names checked twice</h3>
+      <p>The same name-check file runs in the game, for instant feedback, and in the Worker, which is the real gate. It blocks rude words (including tricks like swapping letters for numbers), websites, usernames, schools, grades and too many digits. New players start with a random duck name like "Turbo Waddler".</p>
+    </div>
+    <div class="card">
+      <span class="tag a">Idea Box</span>
+      <h3>A grown-up reads every idea</h3>
+      <p>Each player can suggest 3 ideas a month. A filter catches personal details first, then a grown-up approves or declines each one before anyone else can see it. Approved ideas collect hearts, one per player, and the idea with the most hearts wins the month.</p>
+    </div>
+    <div class="card">
+      <span class="tag d">Friend link</span>
+      <h3>Hard to cheat</h3>
+      <p>A friend link carries a random 8-character code that leaves out look-alikes like l, 1, o and 0. It only counts if the new device really is new (it first played after the link was made, in the last two days) and has found a duck. Each sharer can earn at most 3 credits a day.</p>
+    </div>
   </div>
-  <div class="callout c-why"><b class="h">How a build session goes</b><p>The kid says what they want in their own words. The AI helper builds a preview. You both try it, the kid says what's wrong or what's missing, and the AI helper changes it. Repeat until it feels right. Then the grown-up puts it live.</p></div>
 </section>
-<section data-lesson="parts" class="lesson" id="parts">
-  <div class="lhead"><div class="stud">2</div><div><h2>The three parts of anything online</h2><div class="sub">Games, recipe books and team sites all have these three. Pick a project to see them.</div></div></div>
-  <div class="chips" id="pchips" role="group" aria-label="Pick a project"></div>
+
+<!-- 05 DATA -->
+<section class="ch" id="data">
+  <div class="ch-head">
+    <span class="num">05</span>
+    <h2>The database: what's kept and why</h2>
+    <p>A database is a set of tables, like spreadsheets with strict columns. Quackers has 15 of them, and the most important design choice is which side of the wall each one sits on.</p>
+  </div>
+  <div class="vault">
+    <div class="zone p">
+      <span class="tag e">Linked to a random device ID</span>
+      <h3>Per device</h3>
+      <p>Needed so the leaderboard, Idea Box and friend links work for you. All of it is deleted by the forget button.</p>
+      <div class="chips">
+        <div class="chip"><b>players</b><span>Ducks found, worlds, Pond Points, best levels, last world and screen, device type, country and state, first and last day played.</span></div>
+        <div class="chip"><b>daily</b><span>Which days a device played. Kept 90 days for a players-per-day chart.</span></div>
+        <div class="chip"><b>board</b><span>Leaderboard nickname, and whether it's hidden.</span></div>
+        <div class="chip"><b>ideas · idea_votes</b><span>Ideas and hearts. The link to the device is removed when the month ends.</span></div>
+        <div class="chip"><b>friends · referrals</b><span>Your share code and how many joined. For a new player, only that they were counted, not who invited them.</span></div>
+      </div>
+    </div>
+    <div class="zone t">
+      <span class="tag d">Totals only</span>
+      <h3>Not linked to anyone</h3>
+      <p>Just counters. No device ID is stored with them, so they can't be traced back to a player.</p>
+      <div class="chips">
+        <div class="chip"><b>duck_finds</b><span>How many times each duck has been found.</span></div>
+        <div class="chip"><b>levels</b><span>Tries and wins per mini game level, to tune difficulty.</span></div>
+        <div class="chip"><b>shop · earn</b><span>What gets bought, and where Pond Points come from.</span></div>
+        <div class="chip"><b>sessions</b><span>How long a play session lasts, under its own throwaway ID.</span></div>
+        <div class="chip"><b>cities</b><span>Players per city per day, as a count only.</span></div>
+      </div>
+    </div>
+    <div class="zone h">
+      <span class="tag a">Housekeeping</span>
+      <h3>For the system</h3>
+      <p>Tables the Worker uses to protect itself.</p>
+      <div class="chips">
+        <div class="chip"><b>limits</b><span>Short-lived counters for rate limits.</span></div>
+        <div class="chip"><b>usage</b><span>Daily request and row counts, to stay inside the free plan.</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="split">
+    <div class="prose">
+      <p>The Worker talks to D1 in <b>SQL</b>, the language almost every database speaks. Values are never pasted into the SQL text. They're passed separately as "bound parameters", which is the standard defence against a classic attack called SQL injection.</p>
+      <p>A ping turns into several writes at once, sent as a single <b>batch</b>. Either they all happen or none do, so the tables never disagree with each other.</p>
+    </div>
+    <div class="prose">
+      <div class="codecap"><span>how a duck find is counted (simplified)</span><span>SQL</span></div>
+<pre><code><span class="k">INSERT INTO</span> duck_finds (duck, n)
+<span class="k">VALUES</span> (?1, 1)
+<span class="k">ON CONFLICT</span> (duck)
+<span class="k">DO UPDATE SET</span> n = n + 1;
+<span class="c">-- ?1 is filled in safely by the database,</span>
+<span class="c">-- never glued into the text.</span></code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- 06 PRIVACY -->
+<section class="ch" id="privacy">
+  <div class="ch-head">
+    <span class="num">06</span>
+    <h2>Privacy and safety by design</h2>
+    <p>Players are kids, so the rule is simple: data privacy comes first, always. These safeguards are built into the code, not just written in a policy.</p>
+  </div>
   <div class="grid3">
-    <div class="part"><span class="tag t-front">Frontend</span><h3>What you see</h3><p id="p-front"></p><p class="like">Like the Minecraft world on your screen. It looks amazing, but it forgets everything if nobody saves it.</p></div>
-    <div class="part"><span class="tag t-worker">Server</span><h3>The Worker</h3><p>A small program that runs on Cloudflare's computers. The frontend sends it messages. It checks the rules, then saves or looks things up. <span id="p-worker"></span></p><p class="like">Like a redstone machine: something goes in, it checks it, and something comes out.</p></div>
-    <div class="part"><span class="tag t-db">Database</span><h3>D1</h3><p>The database keeps things saved even when everyone closes the page. Only the Worker can open it. <span id="p-db"></span></p><p class="like">Like a LEGO sorting box with labeled drawers. Each drawer is called a table.</p></div>
+    <div class="card"><span class="tag e">Identity</span><h3>No accounts, no names</h3><p>A random device ID stands in for the player. No sign-up, no email, no real name. The only typed text is an optional nickname and Idea Box ideas, and both are filtered.</p></div>
+    <div class="card"><span class="tag e">Network</span><h3>No IP addresses, no logs</h3><p>The Worker doesn't save IP addresses or write request logs. Cloudflare works out a rough country, state and city from the connection. The city is only ever added to a daily count, never stored with a player.</p></div>
+    <div class="card"><span class="tag a">Choice</span><h3>Off switch and Do Not Track</h3><p>Turning off "Share game stats" in Settings stops all sending. If the browser has Do Not Track on, the game sends nothing at all.</p></div>
+    <div class="card"><span class="tag a">Review</span><h3>Humans in the loop</h3><p>No idea is visible to other players until a grown-up approves it, and declined ideas have their text erased right away. Any leaderboard name can be hidden.</p></div>
+    <div class="card"><span class="tag d">Deletion</span><h3>A real forget button</h3><p>One tap sends <code>/v1/forget</code>. The Worker deletes the device's rows from every per-device table in one batch, takes its hearts back off ideas, and the game starts fresh with a new ID.</p></div>
+    <div class="card"><span class="tag d">Separation</span><h3>Totals stay totals</h3><p>Anything that doesn't need to be tied to a device isn't. Session lengths even use a separate throwaway ID so they can't be joined back to a player.</p></div>
   </div>
-  <div class="diagram" aria-label="Diagram: the game talks to the Worker, and the Worker talks to the database. The grown-up dashboard also reads through the Worker.">
-    <svg id="dia" viewBox="0 0 760 230" role="img">
-      <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/></marker></defs>
-      <g class="dnode" id="n-dev"><rect x="10" y="40" width="150" height="90" rx="14"/><text x="85" y="78" text-anchor="middle" font-size="18">Your tablet</text><text class="small" x="85" y="102" text-anchor="middle" font-size="13">it runs here</text></g>
-      <g class="dnode" id="n-site"><rect x="200" y="40" width="160" height="90" rx="14"/><text x="280" y="78" text-anchor="middle" font-size="18">Website</text><text class="small" x="280" y="102" text-anchor="middle" font-size="13">GitHub Pages</text></g>
-      <g class="dnode" id="n-worker"><rect x="400" y="40" width="150" height="90" rx="14"/><text x="475" y="78" text-anchor="middle" font-size="18">Worker</text><text class="small" x="475" y="102" text-anchor="middle" font-size="13">game-api</text></g>
-      <g class="dnode" id="n-db"><rect x="590" y="40" width="160" height="90" rx="14"/><text x="670" y="78" text-anchor="middle" font-size="18">D1 database</text><text class="small" x="670" y="102" text-anchor="middle" font-size="13">game-db</text></g>
-      <g class="dnode" id="n-stats"><rect x="400" y="165" width="150" height="54" rx="12"/><text x="475" y="198" text-anchor="middle" font-size="15">Grown-up dashboard</text></g>
-      <path class="darrow" id="a1" d="M200,85 L162,85" marker-end="url(#ah)"/>
-      <text class="dlabel" x="164" y="30">loads the page</text>
-      <path class="darrow" id="a2" d="M160,60 C260,0 330,0 398,60" marker-end="url(#ah)"/>
-      <text class="dlabel" x="250" y="18">messages</text>
-      <path class="darrow" id="a3" d="M550,85 L588,85" marker-end="url(#ah)"/>
-      <path class="darrow" id="a4" d="M475,165 L475,132" marker-end="url(#ah)"/>
-    </svg>
-  </div>
-  <div class="callout c-why"><b class="h">Frontend and backend</b><p>The part you see is the <b>frontend</b> because it's in front. The Worker and the database are the <b>backend</b> because they're behind, hidden away. "Making a backend change" means changing the Worker, the database, or both.</p></div>
+  <p class="callout"><b>Open source, no secrets in the design.</b> Everything on this page can be read in the game's code. What stays private is data: player records, and the keys a grown-up uses to run things. Good security doesn't depend on hiding how a system works.</p>
 </section>
-<section data-lesson="travel" class="lesson" id="travel">
-  <div class="lhead"><div class="stud">3</div><div><h2>A message's trip</h2><div class="sub">Worked example: Quackers. What really happens when you find a duck. Press Next to follow it.</div></div></div>
-  <div class="stepper">
-    <ol class="steps" id="tsteps">
-      <li><span class="n">1</span><span>You tap a hidden duck. The game shows the duck in your log right away.</span></li>
-      <li><span class="n">2</span><span>The game packs a message called a <b>request</b>. It says where it's going and what's inside.<br><code>POST /api/ping {"pid":"tab-7k2q","ducks":13}</code></span></li>
-      <li><span class="n">3</span><span>The request flies over the internet to the Worker. <code>pid</code> is your device's random id. It's not your name.</span></li>
-      <li><span class="n">4</span><span>The Worker checks it. Is the id the right shape? Is this device sending too many messages this minute?</span></li>
-      <li><span class="n">5</span><span>The Worker saves it in the database with a line of <b>SQL</b>, the language databases speak.<br><code>UPDATE players SET ducks=13 WHERE pid='tab-7k2q'</code></span></li>
-      <li><span class="n">6</span><span>The Worker sends back an answer called a <b>response</b>: <code>{"ok":true}</code>. Trip complete.</span></li>
-    </ol>
-    <div class="btnrow"><button class="primary" id="tnext" type="button">Next step</button><button id="treset" type="button">Start over</button></div>
-  </div>
-  <div class="callout c-why"><b class="h">GET and POST</b><p><b>GET</b> means "please tell me something", like asking how many friends joined. <b>POST</b> means "here's something new", like a duck you found. The messages are written in <b>JSON</b>, which is just labels and values inside curly brackets.</p></div>
-</section>
-<section data-lesson="tables" class="lesson" id="tables">
-  <div class="lhead"><div class="stud">4</div><div><h2>Tables: the drawers</h2><div class="sub">Worked example: Quackers. Its friend link needed two new drawers.</div></div></div>
-  <p>A table has <b>columns</b> across the top (what kind of fact) and <b>rows</b> going down (one thing each). It's like a Minecraft chest where every slot has a label.</p>
-  <div class="grid3" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
-    <div class="tblwrap"><table class="t"><caption>friends</caption><thead><tr><th>code</th><th>pid</th><th>at</th><th>joins</th></tr></thead>
-      <tbody><tr><td>q7mz4kfa</td><td>tab-7k2q</td><td>day 0</td><td>2</td></tr><tr><td>hx2p9wde</td><td>pho-3c4d</td><td>day 0</td><td>0</td></tr></tbody></table>
-      <p class="sqlnote" style="margin-top:6px">One row per player who asked for a share code. <code>joins</code> counts friends who came with it.</p></div>
-    <div class="tblwrap"><table class="t"><caption>referrals</caption><thead><tr><th>pid</th><th>at</th></tr></thead>
-      <tbody><tr><td>new-8b1c</td><td>day 0</td></tr><tr><td>new-5d7e</td><td>day 0</td></tr></tbody></table>
-      <p class="sqlnote" style="margin-top:6px">One row per device that was counted as a friend. That's all.</p></div>
-  </div>
-  <p>Here's the real SQL that builds the <code>friends</code> drawer:</p>
-<pre class="code"><span class="k">CREATE TABLE IF NOT EXISTS</span> friends(
-  code  <span class="k">TEXT PRIMARY KEY</span>,         <span class="c">-- the random share code, never two the same</span>
-  pid   <span class="k">TEXT NOT NULL UNIQUE</span>,     <span class="c">-- whose code it is, one code per player</span>
-  at    <span class="k">INTEGER NOT NULL</span>,         <span class="c">-- when it was made</span>
-  joins <span class="k">INTEGER NOT NULL DEFAULT</span> 0 <span class="c">-- how many friends joined, starts at 0</span>
-);</pre>
-  <div class="callout c-privacy"><b class="h">Save only what you need</b><p>Look at <code>referrals</code> again. It saves "this device was counted", but never who invited it. The game only needed to know "has this device been counted before?", so that's all it keeps. Every fact you don't save is a fact that can never leak. Great builders think about this first.</p></div>
-</section>
-<section data-lesson="routes" class="lesson" id="routes">
-  <div class="lhead"><div class="stud">5</div><div><h2>Routes: doors into the Worker</h2><div class="sub">Worked example: Quackers. A route is a named door, and each one does one job.</div></div></div>
-  <p>A route is a method plus an address, like <code>POST /api/friend/claim</code>. The Worker has a list near the top that says which door goes to which job. These are the lines for the friend link in Quackers, made a little simpler:</p>
-<pre class="code"><span class="k">if</span> (r === <span class="s">"/api/friend/code"</span>   &amp;&amp; req.method === <span class="s">"POST"</span>) <span class="c">// give me my share code</span>
-<span class="k">if</span> (r === <span class="s">"/api/friend/status"</span> &amp;&amp; req.method === <span class="s">"GET"</span>)  <span class="c">// how many friends joined?</span>
-<span class="k">if</span> (r === <span class="s">"/api/friend/claim"</span>  &amp;&amp; req.method === <span class="s">"POST"</span>) <span class="c">// count me as a friend</span></pre>
-  <p>The claim door has a guard with a checklist. A friend only counts when every box is true:</p>
-  <ul class="rules">
-    <li>The share code is real.</li>
-    <li>It isn't your own code. No counting yourself!</li>
-    <li>The friend has found at least one duck.</li>
-    <li>The friend is new: their first visit came after the code was made, and only a few days ago.</li>
-    <li>This device was never counted before.</li>
-    <li>The sharer hasn't hit today's limit. This stops anyone from faking hundreds of friends.</li>
-  </ul>
-  <p>When all six pass, the Worker adds a row to <code>referrals</code> and adds 1 to <code>joins</code>. When <code>joins</code> reaches 1, the game unlocks a bonus duck for the sharer.</p>
-  <div class="callout c-why"><b class="h">Why does the guard live in the Worker?</b><p>Anyone can mess with the game on their own device, the same way people use cheat mods. The Worker runs on Cloudflare's computers, so only the people who run the game can change its rules. Any rule that keeps things fair has to live in the backend.</p></div>
-</section>
-<section data-lesson="practice" class="lesson sandbox" id="practice">
-  <div class="lhead"><div class="stud">6</div><div><h2>Practice room</h2><div class="sub">A pretend Worker and database for the Quackers friend link, running inside this page. The same moves work for any project.</div></div></div>
-  <div class="warnbar">Everything here is pretend. It isn't connected to anything real, so try anything. Undo and Reset are always there.</div>
 
-  <div class="panel">
-    <h3>Missions</h3>
-    <div class="meter" aria-hidden="true"><i id="meter"></i></div>
-    <ul class="missions" id="missions"></ul>
+<!-- 07 LIMITS -->
+<section class="ch" id="limits">
+  <div class="ch-head">
+    <span class="num">07</span>
+    <h2>Rate limits and staying on the free plan</h2>
+    <p>The whole backend runs on Cloudflare's free plan. That only works because both sides are careful about how often they talk.</p>
   </div>
-
-  <div class="sbgrid">
-    <div class="panel">
-      <h3>Players <span class="tag t-front">Frontend</span></h3>
-      <div class="btnrow"><span class="daybadge" id="day">Today is day 0</span><button class="small" id="nextday" type="button">Next day</button></div>
-      <div class="devices" id="devices"></div>
-      <div class="btnrow"><button class="small primary" id="newfriend" type="button">A friend opens your link</button></div>
-    </div>
-    <div class="panel">
-      <h3>Send a request</h3>
-      <label class="f" for="rq-route">Route<select id="rq-route"></select></label>
-      <div class="frow">
-        <label class="f" for="rq-dev">From which device<select id="rq-dev"></select></label>
-        <label class="f" for="rq-code" id="rq-code-wrap">Share code<input type="text" id="rq-code" list="codes" autocomplete="off" spellcheck="false" placeholder="like q7mz4kfa"></label>
+  <div class="split">
+    <div class="prose">
+      <p>A <b>rate limit</b> caps how many times something can happen in a window of time. The Worker keeps a tiny counter per device and action in the <code>limits</code> table. Each counter expires on its own, and the Worker says no once it's full.</p>
+      <div class="tblwrap">
+      <table class="tbl">
+        <thead><tr><th>Action</th><th>Limit per device</th></tr></thead>
+        <tbody>
+          <tr><td>Game pings</td><td>30 a minute. Extras are told to slow down, and nothing is lost.</td></tr>
+          <tr><td>Nickname changes</td><td>5 an hour</td></tr>
+          <tr><td>Idea suggestions</td><td>10 tries an hour, 3 ideas a month</td></tr>
+          <tr><td>Hearts</td><td>60 an hour</td></tr>
+          <tr><td>Friend-link claims</td><td>10 an hour, and 3 credits a day per sharer</td></tr>
+          <tr><td>Forget requests</td><td>5 an hour</td></tr>
+        </tbody>
+      </table>
       </div>
-      <datalist id="codes"></datalist>
-      <div class="btnrow"><button class="primary" id="send" type="button">Send it</button></div>
-      <div class="resp">
-        <div><div class="lbl">Request</div><pre class="code" id="rq-out">Pick a route and press Send it.</pre></div>
-        <div><div class="lbl">Response</div><pre class="code" id="rs-out">…</pre></div>
-      </div>
-      <div class="lbl" style="font-size:13px;font-weight:700;color:var(--ink-2)">What the Worker checked</div>
-      <ul class="trace" id="trace"><li class="info"><span class="ic">·</span><span>Nothing sent yet.</span></li></ul>
-      <div id="unlock" hidden class="unlock">Bonus duck unlocked! This is the moment a real game would reward the sharer.</div>
+      <p>The game is polite too. It bundles changes, skips a ping when nothing changed, and sends in the background every 5 minutes at most. If a request fails, it <b>backs off</b>: wait 1 minute, then 2, then 4, doubling up to an hour, so a struggling server isn't hammered. If the server says the daily allowance is used up, the game waits until it resets at midnight UTC.</p>
     </div>
+    <figure>
+      <svg viewBox="0 0 420 300" role="img" aria-labelledby="bo-t">
+        <title id="bo-t">Exponential back-off. After failures one to seven, the game waits 1, 2, 4, 8, 16, 32 and then 60 minutes before trying again.</title>
+        <text class="t3" x="20" y="22">WAIT AFTER EACH FAILURE (MINUTES)</text>
+        <path class="lane" d="M50 250H405M50 51H405"/>
+        <text class="t2" x="28" y="255">0</text>
+        <text class="t2" x="22" y="56">60</text>
+        <rect class="bar" x="62"  y="246.7" width="34" height="3.3"/>
+        <rect class="bar" x="110" y="243.4" width="34" height="6.6"/>
+        <rect class="bar" x="158" y="236.7" width="34" height="13.3"/>
+        <rect class="bar" x="206" y="223.5" width="34" height="26.5"/>
+        <rect class="bar" x="254" y="196.9" width="34" height="53.1"/>
+        <rect class="bar" x="302" y="143.9" width="34" height="106.1"/>
+        <rect class="bar l" x="350" y="51" width="34" height="199"/>
+        <text class="t2" x="75"  y="238">1</text>
+        <text class="t2" x="123" y="235">2</text>
+        <text class="t2" x="171" y="228">4</text>
+        <text class="t2" x="219" y="215">8</text>
+        <text class="t2" x="264" y="188">16</text>
+        <text class="t2" x="312" y="135">32</text>
+        <text class="t1" x="358" y="43">60</text>
+        <text class="t2" x="66" y="272">1st</text><text class="t2" x="112" y="272">2nd</text><text class="t2" x="162" y="272">3rd</text>
+        <text class="t2" x="210" y="272">4th</text><text class="t2" x="258" y="272">5th</text><text class="t2" x="306" y="272">6th</text><text class="t2" x="351" y="272">7th+</text>
+        <text class="t3" x="62" y="294">FAILURES IN A ROW</text>
+      </svg>
+      <figcaption>Exponential back-off: each wait doubles, up to a cap. One success resets it.</figcaption>
+    </figure>
   </div>
-
-  <div class="panel">
-    <h3>Database <span class="tag t-db">D1</span></h3>
-    <div class="grid3" id="dbview" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))"></div>
-  </div>
-
-  <div class="sbgrid">
-    <div class="panel">
-      <h3>Add a column</h3>
-      <p class="sqlnote">Give a table a new kind of fact. Every row gets the starting value.</p>
-      <div class="frow">
-        <label class="f" for="ac-table">Table<select id="ac-table"></select></label>
-        <label class="f" for="ac-name">Column name<input type="text" id="ac-name" placeholder="like best_world" spellcheck="false" autocomplete="off"></label>
-        <label class="f" for="ac-type">Kind<select id="ac-type"><option value="INTEGER">Number</option><option value="TEXT">Text</option></select></label>
-        <label class="f" for="ac-def">Starting value<input type="text" id="ac-def" value="0" spellcheck="false" autocomplete="off"></label>
-      </div>
-      <pre class="code" id="ac-sql"></pre>
-      <p class="sqlnote">In a real database, the grown-up pastes this as one line with no <code>--</code> notes in it.</p>
-      <div class="btnrow"><button class="primary" id="ac-run" type="button">Run it</button><span class="err" id="ac-err"></span></div>
+  <div class="split">
+    <div class="prose">
+      <p>The Worker also counts its own work. Every request adds to a daily tally of requests, rows read and rows written, saved in the <code>usage</code> table and compared with the free plan's daily allowance.</p>
+      <p>Most of the care above exists to keep these numbers small: batching, skipping pings that carry nothing new, and reading only the rows a request needs.</p>
     </div>
-    <div class="panel">
-      <h3>Build a route <span class="tag t-worker">Worker</span></h3>
-      <p class="sqlnote">Make a new door. Pick what it does, and watch the real code appear.</p>
-      <div class="frow">
-        <label class="f" for="br-method">Method<select id="br-method"><option>GET</option><option>POST</option></select></label>
-        <label class="f" for="br-name">Address<input type="text" id="br-name" placeholder="like friend/top" spellcheck="false" autocomplete="off"></label>
-      </div>
-      <label class="f" for="br-recipe">What it does<select id="br-recipe">
-        <option value="count">Count the rows in a table</option>
-        <option value="mine">Look up my row in a table</option>
-        <option value="top">Find the biggest number in a column</option>
-        <option value="addone">Add 1 to a number on my row</option>
-      </select></label>
-      <div class="frow">
-        <label class="f" for="br-table">Table<select id="br-table"></select></label>
-        <label class="f" for="br-col" id="br-col-wrap">Column<select id="br-col"></select></label>
-      </div>
-      <pre class="code" id="br-code"></pre>
-      <div class="btnrow"><button class="primary" id="br-save" type="button">Add this door</button><span class="err" id="br-err"></span></div>
+    <div class="tblwrap">
+    <table class="tbl">
+      <thead><tr><th>Free plan</th><th>Allowance</th></tr></thead>
+      <tbody>
+        <tr><td>Worker requests</td><td class="m">100,000 a day</td></tr>
+        <tr><td>Database rows read</td><td class="m">5,000,000 a day</td></tr>
+        <tr><td>Database rows written</td><td class="m">100,000 a day</td></tr>
+        <tr><td>Database storage</td><td class="m">500 MB</td></tr>
+      </tbody>
+    </table>
     </div>
-  </div>
-  <div class="btnrow"><button id="undo" type="button">Undo</button><button id="reset" type="button">Reset the practice room</button><span class="sqlnote" id="resetq" hidden>Reset everything, missions too? <button class="small" id="resetyes" type="button">Yes, reset</button> <button class="small" id="resetno" type="button">Keep it</button></span></div>
-</section>
-<section data-lesson="real" class="lesson" id="real">
-  <div class="lhead"><div class="stud">7</div><div><h2>Changing the real one</h2><div class="sub">The same steps every time, with a grown-up doing the ones that touch real accounts.</div></div></div>
-  <ul class="check" id="checklist">
-    <li><input type="checkbox" id="ck1"><label for="ck1" class="ct">Say the idea in one sentence</label><span class="cd">"The game should remember which world each player likes best." If it doesn't fit in one sentence, make it smaller.</span></li>
-    <li><input type="checkbox" id="ck2"><label for="ck2" class="ct">Plan the drawers and doors</label><span class="cd">Which table, which new columns, which route? What's the smallest amount you need to save? Try it in the practice room first.</span></li>
-    <li><input type="checkbox" id="ck3"><label for="ck3" class="ct">Build a preview, never the live one</label><span class="cd">Ask your AI helper to build the change as a preview. The real project stays the same until a grown-up says yes.</span></li>
-    <li><input type="checkbox" id="ck4"><label for="ck4" class="ct">Test the tricky cases</label><span class="cd">Try to cheat it: twice in a row, your own code, no ducks found. Quackers' friend link had 57 test checks before anyone pasted anything.</span></li>
-    <li><input type="checkbox" id="ck5"><label for="ck5" class="ct">Database change first <span class="who dad">Grown-up</span></label><span class="cd">The grown-up opens the database's console in Cloudflare and pastes the SQL as one line. <code>IF NOT EXISTS</code> makes it safe to run twice. Drawers go in before the Worker tries to use them.</span></li>
-    <li><input type="checkbox" id="ck6"><label for="ck6" class="ct">Then the Worker <span class="who dad">Grown-up</span></label><span class="cd">The grown-up opens the Worker, pastes the new code and presses Deploy.</span></li>
-    <li><input type="checkbox" id="ck7"><label for="ck7" class="ct">Check it really works</label><span class="cd">Close and reopen it. Try the new thing. The grown-up checks the dashboard.</span></li>
-    <li><input type="checkbox" id="ck8"><label for="ck8" class="ct">Write down what changed</label><span class="cd">The date, what you added, and why. Future you will thank you.</span></li>
-  </ul>
-  <div class="callout c-dad"><b class="h">How to undo</b><p><b>The Worker:</b> Cloudflare keeps the older versions of the Worker, so the grown-up can switch back to the last one that worked.</p><p><b>The database:</b> adding a table or a column is easy to undo. Deleting is forever, so we never delete a table or a column with players' data in it without a backup and a grown-up's yes.</p></div>
-  <div class="callout c-why"><b class="h">Golden rules</b><p>1. Preview first, live only with a grown-up's yes. 2. One change at a time. 3. Passwords and keys never go in the code; they live in Cloudflare's secret settings, and only the grown-up in charge knows them. 4. Save as little about players as you can. Privacy comes first, always.</p></div>
-  <div class="btnrow"><button class="small" id="ckclear" type="button">Clear the checklist</button></div>
-</section>
-<section data-lesson="words" class="lesson" id="words">
-  <div class="lhead"><div class="stud">★</div><div><h2>Word bank</h2><div class="sub">Real words real engineers use.</div></div></div>
-  <div class="words">
-    <div class="word"><b>Frontend</b><span>The part people see and tap.</span></div>
-    <div class="word"><b>Backend</b><span>The hidden part: the Worker and the database.</span></div>
-    <div class="word"><b>Server</b><span>A computer program that answers messages. Ours is the Worker.</span></div>
-    <div class="word"><b>Database</b><span>Where things stay saved. Ours is D1.</span></div>
-    <div class="word"><b>Table, row, column</b><span>A drawer, one thing in it, one kind of fact.</span></div>
-    <div class="word"><b>SQL</b><span>The language for asking a database to save or find things.</span></div>
-    <div class="word"><b>Route</b><span>A named door into the Worker, like <code>GET /api/friend/status</code>.</span></div>
-    <div class="word"><b>Request and response</b><span>The message the frontend sends and the answer it gets back.</span></div>
-    <div class="word"><b>JSON</b><span>Labels and values in curly brackets, like <code>{"ok":true}</code>.</span></div>
-    <div class="word"><b>Deploy</b><span>Putting new code live so everyone gets it.</span></div>
-    <div class="word"><b>Roll back</b><span>Going back to the last version that worked.</span></div>
-    <div class="word"><b>Secret</b><span>A password the Worker uses that never goes in the code.</span></div>
   </div>
 </section>
-      <div class="lfoot">
-        <button id="prev" type="button">← Back</button>
-        <div class="mid"><button class="donebtn" id="done" type="button" aria-pressed="false">Mark complete</button></div>
-        <button class="primary" id="next" type="button">Next →</button>
-      </div>
+
+<!-- 08 CLEANUP -->
+<section class="ch" id="cleanup">
+  <div class="ch-head">
+    <span class="num">08</span>
+    <h2>Cleanup: data has an expiry date</h2>
+    <p>The safest data is data you no longer have. Once a day, the Worker runs a cleanup that deletes anything past its time.</p>
+  </div>
+  <div class="split">
+    <ul class="tl">
+      <li><span class="when">Right away</span><p>A declined idea has its text erased.</p></li>
+      <li><span class="when">End of each month</span><p>Hearts on last month's ideas are removed, and ideas lose their link to the device that sent them. Only the idea and its final count remain.</p></li>
+      <li><span class="when">After 60 days</span><p>Ideas nobody reviewed are deleted.</p></li>
+      <li><span class="when">After 90 days</span><p>Old entries in the players-per-day list and the daily usage counts are deleted.</p></li>
+      <li><span class="when">After 1 year</span><p>A device that hasn't played for a year is deleted entirely, everywhere. Year-old session and city counts go too.</p></li>
+      <li><span class="when">Every run</span><p>Expired rate-limit counters are swept away.</p></li>
+    </ul>
+    <div class="prose">
+      <p>Cleanup rides along with normal traffic. The first game ping of the day starts it, and a once-a-day rate limit on the cleanup itself stops busy days from running it over and over.</p>
+      <p>It reuses the same delete steps as the forget button, just pointed at every device last seen more than a year ago. One piece of code doing two jobs means the two can't drift apart.</p>
     </div>
   </div>
+</section>
+
+<!-- 09 HEALTH -->
+<section class="ch" id="health">
+  <div class="ch-head">
+    <span class="num">09</span>
+    <h2>Health monitoring</h2>
+    <p>Software breaks quietly. A health check is how you find out before players do.</p>
+  </div>
+  <div class="split flip">
+    <div class="prose">
+      <p>The Worker has a health check that answers three questions: is the Worker up, can it reach the database, and how close is today's usage to each free-plan limit, as a percentage. If the database can't be reached, it answers with error code 503 ("service unavailable") so anything watching knows right away.</p>
+      <p>A watcher calls the health check three times a day. If it fails, or any limit passes 70%, a grown-up gets an alert. Warning at 70% leaves time to react before anything actually stops.</p>
+      <p>And if the backend does go down, the design already covers it: the game keeps playing, stats wait in the queue, and the back-off keeps retries gentle until it's back.</p>
+    </div>
+    <figure>
+      <svg viewBox="0 0 420 380" role="img" aria-labelledby="h-t">
+        <title id="h-t">Health monitoring. A watcher runs three times a day and calls the health check, which checks the Worker, the database and usage. The result is ok, near limit at 70 percent or more, or down. Near limit or down sends an alert.</title>
+        <defs>
+          <marker id="h1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ah" d="M0 0L10 5L0 10z"/></marker>
+          <marker id="h2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ah w" d="M0 0L10 5L0 10z"/></marker>
+        </defs>
+        <rect class="n-box" x="20" y="20" width="380" height="58" rx="12"/>
+        <text class="t1" x="38" y="45">Watcher</text>
+        <text class="t2" x="38" y="64">runs 3 times a day</text>
+        <path class="wire" d="M210 78V105" marker-end="url(#h1)"/>
+        <rect class="n-edge" x="20" y="108" width="380" height="84" rx="12"/>
+        <text class="t1" x="38" y="134">Health check</text>
+        <text class="t2" x="38" y="154">Worker up?  Database up?</text>
+        <text class="t2" x="38" y="172">Usage as a % of each daily limit</text>
+        <path class="wire" d="M80 192V231" marker-end="url(#h1)"/>
+        <path class="wire" d="M210 192V231" marker-end="url(#h1)"/>
+        <path class="wire" d="M340 192V231" marker-end="url(#h1)"/>
+        <rect class="n-data" x="20" y="234" width="120" height="56" rx="10"/>
+        <text class="t1" x="36" y="259">ok</text><text class="t2" x="36" y="277">nothing to do</text>
+        <rect class="n-acc" x="150" y="234" width="120" height="56" rx="10"/>
+        <text class="t1" x="166" y="259">near limit</text><text class="t2" x="166" y="277">any use ≥ 70%</text>
+        <rect class="n-warn" x="280" y="234" width="120" height="56" rx="10"/>
+        <text class="t1" x="296" y="259">down</text><text class="t2" x="296" y="277">error 503</text>
+        <path class="wire w" d="M210 290V318H325"/>
+        <path class="wire w" d="M340 290V329" marker-end="url(#h2)"/>
+        <rect class="n-warn" x="250" y="332" width="150" height="38" rx="10"/>
+        <text class="t1" x="268" y="356">alert a grown-up</text>
+      </svg>
+      <figcaption>Monitoring only reads totals. It never looks at a player's data.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<footer>
+  <p>Quackers is designed by Mitchell and built with his dad, with help from an AI coding assistant. Play it at <a href="https://quackersgame.com">quackersgame.com</a>.</p>
+  <p>This page explains how the system is built. It shows no player data.</p>
+</footer>
+
 </main>
-
-<main class="view gut" id="v-calendar" hidden>
-  <div class="sechead" style="margin-top:0"><h2>Calendar</h2><span class="sample">Planned, no dates yet</span></div>
-  <div class="events">
-    <div class="wcard event"><div class="day">Weekly<small>evening</small></div><div><h3 style="font-size:19px">Live build night</h3><p>Teams build along with a real project, step by step, and ask questions as they go.</p></div></div>
-    <div class="wcard event"><div class="day">Monthly<small>weekend</small></div><div><h3 style="font-size:19px">Show and tell</h3><p>Teams show what they made. Kids present, grown-ups cheer.</p></div></div>
-    <div class="wcard event"><div class="day">Monthly<small>evening</small></div><div><h3 style="font-size:19px">Grown-ups' safety hour</h3><p>Accounts, privacy and going live, just for the grown-ups.</p></div></div>
-  </div>
-</main>
-
-<main class="view gut" id="v-leaderboards" hidden>
-  <div class="wcard mylvl"><div class="ring" id="ring"><div><b id="ring-l">1</b><small>Level</small></div></div><div><h3 style="font-size:22px" id="lvl-name">New builder</h3><p id="lvl-next" class="sqlnote"></p><p class="sqlnote">Earn points by finishing lessons (20 each) and practice missions (10 each). Your points stay on this device.</p></div></div>
-  <div class="sechead"><h2>Levels</h2></div>
-  <ul class="ladder" id="ladder"></ul>
-  <div class="sechead"><h2>Leaderboards</h2><span class="sample">Sample teams</span></div>
-  <div class="boards">
-    <div class="wcard"><h3 style="font-size:19px">Last 7 days</h3><div class="lbwrap"><div class="lbrow"><span class="rk">1</span><span class="avw"><span class="av t1">OT</span><span class="lvl">5</span></span><span>Team Otter</span><span class="pts">+64</span></div><div class="lbrow"><span class="rk">2</span><span class="avw"><span class="av t2">CO</span><span class="lvl">4</span></span><span>Team Comet</span><span class="pts">+51</span></div><div class="lbrow"><span class="rk">3</span><span class="avw"><span class="av t4">PX</span><span class="lvl">3</span></span><span>Team Pixel</span><span class="pts">+40</span></div><div class="lbrow"><span class="rk">4</span><span class="avw"><span class="av t3">MA</span><span class="lvl">4</span></span><span>Team Maple</span><span class="pts">+33</span></div><div class="lbrow"><span class="rk">5</span><span class="avw"><span class="av t5">PB</span><span class="lvl">2</span></span><span>Team Pebble</span><span class="pts">+18</span></div><div class="lbrow me"><span class="rk">·</span><span class="avw"><span class="av">YOU</span><span class="lvl lvl-me">1</span></span><span>Your team</span><span class="pts me-pts">+0</span></div></div></div>
-    <div class="wcard"><h3 style="font-size:19px">Last 30 days</h3><div class="lbwrap"><div class="lbrow"><span class="rk">1</span><span class="avw"><span class="av t1">OT</span><span class="lvl">5</span></span><span>Team Otter</span><span class="pts">+212</span></div><div class="lbrow"><span class="rk">2</span><span class="avw"><span class="av t3">MA</span><span class="lvl">4</span></span><span>Team Maple</span><span class="pts">+180</span></div><div class="lbrow"><span class="rk">3</span><span class="avw"><span class="av t2">CO</span><span class="lvl">4</span></span><span>Team Comet</span><span class="pts">+164</span></div><div class="lbrow"><span class="rk">4</span><span class="avw"><span class="av t4">PX</span><span class="lvl">3</span></span><span>Team Pixel</span><span class="pts">+120</span></div><div class="lbrow"><span class="rk">5</span><span class="avw"><span class="av t5">PB</span><span class="lvl">2</span></span><span>Team Pebble</span><span class="pts">+75</span></div><div class="lbrow me"><span class="rk">·</span><span class="avw"><span class="av">YOU</span><span class="lvl lvl-me">1</span></span><span>Your team</span><span class="pts me-pts">+0</span></div></div></div>
-    <div class="wcard"><h3 style="font-size:19px">All time</h3><div class="lbwrap"><div class="lbrow"><span class="rk">1</span><span class="avw"><span class="av t1">OT</span><span class="lvl">5</span></span><span>Team Otter</span><span class="pts">+410</span></div><div class="lbrow"><span class="rk">2</span><span class="avw"><span class="av t2">CO</span><span class="lvl">4</span></span><span>Team Comet</span><span class="pts">+356</span></div><div class="lbrow"><span class="rk">3</span><span class="avw"><span class="av t3">MA</span><span class="lvl">4</span></span><span>Team Maple</span><span class="pts">+301</span></div><div class="lbrow"><span class="rk">4</span><span class="avw"><span class="av t4">PX</span><span class="lvl">3</span></span><span>Team Pixel</span><span class="pts">+190</span></div><div class="lbrow"><span class="rk">5</span><span class="avw"><span class="av t5">PB</span><span class="lvl">2</span></span><span>Team Pebble</span><span class="pts">+95</span></div><div class="lbrow me"><span class="rk">·</span><span class="avw"><span class="av">YOU</span><span class="lvl lvl-me">1</span></span><span>Your team</span><span class="pts me-pts">+0</span></div></div></div>
-  </div>
-</main>
-
-<main class="view gut" id="v-about" hidden>
-  <div class="about">
-    <div class="wcard">
-      <div class="kicker">About</div>
-      <h1 style="font-size:clamp(28px,5vw,40px)">Build real things together, with AI</h1>
-      <p class="lede" style="font-size:18px">A grown-up and a kid, no coding experience needed. We built a real game this way, and every course here comes from what we learned.</p>
-      <div class="roles3"><div><b>Kid</b>The idea boss: dreams it up, decides how it looks, tests it.</div><div><b>Grown-up</b>The safety boss: owns the accounts and money, says yes before anything goes live.</div><div><b>AI helper</b>The builder: writes the code and explains it as often as you ask.</div></div>
-      <h3 style="font-size:19px;margin-top:8px">Our privacy promise</h3>
-      <ul class="rules" style="font-size:15px"><li>Teams use a team name. No kid's full name, school, town or face.</li><li>Points and progress stay on your own device until accounts open.</li><li>We save as little as we can, and you can delete it.</li></ul>
-    </div>
-    <div class="side">
-      <div class="wcard group"><div class="gcover"><svg class="logo" viewBox="0 0 100 100" aria-hidden="true"><path class="lg-ink" fill-rule="evenodd" d="M67.00,56.00 L73.93,58.13 L73.33,62.72 L66.08,62.99 L64.94,66.33 L63.38,69.50 L68.32,74.82 L65.50,78.48 L59.09,75.09 L56.44,77.42 L53.50,79.38 L55.12,86.45 L50.84,88.22 L46.99,82.08 L43.52,82.77 L40.00,83.00 L37.87,89.93 L33.28,89.33 L33.01,82.08 L29.67,80.94 L26.50,79.38 L21.18,84.32 L17.52,81.50 L20.91,75.09 L18.58,72.44 L16.62,69.50 L9.55,71.12 L7.78,66.84 L13.92,62.99 L13.23,59.52 L13.00,56.00 L6.07,53.87 L6.67,49.28 L13.92,49.01 L15.06,45.67 L16.62,42.50 L11.68,37.18 L14.50,33.52 L20.91,36.91 L23.56,34.58 L26.50,32.62 L24.88,25.55 L29.16,23.78 L33.01,29.92 L36.48,29.23 L40.00,29.00 L42.13,22.07 L46.72,22.67 L46.99,29.92 L50.33,31.06 L53.50,32.62 L58.82,27.68 L62.48,30.50 L59.09,36.91 L61.42,39.56 L63.38,42.50 L70.45,40.88 L72.22,45.16 L66.08,49.01 L66.77,52.48 Z M51.00,56.00 A11,11 0 1,0 29.00,56.00 A11,11 0 1,0 51.00,56.00 Z"/><path class="lg-yel" fill-rule="evenodd" d="M90.70,32.98 L95.14,35.80 L93.57,39.56 L88.44,38.38 L86.57,40.65 L84.29,42.50 L85.43,47.64 L81.66,49.18 L78.87,44.72 L75.95,45.00 L73.02,44.70 L70.20,49.14 L66.44,47.57 L67.62,42.44 L65.35,40.57 L63.50,38.29 L58.36,39.43 L56.82,35.66 L61.28,32.87 L61.00,29.95 L61.30,27.02 L56.86,24.20 L58.43,20.44 L63.56,21.62 L65.43,19.35 L67.71,17.50 L66.57,12.36 L70.34,10.82 L73.13,15.28 L76.05,15.00 L78.98,15.30 L81.80,10.86 L85.56,12.43 L84.38,17.56 L86.65,19.43 L88.50,21.71 L93.64,20.57 L95.18,24.34 L90.72,27.13 L91.00,30.05 Z M82.00,30.00 A6,6 0 1,0 70.00,30.00 A6,6 0 1,0 82.00,30.00 Z"/><path class="lg-teal" d="M87.96,74.80 L91.74,76.47 L90.85,79.12 L86.83,78.17 L85.73,79.59 L84.34,80.72 L85.39,84.72 L82.76,85.68 L80.99,81.94 L79.20,81.96 L77.45,81.58 L74.97,84.90 L72.59,83.44 L74.41,79.73 L73.28,78.34 L72.48,76.73 L68.35,76.87 L68.00,74.09 L72.04,73.20 L72.42,71.45 L73.17,69.83 L70.49,66.68 L72.45,64.68 L75.66,67.28 L77.27,66.48 L79.01,66.06 L79.80,62.00 L82.58,62.28 L82.55,66.42 L84.17,67.17 L85.59,68.27 L89.26,66.36 L90.77,68.71 L87.52,71.27 L87.94,73.01 Z"/><path class="lg-paper" d="M80.00,68.00 L81.56,72.44 L86.00,74.00 L81.56,75.56 L80.00,80.00 L78.44,75.56 L74.00,74.00 L78.44,72.44 Z"/></svg></div><div class="gb"><h3>The Engine Room</h3><p class="sqlnote">A grown-up and a kid, building real things together with AI. No coding experience needed.</p><div class="gstats"><div><b>Teams</b><span>Opening soon</span></div><div><b>Courses</b><span>1 open, 6 coming</span></div><div><b>Price</b><span>To be set</span></div></div><a class="btnlink" href="#about" style="text-align:center">How it works</a></div></div>
-      <div class="wcard"><h3 style="font-size:19px">Community rules</h3><ul class="rules" style="font-size:15px"><li>Kids post with their grown-up.</li><li>First names or nicknames only. No schools, towns or faces.</li><li>Never share passwords, codes or links to private pages.</li><li>Be kind. Everyone here is learning.</li></ul></div>
-    </div>
-  </div>
-</main>
-
-<script>
-(function(){
-const $ = id => document.getElementById(id);
-const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const store = { get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } }, set(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} } };
-
-/* ---------- project picker ---------- */
-const PROJECTS = [
-  {k:'game', label:'A game', front:'Worlds, ducks and buttons you tap, on your tablet or phone.', worker:'In Quackers, it checks a friend link is fair before counting it.', db:'In Quackers, it saves ducks found, the leaderboard and friend codes.'},
-  {k:'recipes', label:'A family recipe book', front:'Recipe cards with photos and a search box.', worker:'It could check a new recipe has a name and isn\'t already there.', db:'It could save the recipes, star ratings, and who cooks which night.'},
-  {k:'pets', label:'A pet care tracker', front:'A checklist: fed, walked, water bowl full.', worker:'It could stop two people from both feeding the dog dinner.', db:'It could save every feeding and walk, with the time.'},
-  {k:'science', label:'A science fair lab', front:'A chart of how tall the plant grew each day.', worker:'It could check each measurement is a real number.', db:'It could save each day\'s measurements.'},
-  {k:'team', label:'A team or club site', front:'The schedule, scores and team photos.', worker:'It could let only the coach post scores.', db:'It could save games, scores and the schedule.'}
-];
-let pk = (store.get('qer-pub-project')||'game');
-function drawProject(){
-  const p = PROJECTS.find(x=>x.k===pk) || PROJECTS[0];
-  $('pchips').innerHTML = PROJECTS.map(x=>`<button type="button" class="chip" aria-pressed="${x.k===p.k}" data-p="${x.k}">${esc(x.label)}</button>`).join('');
-  $('p-front').textContent = p.front; $('p-worker').textContent = p.worker; $('p-db').textContent = p.db;
-}
-$('pchips').addEventListener('click', e=>{ const b=e.target.closest('[data-p]'); if(!b) return; pk=b.dataset.p; store.set('qer-pub-project', pk); drawProject(); });
-drawProject();
-
-/* ---------- lesson 2 stepper ---------- */
-const tmap = [["n-dev"],["n-dev"],["a2","n-worker"],["n-worker"],["a3","n-db"],["a2","n-dev"]];
-let tstep = -1;
-function tdraw(){
-  document.querySelectorAll('#tsteps li').forEach((li,i)=>{ li.classList.toggle('on', i===tstep); li.classList.toggle('done', i<tstep); });
-  document.querySelectorAll('#dia .on').forEach(e=>e.classList.remove('on'));
-  if (tstep>=0) tmap[tstep].forEach(id=>$(id).classList.add('on'));
-  $('tnext').textContent = tstep<0 ? 'Start the trip' : (tstep>=5 ? 'Done!' : 'Next step');
-  $('tnext').disabled = tstep>=5;
-}
-$('tnext').onclick = ()=>{ tstep=Math.min(5,tstep+1); tdraw(); };
-$('treset').onclick = ()=>{ tstep=-1; tdraw(); };
-tdraw();
-
-/* ---------- practice room state ---------- */
-const ALPH = 'abcdefghjkmnpqrstuvwxyz23456789';
-const rand = n => Array.from({length:n},()=>ALPH[Math.floor(Math.random()*ALPH.length)]).join('');
-function fresh(){
-  return {
-    day:0, friendN:0, limits:{}, events:{}, routes:[], newcols:[],
-    devices:[
-      {pid:'tab-7k2q', name:"My tablet"},
-      {pid:'lap-9x4m', name:'Laptop that played last month'}
-    ],
-    db:{
-      players:{cols:[['pid','TEXT'],['ducks','INTEGER'],['first_day','INTEGER']], rows:[
-        {pid:'tab-7k2q', ducks:12, first_day:-10},
-        {pid:'lap-9x4m', ducks:40, first_day:-30}
-      ]},
-      friends:{cols:[['code','TEXT'],['pid','TEXT'],['at','INTEGER'],['joins','INTEGER']], rows:[]},
-      referrals:{cols:[['pid','TEXT'],['at','INTEGER']], rows:[]}
-    }
-  };
-}
-let S = store.get('qer-pub-state') || fresh();
-if (!S || !S.db || !S.devices) S = fresh();
-let hist = [];
-let hi = {};   // table -> Set of row indexes changed by the last action
-function snap(){ hist.push(JSON.stringify(S)); if (hist.length>30) hist.shift(); }
-function save(){ store.set('qer-pub-state', S); }
-const T = n => S.db[n];
-const colType = (t,c) => { const x = T(t).cols.find(k=>k[0]===c); return x ? x[1] : null; };
-const findRow = (t, f) => T(t).rows.findIndex(f);
-const devName = pid => (S.devices.find(d=>d.pid===pid)||{}).name || pid;
-function mark(t, i){ (hi[t] = hi[t] || new Set()).add(i); }
-
-/* ---------- pretend Worker ---------- */
-const BUILTIN = [
-  {id:'b-code',  method:'POST', path:'/api/friend/code',   needsCode:false, about:'Give me my share code'},
-  {id:'b-claim', method:'POST', path:'/api/friend/claim',  needsCode:true,  about:'Count me as a friend'},
-  {id:'b-stat',  method:'GET',  path:'/api/friend/status', needsCode:false, about:'How many friends joined?'}
-];
-const allRoutes = () => BUILTIN.concat(S.routes);
-
-function run(route, pid, code){
-  const tr = []; const ok = t=>tr.push(['ok',t]); const bad = t=>tr.push(['bad',t]); const info = t=>tr.push(['info',t]);
-  let res;
-  const player = T('players').rows.find(r=>r.pid===pid);
-  if (route.id==='b-code'){
-    if (!player){ bad('This device has never played, so it has no player row.'); return {res:{ok:false}, tr}; }
-    ok('This device is a real player.');
-    let i = findRow('friends', r=>r.pid===pid);
-    if (i<0){ T('friends').rows.push({code:rand(8), pid, at:S.day, joins:0}); i = T('friends').rows.length-1; mark('friends', i); ok('No code yet, so the Worker made a random 8-letter code and saved a new row in friends.'); }
-    else info('This device already has a code, so the Worker gives back the same one.');
-    res = {ok:true, code:T('friends').rows[i].code};
-    S.events.code = true;
-  } else if (route.id==='b-stat'){
-    const r = T('friends').rows.find(r=>r.pid===pid);
-    info(r ? 'Found this device in friends and read its joins.' : 'This device has no share code yet, so the answer is 0.');
-    res = {ok:true, friends: r ? r.joins : 0};
-  } else if (route.id==='b-claim'){
-    code = (code||'').trim();
-    const oi = findRow('friends', r=>r.code===code);
-    if (oi<0){ bad('Is the share code real? No, there is no row in friends with that code.'); return {res:{ok:false, why:'no'}, tr}; }
-    const owner = T('friends').rows[oi];
-    ok('The share code is real. It belongs to ' + devName(owner.pid) + '.');
-    if (owner.pid===pid){ bad("Is it someone else's code? No, it's your own. No counting yourself!"); S.events.own=true; return {res:{ok:false, why:'no'}, tr}; }
-    ok("It isn't the claimer's own code.");
-    if (!player){ bad('This device has never played.'); return {res:{ok:false, why:'no'}, tr}; }
-    if (player.ducks<1){ bad('Has the friend found a duck? Not yet. The game will try again later.'); S.events.duck=true; return {res:{ok:false, retry:true, why:'duck'}, tr}; }
-    ok('The friend has found ' + player.ducks + (player.ducks===1?' duck.':' ducks.'));
-    if (player.first_day < owner.at || player.first_day < S.day-3){ bad('Is the friend new? No, this device was playing before the code was made, or more than 3 days ago.'); S.events.notnew=true; return {res:{ok:false, why:'no'}, tr}; }
-    ok('The friend is new.');
-    if (T('referrals').rows.some(r=>r.pid===pid)){ info('Was this device counted before? Yes, so it is not counted again.'); S.events.already=true; return {res:{ok:true, counted:false, why:'already'}, tr}; }
-    ok('This device was never counted before.');
-    const lk = owner.pid + ':' + S.day; const used = S.limits[lk]||0;
-    if (used>=2){ bad('Has the sharer hit the limit? Yes, 2 friends today already in this practice room. Try again tomorrow.'); S.events.later=true; return {res:{ok:false, retry:true, why:'later'}, tr}; }
-    ok('The sharer has had ' + used + ' friend' + (used===1?'':'s') + ' counted today, which is under the limit of 2.');
-    S.limits[lk] = used+1;
-    T('referrals').rows.push({pid, at:S.day}); mark('referrals', T('referrals').rows.length-1);
-    owner.joins += 1; mark('friends', oi);
-    info('Saved a row in referrals and added 1 to joins.');
-    S.events.counted = true;
-    res = {ok:true, counted:true};
-  } else {
-    S.events.custom = true;
-    const t = route.table, c = route.col;
-    if (!T(t)){ bad('The table ' + t + ' does not exist.'); return {res:{ok:false}, tr}; }
-    if (route.recipe==='count'){ info('Counted the rows in ' + t + '.'); res={ok:true, count:T(t).rows.length}; }
-    else if (route.recipe==='top'){ const v = T(t).rows.map(r=>Number(r[c])).filter(n=>!isNaN(n)); info('Looked at every ' + c + ' in ' + t + ' and kept the biggest.'); res={ok:true, top: v.length?Math.max(...v):null}; }
-    else if (route.recipe==='mine'){ const r = T(t).rows.find(r=>r.pid===pid); if (r){ ok('Found this device in ' + t + '.'); mark(t, T(t).rows.indexOf(r)); } else info('No row for this device in ' + t + '.'); res={ok:true, row:r||null}; }
-    else if (route.recipe==='addone'){ const i = findRow(t, r=>r.pid===pid); if (i<0){ bad('No row for this device in ' + t + ', so there is nothing to add to.'); return {res:{ok:false}, tr}; } T(t).rows[i][c] = (Number(T(t).rows[i][c])||0)+1; mark(t,i); ok('Added 1 to ' + c + '.'); res={ok:true}; res[c]=T(t).rows[i][c]; }
-  }
-  return {res, tr};
-}
-
-/* ---------- missions ---------- */
-const MISSIONS = [
-  ['Get a share code for my tablet', 'Route: POST /api/friend/code, from my tablet.', ()=>S.events.code],
-  ['Try to count a brand-new friend', 'Press "A friend opens your link", then send a claim from Friend 1 with the tablet\'s code. What does the guard say?', ()=>S.events.duck],
-  ['Help the friend find a duck, then claim again', 'Press "Find a duck" next to Friend 1, then send the claim again.', ()=>S.events.counted],
-  ['Try to cheat: claim the same friend twice', 'Send the same claim again from the same friend.', ()=>S.events.already],
-  ['Try to count yourself', 'Send a claim from my tablet with its own code.', ()=>S.events.own],
-  ['Try with the old laptop', 'It found lots of ducks, but is it new?', ()=>S.events.notnew],
-  ['Hit the daily limit', 'Count 2 friends today, then try a 3rd. Press "Next day" and try again.', ()=>S.events.later],
-  ['Add a column to a table', 'Use "Add a column" below. Maybe a favorite_world column on players?', ()=>S.newcols.length>0],
-  ['Build your own door and use it', 'Use "Build a route", then pick it in Send a request.', ()=>S.events.custom]
-];
-function drawMissions(){
-  let n=0;
-  $('missions').innerHTML = MISSIONS.map(([t,h,f],i)=>{ const d=!!f(); if(d) n++; return `<li class="${d?'done':''}"><span class="box" aria-hidden="true">${d?'✓':i+1}</span><span class="mt">${esc(t)}${d?' <span class="sr" style="position:absolute;left:-9999px">done</span>':''}</span><span class="mh">${esc(h)}</span></li>`; }).join('');
-  $('meter').style.width = (n/MISSIONS.length*100)+'%'; window.dispatchEvent(new CustomEvent('er-missions',{detail:n}));
-}
-
-/* ---------- drawing ---------- */
-function drawDevices(){
-  $('day').textContent = 'Today is day ' + S.day;
-  $('devices').innerHTML = S.devices.map(d=>{ const p = T('players').rows.find(r=>r.pid===d.pid)||{}; return `<div class="dev"><div><div class="nm">${esc(d.name)}</div><div class="meta">pid ${esc(d.pid)} · ${p.ducks} duck${p.ducks===1?'':'s'} · first played day ${p.first_day}</div></div><button class="small" type="button" data-duck="${esc(d.pid)}">Find a duck</button></div>`; }).join('');
-  const cur = $('rq-dev').value;
-  $('rq-dev').innerHTML = S.devices.map(d=>`<option value="${esc(d.pid)}">${esc(d.name)}</option>`).join('');
-  if (S.devices.some(d=>d.pid===cur)) $('rq-dev').value = cur;
-  $('codes').innerHTML = T('friends').rows.map(r=>`<option value="${esc(r.code)}">${esc(devName(r.pid))}</option>`).join('');
-}
-function drawDB(){
-  $('dbview').innerHTML = Object.keys(S.db).map(t=>{
-    const tb=T(t), set=hi[t]||new Set();
-    const head = tb.cols.map(([c])=>`<th class="${S.newcols.includes(t+'.'+c)?'newcol':''}">${esc(c)}</th>`).join('');
-    const body = tb.rows.length ? tb.rows.map((r,i)=>`<tr class="${set.has(i)?'hi':''}">${tb.cols.map(([c])=>`<td>${esc(r[c]===undefined||r[c]===null?'':r[c])}</td>`).join('')}</tr>`).join('')
-      : `<tr><td class="empty" colspan="${tb.cols.length}">empty drawer</td></tr>`;
-    return `<div class="tblwrap"><table class="t"><caption>${esc(t)}</caption><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
-  }).join('');
-}
-function drawRoutes(){
-  const cur = $('rq-route').value;
-  $('rq-route').innerHTML = allRoutes().map(r=>`<option value="${esc(r.id)}">${esc(r.method+' '+r.path)} · ${esc(r.about)}</option>`).join('');
-  if (allRoutes().some(r=>r.id===cur)) $('rq-route').value = cur;
-  const r = allRoutes().find(x=>x.id===$('rq-route').value);
-  $('rq-code-wrap').hidden = !(r && r.needsCode);
-}
-function drawTablesSelects(){
-  const opts = Object.keys(S.db).map(t=>`<option>${esc(t)}</option>`).join('');
-  ['ac-table','br-table'].forEach(id=>{ const v=$(id).value; $(id).innerHTML=opts; if (S.db[v]) $(id).value=v; });
-  brCols();
-}
-function all(){ drawDevices(); drawDB(); drawRoutes(); drawTablesSelects(); drawMissions(); acPreview(); brPreview(); save(); }
-
-/* ---------- player actions ---------- */
-$('devices').addEventListener('click', e=>{
-  const b = e.target.closest('[data-duck]'); if (!b) return;
-  snap(); hi={};
-  const i = findRow('players', r=>r.pid===b.dataset.duck); T('players').rows[i].ducks += 1; mark('players', i);
-  $('rq-out').textContent = 'POST /api/ping\n' + JSON.stringify({pid:b.dataset.duck, ducks:T('players').rows[i].ducks}, null, 2);
-  $('rs-out').textContent = JSON.stringify({ok:true}, null, 2);
-  setTrace([['info','The game sent a ping, and the Worker saved the new duck count in players.']]);
-  all();
-});
-$('newfriend').onclick = ()=>{
-  snap(); hi={};
-  S.friendN += 1; const pid = 'new-' + rand(4);
-  S.devices.push({pid, name:'Friend ' + S.friendN});
-  T('players').rows.push({pid, ducks:0, first_day:S.day}); mark('players', T('players').rows.length-1);
-  setTrace([['info','Friend ' + S.friendN + ' opened the game for the first time. The game made a random pid and the Worker saved a new player row.']]);
-  all();
-  $('rq-dev').value = pid;
-  const claim = BUILTIN[1]; $('rq-route').value = claim.id; drawRoutes();
-  const mine = T('friends').rows.find(r=>r.pid==='tab-7k2q'); if (mine && !$('rq-code').value) $('rq-code').value = mine.code;
-};
-$('nextday').onclick = ()=>{ snap(); hi={}; S.day += 1; setTrace([['info','A new day. Each sharer can have 2 more friends counted today.']]); all(); };
-
-function setTrace(list){ $('trace').innerHTML = list.map(([k,t])=>`<li class="${k}"><span class="ic">${k==='ok'?'✓':k==='bad'?'✗':'·'}</span><span>${esc(t)}</span></li>`).join(''); }
-
-$('rq-route').onchange = drawRoutes;
-$('send').onclick = ()=>{
-  const r = allRoutes().find(x=>x.id===$('rq-route').value); if (!r) return;
-  const pid = $('rq-dev').value, code = $('rq-code').value.trim();
-  snap(); hi={};
-  const body = r.needsCode ? {pid, code} : {pid};
-  $('rq-out').textContent = r.method==='GET' ? `GET ${r.path}?pid=${pid}` : `POST ${r.path}\n` + JSON.stringify(body, null, 2);
-  const before = (T('friends').rows.find(x=>x.pid==='tab-7k2q')||{}).joins||0;
-  const out = run(r, pid, code);
-  $('rs-out').textContent = JSON.stringify(out.res, null, 2);
-  setTrace(out.tr);
-  const after = (T('friends').rows.find(x=>x.pid==='tab-7k2q')||{}).joins||0;
-  $('unlock').hidden = !(before===0 && after>=1);
-  if (r.id==='b-code' && out.res.code) $('rq-code').value = out.res.code;
-  all();
-};
-
-/* ---------- add a column ---------- */
-const NAME = /^[a-z][a-z0-9_]{1,23}$/;
-function acPreview(){
-  const t=$('ac-table').value, n=$('ac-name').value.trim()||'new_column', ty=$('ac-type').value, d=$('ac-def').value.trim();
-  const dv = ty==='TEXT' ? `'${d.replace(/'/g,"''")}'` : (d===''?'0':d);
-  $('ac-sql').innerHTML = `<span class="k">ALTER TABLE</span> ${esc(t)} <span class="k">ADD COLUMN</span> ${esc(n)} <span class="k">${ty}</span> <span class="k">DEFAULT</span> <span class="s">${esc(dv)}</span>;`;
-}
-['ac-table','ac-name','ac-type','ac-def'].forEach(id=>$(id).addEventListener('input', ()=>{ $('ac-err').textContent=''; if(id==='ac-type'){ $('ac-def').value = $('ac-type').value==='TEXT' ? '' : '0'; } acPreview(); }));
-$('ac-run').onclick = ()=>{
-  const t=$('ac-table').value, n=$('ac-name').value.trim(), ty=$('ac-type').value, d=$('ac-def').value.trim();
-  if (!NAME.test(n)) { $('ac-err').textContent = 'Use small letters, numbers and _ only, starting with a letter, like best_world.'; return; }
-  if (colType(t,n)) { $('ac-err').textContent = t + ' already has a column called ' + n + '.'; return; }
-  if (ty==='INTEGER' && d!=='' && !/^-?\d+$/.test(d)) { $('ac-err').textContent = 'A number column needs a whole number to start with, like 0.'; return; }
-  snap(); hi={};
-  T(t).cols.push([n, ty]);
-  const v = ty==='INTEGER' ? Number(d||0) : d;
-  T(t).rows.forEach((r,i)=>{ r[n]=v; mark(t,i); });
-  S.newcols.push(t+'.'+n);
-  $('ac-name').value=''; $('ac-err').textContent='';
-  setTrace([['ok','The database ran: ALTER TABLE ' + t + ' ADD COLUMN ' + n + '. Every row got the starting value. The yellow header is your new column.']]);
-  all();
-};
-
-/* ---------- build a route ---------- */
-function brCols(){
-  const t=$('br-table').value, rec=$('br-recipe').value; if (!T(t)) return;
-  const nums = T(t).cols.filter(c=>c[1]==='INTEGER').map(c=>c[0]);
-  const v=$('br-col').value;
-  $('br-col').innerHTML = nums.map(c=>`<option>${esc(c)}</option>`).join('');
-  if (nums.includes(v)) $('br-col').value=v;
-  $('br-col-wrap').hidden = !(rec==='top'||rec==='addone');
-}
-const camel = s => s.split(/[\/_-]+/).filter(Boolean).map((w,i)=>i?w[0].toUpperCase()+w.slice(1):w).join('');
-function brPreview(){
-  const m=$('br-method').value, name=($('br-name').value.trim().replace(/^\/+|\/+$/g,'')||'my/door'), rec=$('br-recipe').value, t=$('br-table').value, c=$('br-col').value||'joins';
-  const fn = camel(name) || 'myDoor';
-  const getPid = m==='GET' ? `<span class="k">const</span> pid = <span class="k">new</span> URL(req.url).searchParams.get(<span class="s">"pid"</span>);` : `<span class="k">const</span> { pid } = <span class="k">await</span> req.json();`;
-  const usesPid = rec==='mine'||rec==='addone';
-  let lines;
-  if (rec==='count') lines = [`<span class="k">const</span> row = <span class="k">await</span> env.DB.prepare(<span class="s">"SELECT COUNT(*) n FROM ${esc(t)}"</span>).first();`, `<span class="k">return</span> { ok: <span class="k">true</span>, count: row.n };`];
-  else if (rec==='top') lines = [`<span class="k">const</span> row = <span class="k">await</span> env.DB.prepare(<span class="s">"SELECT MAX(${esc(c)}) top FROM ${esc(t)}"</span>).first();`, `<span class="k">return</span> { ok: <span class="k">true</span>, top: row.top };`];
-  else if (rec==='mine') lines = [getPid, `<span class="k">const</span> row = <span class="k">await</span> env.DB.prepare(<span class="s">"SELECT * FROM ${esc(t)} WHERE pid=?1"</span>).bind(pid).first();`, `<span class="k">return</span> { ok: <span class="k">true</span>, row };`];
-  else lines = [getPid, `<span class="k">await</span> env.DB.prepare(<span class="s">"UPDATE ${esc(t)} SET ${esc(c)}=${esc(c)}+1 WHERE pid=?1"</span>).bind(pid).run();`, `<span class="k">return</span> { ok: <span class="k">true</span> };`];
-  $('br-code').innerHTML =
-`<span class="c">// 1. Add the door to the Worker's list</span>
-<span class="k">if</span> (r === <span class="s">"/api/${esc(name)}"</span> &amp;&amp; req.method === <span class="s">"${m}"</span>) <span class="k">return</span> json(<span class="k">await</span> ${esc(fn)}(req, env));
-
-<span class="c">// 2. The job behind the door</span>
-<span class="k">async function</span> ${esc(fn)}(req, env) {
-  ${lines.join('\n  ')}
-}` + (rec==='addone' && m==='GET' ? `\n<span class="c">// Tip: a door that changes things should be POST.</span>` : '') + (usesPid ? '' : '');
-}
-['br-method','br-name','br-table','br-col'].forEach(id=>$(id).addEventListener('input', ()=>{ $('br-err').textContent=''; brPreview(); }));
-$('br-recipe').addEventListener('input', ()=>{ $('br-err').textContent=''; brCols(); brPreview(); });
-$('br-table').addEventListener('input', ()=>{ brCols(); brPreview(); });
-$('br-save').onclick = ()=>{
-  const m=$('br-method').value, name=$('br-name').value.trim().replace(/^\/+|\/+$/g,''), rec=$('br-recipe').value, t=$('br-table').value, c=$('br-col').value;
-  if (!/^[a-z][a-z0-9_\/-]{1,30}$/.test(name)) { $('br-err').textContent = 'Give it an address with small letters, like friend/top.'; return; }
-  const path = '/api/' + name;
-  if (allRoutes().some(r=>r.path===path && r.method===m)) { $('br-err').textContent = 'There is already a ' + m + ' door at ' + path + '.'; return; }
-  if ((rec==='top'||rec==='addone') && !c) { $('br-err').textContent = t + ' has no number columns. Pick another table, or add a number column first.'; return; }
-  snap(); hi={};
-  const about = {count:'Count rows in '+t, mine:'My row in '+t, top:'Biggest '+c+' in '+t, addone:'Add 1 to my '+c}[rec];
-  S.routes.push({id:'c-'+rand(6), method:m, path, recipe:rec, table:t, col:(rec==='top'||rec==='addone')?c:null, needsCode:false, about});
-  $('br-name').value=''; $('br-err').textContent='';
-  all();
-  $('rq-route').value = S.routes[S.routes.length-1].id; drawRoutes();
-  setTrace([['ok','New door added: ' + m + ' ' + path + '. It is picked in Send a request, so press Send it to try it.']]);
-};
-
-/* ---------- undo / reset ---------- */
-$('undo').onclick = ()=>{ if (!hist.length) { setTrace([['info','Nothing to undo yet.']]); return; } S = JSON.parse(hist.pop()); hi={}; setTrace([['info','Undone. The practice room went back one step.']]); $('unlock').hidden=true; all(); };
-$('reset').onclick = ()=>{ $('resetq').hidden=false; };
-$('resetno').onclick = ()=>{ $('resetq').hidden=true; };
-$('resetyes').onclick = ()=>{ S=fresh(); hist=[]; hi={}; $('resetq').hidden=true; $('rq-code').value=''; $('unlock').hidden=true; $('rq-out').textContent='Pick a route and press Send it.'; $('rs-out').textContent='…'; setTrace([['info','Fresh practice room. Mission 1 is waiting.']]); all(); };
-
-/* ---------- checklist ---------- */
-const ck = store.get('qer-pub-check') || {};
-document.querySelectorAll('#checklist input').forEach(i=>{ i.checked=!!ck[i.id]; i.onchange=()=>{ ck[i.id]=i.checked; store.set('qer-pub-check', ck); }; });
-$('ckclear').onclick = ()=>{ document.querySelectorAll('#checklist input').forEach(i=>{ i.checked=false; ck[i.id]=false; }); store.set('qer-pub-check', ck); };
-
-all();
-})();
-</script>
-<script>
-(function(){
-const $ = id => document.getElementById(id);
-const store = { get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } }, set(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} } };
-const ORDER = ['team','parts','travel','tables','routes','practice','real','words'];
-const NAMES = {team:'The team',parts:'Three parts of anything online',travel:"A message's trip",tables:'Tables: the drawers',routes:'Routes: doors into the Worker',practice:'Practice room',real:'Changing the real one',words:'Word bank'};
-const VIEWS = ['home','classroom','calendar','leaderboards','about'];
-let done = store.get('er-done') || {};
-let last = store.get('er-last') || 'team';
-let missions = 0;
-const LEVELS = [[0,'New builder'],[20,'Tinkerer'],[50,'Apprentice'],[90,'Builder'],[140,'Engineer'],[200,'Architect'],[270,'Inventor'],[350,'Master builder'],[440,'Legend']];
-function pts(){ return ORDER.filter(k=>done[k]).length*20 + missions*10; }
-function lvlIdx(x){ let i=0; LEVELS.forEach((v,j)=>{ if(x>=v[0]) i=j; }); return i; }
-function nextUp(){ return ORDER.find(k=>!done[k]) || last; }
-function draw(){
-  const n = ORDER.filter(k=>done[k]).length, pct = Math.round(n/ORDER.length*100);
-  ['o-bar','cont-bar'].forEach(id=>$(id).style.width=pct+'%');
-  document.querySelectorAll('.cprog').forEach(e=>e.style.width=pct+'%');
-  document.querySelectorAll('.cprogt').forEach(e=>e.textContent = n ? `${pct}% complete` : 'Not started yet');
-  $('o-prog').textContent = `${n} of ${ORDER.length} lessons done · ${pct}%`;
-  $('cont-text').textContent = n ? `Next up: ${NAMES[nextUp()]}` : 'Start with lesson 1: The team';
-  $('cont-go').href = '#l-' + (n ? nextUp() : 'team');
-  document.querySelectorAll('.outline a').forEach(a=>a.classList.toggle('done', !!done[a.dataset.l]));
-  document.querySelectorAll('.outline a .ck').forEach(c=>c.textContent = c.parentElement.classList.contains('done') ? '✓' : '');
-  const x = pts(), li = lvlIdx(x), nx = LEVELS[li+1];
-  $('xp').textContent = `${x} points`;
-  document.querySelectorAll('.lvl-me').forEach(e=>e.textContent = li+1);
-  document.querySelectorAll('.me-pts').forEach(e=>e.textContent = '+'+x);
-  $('ring-l').textContent = li+1; $('lvl-name').textContent = LEVELS[li][1];
-  const p = nx ? Math.round((x-LEVELS[li][0])/(nx[0]-LEVELS[li][0])*100) : 100;
-  $('ring').style.setProperty('--p', p);
-  $('lvl-next').textContent = nx ? `${nx[0]-x} points to Level ${li+2}, ${nx[1]}` : 'Top level reached!';
-  $('ladder').innerHTML = LEVELS.map((v,i)=>`<li class="${i<=li?'got':''} ${i===li?'on':''}"><i>${i+1}</i><span>${v[1]}<small>${v[0]} points</small></span></li>`).join('');
-}
-function toast(t){ const d=document.createElement('div'); d.className='toast'; d.textContent=t; document.body.appendChild(d); setTimeout(()=>d.remove(),1800); }
-function show(){
-  const h = (location.hash||'#home').slice(1);
-  const isL = h.startsWith('l-') && ORDER.includes(h.slice(2));
-  const view = isL ? 'player' : (VIEWS.includes(h) ? h : 'home');
-  ['player',...VIEWS].forEach(v=>$('v-'+v).hidden = v!==view);
-  const tab = view==='player' ? 'classroom' : view;
-  document.querySelectorAll('.tabs a').forEach(a=>a.setAttribute('aria-current', a.dataset.tab===tab ? 'page' : 'false'));
-  if (isL){
-    const k = h.slice(2); last = k; store.set('er-last', k);
-    document.querySelectorAll('[data-lesson]').forEach(s=>s.hidden = s.dataset.lesson!==k);
-    document.querySelectorAll('.outline a').forEach(a=>a.setAttribute('aria-current', a.dataset.l===k ? 'page' : 'false'));
-    $('crumb-l').textContent = NAMES[k];
-    const i = ORDER.indexOf(k);
-    $('prev').disabled = i===0; $('next').textContent = i===ORDER.length-1 ? 'Back to classroom' : 'Next →';
-    $('done').setAttribute('aria-pressed', !!done[k]); $('done').textContent = done[k] ? '✓ Completed' : 'Mark complete';
-    $('outline').classList.add('shut'); $('otoggle').setAttribute('aria-expanded','false'); $('otoggle').textContent='Show lessons';
-  }
-  window.scrollTo(0,0);
-}
-function complete(k){ const before=lvlIdx(pts()); done[k]=true; store.set('er-done',done); const after=lvlIdx(pts()); toast(after>before ? `Level up! You're Level ${after+1}, ${LEVELS[after][1]}` : '+20 points. Lesson complete!'); draw(); }
-$('done').onclick = ()=>{ const k=last; if(done[k]){ done[k]=false; store.set('er-done',done); draw(); } else complete(k); show(); };
-$('prev').onclick = ()=>{ const i=ORDER.indexOf(last); if(i>0) location.hash='#l-'+ORDER[i-1]; };
-$('next').onclick = ()=>{ const i=ORDER.indexOf(last); if(!done[last]) complete(last); location.hash = i<ORDER.length-1 ? '#l-'+ORDER[i+1] : '#classroom'; };
-$('otoggle').onclick = ()=>{ const o=$('outline'); const shut=o.classList.toggle('shut'); $('otoggle').setAttribute('aria-expanded', String(!shut)); $('otoggle').textContent = shut ? 'Show lessons' : 'Hide lessons'; };
-document.querySelectorAll('.cats .chip').forEach(b=>b.onclick=()=>{ document.querySelectorAll('.cats .chip').forEach(x=>x.setAttribute('aria-pressed', String(x===b))); const c=b.dataset.cat; document.querySelectorAll('.post').forEach(p=>p.hidden = c!=='All' && p.dataset.cat!==c); });
-window.addEventListener('er-missions', e=>{ const before=missions, bl=lvlIdx(pts()); missions=e.detail; if (missions>before && window.__erReady){ const al=lvlIdx(pts()); toast(al>bl ? `Level up! You're Level ${al+1}, ${LEVELS[al][1]}` : '+10 points. Mission done!'); } draw(); });
-window.addEventListener('hashchange', show);
-draw(); show(); window.__erReady = true;
-})();
-</script>
 </body>
 </html>
