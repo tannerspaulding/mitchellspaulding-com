@@ -242,6 +242,11 @@ td.r,th.r{text-align:right}
   .views{position:fixed;top:auto;left:0;right:0;bottom:0;border-width:2.5px 0 0;box-shadow:0 -3px 0 var(--shadow);padding-bottom:env(safe-area-inset-bottom)}
   .dash{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
 }
+@media (min-width:960px){
+  .views{display:flex;flex-direction:column;position:fixed;top:max(24px, env(safe-area-inset-top, 0px));left:calc(50% - 310px - 24px - 104px);width:104px}
+  .views button{border-left:0;border-top:2px solid var(--rule);padding:12px 4px 10px}
+  .views button:first-child{border-top:0}
+}
 .gauges{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
 .gauges li{display:flex;flex-direction:column;gap:5px}
 .gauges .gtop{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
@@ -293,7 +298,7 @@ td.r,th.r{text-align:right}
       <button type="button" class="alert" id="ideaAlert" hidden></button>
     </section>
 
-    <nav class="views" id="views" role="tablist" aria-label="Stats views">
+    <nav class="views" id="views" role="tablist" aria-label="Stats views" aria-orientation="horizontal">
       <button type="button" role="tab" id="t-players" data-view="players" aria-controls="v-players"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6M15.5 5.2a3 3 0 0 1 0 5.6M18 14.4c2 .8 3 2.8 3 5.6"/></svg><span>Players</span></button>
       <button type="button" role="tab" id="t-traffic" data-view="traffic" aria-controls="v-traffic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="8" width="14" height="11" rx="3"/><path d="M12 4.5V8M9.5 13h.01M14.5 13h.01M9.5 16h5"/><circle cx="12" cy="4" r="1"/></svg><span>Traffic</span></button>
       <button type="button" role="tab" id="t-progress" data-view="progress" aria-controls="v-progress"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg><span>Progress</span></button>
@@ -572,11 +577,12 @@ function setView(v,scroll){
   VIEWS.forEach(k=>{ $("v-"+k).hidden=k!==v; });
   try{ history.replaceState(null,"","#"+v); }catch(_){}
   if(v==="players") drawMap();
-  if(scroll){ const top=$("views").getBoundingClientRect().top+scrollY-8; if(scrollY>top) scrollTo({top}); }
+  if(scroll){ const fixed=getComputedStyle($("views")).position==="fixed", el=fixed?$("v-"+v):$("views"), top=el.getBoundingClientRect().top+scrollY-(fixed?16:8); if(scrollY>top) scrollTo({top}); }
 }
 document.querySelectorAll("#views [role=tab]").forEach(b=>{
   b.addEventListener("click",()=>setView(b.dataset.view,true));
-  b.addEventListener("keydown",e=>{ const i=VIEWS.indexOf(view), d=e.key==="ArrowRight"?1:e.key==="ArrowLeft"?-1:0; if(!d) return; e.preventDefault(); const n=VIEWS[(i+d+VIEWS.length)%VIEWS.length]; setView(n,true); $("t-"+n).focus(); }); });
+  b.addEventListener("keydown",e=>{ const i=VIEWS.indexOf(view), rail=matchMedia("(min-width:960px)").matches, d=e.key==="ArrowRight"||(rail&&e.key==="ArrowDown")?1:e.key==="ArrowLeft"||(rail&&e.key==="ArrowUp")?-1:0; if(!d) return; e.preventDefault(); const n=VIEWS[(i+d+VIEWS.length)%VIEWS.length]; setView(n,true); $("t-"+n).focus(); }); });
+{ const q=matchMedia("(min-width:960px)"), o=()=>$("views").setAttribute("aria-orientation",q.matches?"vertical":"horizontal"); o(); try{ q.addEventListener("change",o); }catch(_){} }
 setView((location.hash||"").slice(1));
 $("loginForm").addEventListener("submit",async e=>{ e.preventDefault();
   const pw=$("pw").value; if(!pw){ loginMsg("Type the password first."); return; }
