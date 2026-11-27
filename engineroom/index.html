@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex,nofollow">
 <meta name="referrer" content="no-referrer">
 <title>The Engine Room · How Quackers works</title>
-<meta name="description" content="A look behind the curtain at how the Quackers game is built: the front end, the Worker, the database, and the privacy and safety rules around them.">
+<meta name="description" content="A look behind the curtain at how the Quackers game is built: the front end, the three Workers, the database, and the privacy and safety rules around them.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Lexend:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Gochi+Hand&display=swap">
 <style>
@@ -16,7 +16,7 @@
   --paper:#F4F7FB; --grid:#D3E1EF; --grid-major:#B9CDE2; --ink:#14233F; --ink-soft:#4A5D7A; --ink-faint:#5E7190;
   --card:#FFFFFF; --card-2:#EEF4FA; --card-edge:#14233F; --tape:rgba(255,233,74,.75); --shadow:#14233F; --rule:#B9CDE2; --dash:#9FB3CB;
   --red:#FF5A36; --blue:#2F5BFF; --lime:#B8F02E; --hi:#FFE94A; --violet:#7A4DFF;
-  /* diagram roles: edge = the Worker and requests, data = the database, accent = the game, warn = limits and alerts */
+  /* diagram roles: edge = the Workers and requests, data = the database, accent = the game, warn = limits and alerts */
   --accent:#C2410C; --accent-soft:#FFE7A3; --edge:#2F5BFF; --edge-soft:#DCE5FF; --data:#2D7A1E; --data-soft:#E2F7C2;
   --warn:#C0263A; --warn-soft:#FFD9D2;
   --code-bg:#14233F; --code-fg:#EAF2FF; --code-key:#FFE94A; --code-str:#B8F02E; --code-com:#A9BEDF;
@@ -210,11 +210,11 @@ section[id]{scroll-margin-top:16px}
 <header class="hero">
   <div class="eyebrow">The Engine Room</div>
   <h1>How <em>Quackers</em> works, behind the curtain</h1>
-  <p class="lede">Quackers is a duck-finding game that Mitchell designs and builds with his dad. On the surface it's hidden ducks, worlds and mini games. Underneath, it's a small but real web system: a static front end, a serverless API, and a database with strict rules about what it keeps. This page walks through all of it.</p>
+  <p class="lede">Quackers is a duck-finding game that Mitchell designs and builds with his dad. On the surface it's hidden ducks, worlds and mini games. Underneath, it's a small but real web system: a static front end, a serverless API split into three small programs, and a database with strict rules about what it keeps. This page walks through all of it.</p>
   <dl class="facts">
     <div><dt>Front end</dt><dd>Plain HTML, CSS, JS</dd></div>
     <div><dt>Hosting</dt><dd>GitHub Pages</dd></div>
-    <div><dt>API</dt><dd>Cloudflare Worker</dd></div>
+    <div><dt>API</dt><dd>3 Cloudflare Workers</dd></div>
     <div><dt>Database</dt><dd>Cloudflare D1 (SQLite)</dd></div>
     <div><dt>Cost to run</dt><dd>Free plan</dd></div>
   </dl>
@@ -230,13 +230,13 @@ section[id]{scroll-margin-top:16px}
   <div class="split">
     <div class="prose">
       <p><b>The front end</b> is the game itself. GitHub Pages hands your browser a set of files once, and from then on the game runs entirely on your device. Your progress is saved right there too, in the browser's local storage.</p>
-      <p><b>The Worker</b> is a small program that runs on Cloudflare's network, close to wherever the player is. It only wakes up when the game sends it a request, does its job in a few milliseconds, and goes back to sleep. That's what "serverless" means: no computer of ours sitting there waiting.</p>
-      <p><b>D1</b> is the database the Worker talks to. It's SQLite, the same database engine that's inside most phones, run by Cloudflare. Only the Worker can reach it. The game never touches the database directly.</p>
+      <p><b>The Workers</b> are small programs that run on Cloudflare's network, close to wherever the player is. Each one only wakes up when a request arrives, does its job in a few milliseconds, and goes back to sleep. That's what "serverless" means: no computer of ours sitting there waiting. Quackers has three, and each has one job: <code>quackers-api</code> answers the game, <code>quackers-words</code> checks words, and <code>quackers-stats</code> runs the grown-ups' stats page.</p>
+      <p><b>D1</b> is the database. It's SQLite, the same database engine that's inside most phones, run by Cloudflare. Only the Workers can reach it. The game never touches the database directly.</p>
       <p>Notice the two separate jobs. Delivering the game is one job (GitHub). Shared things like the leaderboard and the Idea Box are another (Cloudflare). If the second one is down, the game still plays.</p>
     </div>
     <figure>
-      <svg viewBox="0 0 420 520" role="img" aria-labelledby="map-t">
-        <title id="map-t">System map. The code repository publishes to GitHub Pages, which sends the game to the browser. The browser sends requests to the Cloudflare Worker, which reads and writes the D1 database.</title>
+      <svg viewBox="0 0 420 612" role="img" aria-labelledby="map-t">
+        <title id="map-t">System map. The code repository publishes to GitHub Pages, which sends the game to the browser. The browser sends requests to the game Worker, quackers-api. That Worker asks the private quackers-words Worker to check names and ideas. A separate quackers-stats Worker serves the grown-ups' stats page. Both quackers-api and quackers-stats read and write the D1 database.</title>
         <defs>
           <marker id="m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ah" d="M0 0L10 5L0 10z"/></marker>
           <marker id="me" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ah e" d="M0 0L10 5L0 10z"/></marker>
@@ -262,23 +262,36 @@ section[id]{scroll-margin-top:16px}
         <text class="t2" x="38" y="250">saves your progress in local storage</text>
         <text class="t2" x="38" y="268">keeps a small queue of stats to send</text>
 
-        <path class="wire e" d="M130 278V351" marker-end="url(#me)"/>
-        <path class="wire e dash" d="M160 354V281" marker-end="url(#me)"/>
-        <text class="t2" x="174" y="311">HTTPS + JSON</text>
-        <text class="t2" x="174" y="328">request, then reply</text>
+        <path class="wire e" d="M100 278V351" marker-end="url(#me)"/>
+        <path class="wire e dash" d="M130 354V281" marker-end="url(#me)"/>
+        <text class="t2" x="144" y="311">HTTPS + JSON</text>
+        <text class="t2" x="144" y="328">request, then reply</text>
 
         <text class="t3" x="300" y="344">CLOUDFLARE</text>
-        <rect class="n-edge" x="20" y="354" width="380" height="64" rx="12"/>
-        <text class="t1" x="38" y="381">Worker: quackers-api</text>
-        <text class="t2" x="38" y="401">checks every request, then answers</text>
+        <rect class="n-edge" x="20" y="354" width="222" height="84" rx="12"/>
+        <text class="t1" x="36" y="381">Worker: quackers-api</text>
+        <text class="t2" x="36" y="401">the game's front door</text>
+        <text class="t2" x="36" y="419">checks every request</text>
 
-        <path class="wire d" d="M130 418V453" marker-end="url(#md)"/>
-        <path class="wire d dash" d="M160 456V421" marker-end="url(#md)"/>
-        <rect class="n-data" x="20" y="456" width="380" height="56" rx="12"/>
-        <text class="t1" x="38" y="481">D1 database: quackers</text>
-        <text class="t2" x="38" y="500">15 tables, reachable only by the Worker</text>
+        <path class="wire e" d="M242 390H259" marker-end="url(#me)"/>
+        <rect class="n-box" x="262" y="354" width="138" height="84" rx="12"/>
+        <text class="t1" x="276" y="381">quackers-words</text>
+        <text class="t2" x="276" y="401">checks names, ideas</text>
+        <text class="t2" x="276" y="419">no public address</text>
+
+        <rect class="n-box" x="262" y="462" width="138" height="62" rx="12"/>
+        <text class="t1" x="276" y="488">quackers-stats</text>
+        <text class="t2" x="276" y="508">grown-ups only</text>
+
+        <path class="wire d" d="M100 438V545" marker-end="url(#md)"/>
+        <path class="wire d dash" d="M130 548V441" marker-end="url(#md)"/>
+        <text class="t2" x="144" y="486">SQL, in batches</text>
+        <path class="wire d" d="M331 524V545" marker-end="url(#md)"/>
+        <rect class="n-data" x="20" y="548" width="380" height="56" rx="12"/>
+        <text class="t1" x="38" y="573">D1 database: quackers</text>
+        <text class="t2" x="38" y="592">reachable only by the Workers</text>
       </svg>
-      <figcaption>Solid arrows are requests. Dashed arrows are what comes back.</figcaption>
+      <figcaption>Solid arrows are requests, dashed ones are replies. The word checker has no address on the internet at all.</figcaption>
     </figure>
   </div>
 </section>
@@ -337,14 +350,14 @@ section[id]{scroll-margin-top:16px}
   <div class="split">
     <figure>
       <svg viewBox="0 0 420 560" role="img" aria-labelledby="seq-t">
-        <title id="seq-t">Sequence of one ping. The game saves locally, waits twenty seconds to bundle changes, and posts a ping to the Worker. The Worker checks the data and the rate limit, writes a batch to D1, and replies ok.</title>
+        <title id="seq-t">Sequence of one ping. The game saves locally, waits twenty seconds to bundle changes, and posts a ping to the game Worker, quackers-api. It checks the data and the rate limit, writes a batch to D1, and replies ok.</title>
         <defs>
           <marker id="s1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ah e" d="M0 0L10 5L0 10z"/></marker>
           <marker id="s2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ah d" d="M0 0L10 5L0 10z"/></marker>
           <marker id="s3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ah" d="M0 0L10 5L0 10z"/></marker>
         </defs>
         <rect class="n-acc" x="10" y="10" width="110" height="34" rx="8"/><text class="t1" x="44" y="32">Game</text>
-        <rect class="n-edge" x="155" y="10" width="110" height="34" rx="8"/><text class="t1" x="186" y="32">Worker</text>
+        <rect class="n-edge" x="155" y="10" width="110" height="34" rx="8"/><text class="t1" x="210" y="32" text-anchor="middle">quackers-api</text>
         <rect class="n-data" x="300" y="10" width="110" height="34" rx="8"/><text class="t1" x="344" y="32">D1</text>
         <path class="lane" d="M65 44V550M210 44V550M355 44V550"/>
 
@@ -389,7 +402,7 @@ section[id]{scroll-margin-top:16px}
       <figcaption>The whole round trip usually takes well under a second.</figcaption>
     </figure>
     <div class="prose">
-      <p>A <b>request</b> is a message from the game to the Worker. It goes to an address called an <b>endpoint</b>, like <code>/v1/ping</code>, and carries data in <b>JSON</b>, a simple text format for lists and labelled values. Every request travels over HTTPS, so it's encrypted on the way.</p>
+      <p>A <b>request</b> is a message from the game to a Worker. Pings go to the game Worker, <code>quackers-api</code>. It goes to an address called an <b>endpoint</b>, like <code>/v1/ping</code>, and carries data in <b>JSON</b>, a simple text format for lists and labelled values. Every request travels over HTTPS, so it's encrypted on the way.</p>
       <p>This is roughly what a ping looks like. The ID is random letters and numbers the game makes the first time it runs. Nothing in it says who you are.</p>
       <div class="codecap"><span>request body (example values)</span><span>POST /v1/ping</span></div>
 <pre><code>{
@@ -403,7 +416,7 @@ section[id]{scroll-margin-top:16px}
   <span class="k">"where"</span>: { <span class="k">"world"</span>: <span class="s">"sea"</span>, <span class="k">"screen"</span>: <span class="s">"reef"</span> },
   <span class="k">"ev"</span>: [ { <span class="k">"t"</span>: <span class="s">"try"</span>, <span class="k">"g"</span>: <span class="s">"egg"</span>, <span class="k">"l"</span>: 6, <span class="k">"win"</span>: true } ]
 }</code></pre>
-      <p>The rule every backend follows: <b>never trust the client</b>. Anyone can send anything to a public endpoint, so the Worker re-checks every field. An ID that isn't 16 to 40 letters and numbers is turned away. A device that isn't one of the three allowed words is dropped. Duck counts are capped at 500 and levels at 10, and long lists are cut short. Bad data never reaches the database.</p>
+      <p>The rule every backend follows: <b>never trust the client</b>. Anyone can send anything to a public endpoint, so the game Worker re-checks every field. An ID that isn't 16 to 40 letters and numbers is turned away. A device that isn't one of the three allowed words is dropped. Duck counts are capped at 500 and levels at 10, and long lists are cut short. Bad data never reaches the database.</p>
     </div>
   </div>
 </section>
@@ -412,8 +425,31 @@ section[id]{scroll-margin-top:16px}
 <section class="ch" id="worker">
   <div class="ch-head">
     <span class="num">04</span>
-    <h2>The Worker: one program, many doors</h2>
-    <p>The Worker is a single JavaScript program. It looks at which endpoint a request came to and runs the matching function. These are the doors the game uses.</p>
+    <h2>The Workers: three programs, one job each</h2>
+    <p>The backend used to be one program that did everything. Now it's split into three, so each piece only has the power it needs.</p>
+  </div>
+  <div class="grid3">
+    <div class="card">
+      <span class="tag e">Public</span>
+      <h3>quackers-api, the game's door</h3>
+      <p>The only Worker the game talks to. It takes pings, runs Top Ducks, the Idea Box and friend links, handles the forget button, sorts out bots, answers the health check and runs the daily cleanup.</p>
+    </div>
+    <div class="card">
+      <span class="tag d">Private</span>
+      <h3>quackers-words, the word checker</h3>
+      <p>Holds the list of words that aren't allowed and answers one question: is this text OK? It has no web address, so nobody on the internet can reach it. Only the game Worker can, through a <b>service binding</b>, a private connection inside Cloudflare.</p>
+    </div>
+    <div class="card">
+      <span class="tag a">Grown-ups</span>
+      <h3>quackers-stats, the control room</h3>
+      <p>Serves the stats page, where a grown-up reviews ideas and can hide a leaderboard name. It needs a grown-up's sign-in, and the game never talks to it.</p>
+    </div>
+  </div>
+  <div class="split">
+    <div class="prose">
+      <p>This idea has a name: <b>least privilege</b>. Each part gets only what its job needs. The game's public door has no grown-up tools in it, so a mistake there can't reach them. And each Worker can be updated on its own without touching the others.</p>
+      <p>A Worker looks at which <b>endpoint</b> a request came to and runs the matching function. These are the doors the game uses, all on <code>quackers-api</code>.</p>
+    </div>
   </div>
   <div class="tblwrap">
   <table class="tbl">
@@ -434,7 +470,7 @@ section[id]{scroll-margin-top:16px}
     <div class="card">
       <span class="tag e">Leaderboard</span>
       <h3>Names checked twice</h3>
-      <p>The same name-check file runs in the game, for instant feedback, and in the Worker, which is the real gate. It blocks rude words (including tricks like swapping letters for numbers), websites, usernames, schools, grades and too many digits. New players start with a random duck name like "Turbo Waddler".</p>
+      <p>The game checks a name as you type, for instant feedback. The real gate is <code>quackers-words</code>: the game Worker asks it about every nickname and idea. It blocks rude words (including tricks like swapping letters for numbers), websites, usernames, schools, grades and too many digits. If the checker can't answer, the name waits instead of slipping through.</p>
     </div>
     <div class="card">
       <span class="tag a">Idea Box</span>
@@ -446,6 +482,11 @@ section[id]{scroll-margin-top:16px}
       <h3>Hard to cheat</h3>
       <p>A friend link carries a random 8-character code that leaves out look-alikes like l, 1, o and 0. It only counts if the new device really is new (it first played after the link was made, in the last two days) and has found a duck. Each sharer can earn at most 3 credits a day.</p>
     </div>
+    <div class="card">
+      <span class="tag e">Bots</span>
+      <h3>Players, idle visits and bots</h3>
+      <p>Not every visit is a kid playing. Search engines and other programs load the game too. The game Worker sorts each device into player, idle or bot, using clues like whether it played at all or came from a data center, so the numbers count real players.</p>
+    </div>
   </div>
 </section>
 
@@ -454,7 +495,7 @@ section[id]{scroll-margin-top:16px}
   <div class="ch-head">
     <span class="num">05</span>
     <h2>The database: what's kept and why</h2>
-    <p>A database is a set of tables, like spreadsheets with strict columns. Quackers has 15 of them, and the most important design choice is which side of the wall each one sits on.</p>
+    <p>A database is a set of tables, like spreadsheets with strict columns. Quackers has 16 of them, and the most important design choice is which side of the wall each one sits on.</p>
   </div>
   <div class="vault">
     <div class="zone p">
@@ -462,7 +503,7 @@ section[id]{scroll-margin-top:16px}
       <h3>Per device</h3>
       <p>Needed so the leaderboard, Idea Box and friend links work for you. All of it is deleted by the forget button.</p>
       <div class="chips">
-        <div class="chip"><b>players</b><span>Ducks found, worlds, Pond Points, best levels, last world and screen, device type, country and state, first and last day played.</span></div>
+        <div class="chip"><b>players</b><span>Ducks found, worlds, Pond Points, best levels, last world and screen, device type, country and state, first and last day played, player or bot, and the kind of place it came from, like a search engine or a friend link.</span></div>
         <div class="chip"><b>daily</b><span>Which days a device played. Kept 90 days for a players-per-day chart.</span></div>
         <div class="chip"><b>board</b><span>Leaderboard nickname, and whether it's hidden.</span></div>
         <div class="chip"><b>ideas · idea_votes</b><span>Ideas and hearts. The link to the device is removed when the month ends.</span></div>
@@ -478,13 +519,13 @@ section[id]{scroll-margin-top:16px}
         <div class="chip"><b>levels</b><span>Tries and wins per mini game level, to tune difficulty.</span></div>
         <div class="chip"><b>shop · earn</b><span>What gets bought, and where Pond Points come from.</span></div>
         <div class="chip"><b>sessions</b><span>How long a play session lasts, under its own throwaway ID.</span></div>
-        <div class="chip"><b>cities</b><span>Players per city per day, as a count only.</span></div>
+        <div class="chip"><b>visits · cities</b><span>Visits per city per day, as a count only, with bots counted apart from players.</span></div>
       </div>
     </div>
     <div class="zone h">
       <span class="tag a">Housekeeping</span>
       <h3>For the system</h3>
-      <p>Tables the Worker uses to protect itself.</p>
+      <p>Tables the Workers use to protect themselves.</p>
       <div class="chips">
         <div class="chip"><b>limits</b><span>Short-lived counters for rate limits.</span></div>
         <div class="chip"><b>usage</b><span>Daily request and row counts, to stay inside the free plan.</span></div>
@@ -493,7 +534,7 @@ section[id]{scroll-margin-top:16px}
   </div>
   <div class="split">
     <div class="prose">
-      <p>The Worker talks to D1 in <b>SQL</b>, the language almost every database speaks. Values are never pasted into the SQL text. They're passed separately as "bound parameters", which is the standard defence against a classic attack called SQL injection.</p>
+      <p>The Workers talk to D1 in <b>SQL</b>, the language almost every database speaks. Values are never pasted into the SQL text. They're passed separately as "bound parameters", which is the standard defence against a classic attack called SQL injection.</p>
       <p>A ping turns into several writes at once, sent as a single <b>batch</b>. Either they all happen or none do, so the tables never disagree with each other.</p>
     </div>
     <div class="prose">
@@ -517,13 +558,13 @@ section[id]{scroll-margin-top:16px}
   </div>
   <div class="grid3">
     <div class="card"><span class="tag e">Identity</span><h3>No accounts, no names</h3><p>A random device ID stands in for the player. No sign-up, no email, no real name. The only typed text is an optional nickname and Idea Box ideas, and both are filtered.</p></div>
-    <div class="card"><span class="tag e">Network</span><h3>No IP addresses, no logs</h3><p>The Worker doesn't save IP addresses or write request logs. Cloudflare works out a rough country, state and city from the connection. The city is only ever added to a daily count, never stored with a player.</p></div>
+    <div class="card"><span class="tag e">Network</span><h3>No IP addresses, no logs</h3><p>The Workers don't save IP addresses or write request logs. Cloudflare works out a rough country, state and city from the connection. The city is only ever added to a daily count, never stored with a player.</p></div>
     <div class="card"><span class="tag a">Choice</span><h3>Off switch and Do Not Track</h3><p>Turning off "Share game stats" in Settings stops all sending. If the browser has Do Not Track on, the game sends nothing at all.</p></div>
     <div class="card"><span class="tag a">Review</span><h3>Humans in the loop</h3><p>No idea is visible to other players until a grown-up approves it, and declined ideas have their text erased right away. Any leaderboard name can be hidden.</p></div>
-    <div class="card"><span class="tag d">Deletion</span><h3>A real forget button</h3><p>One tap sends <code>/v1/forget</code>. The Worker deletes the device's rows from every per-device table in one batch, takes its hearts back off ideas, and the game starts fresh with a new ID.</p></div>
+    <div class="card"><span class="tag d">Deletion</span><h3>A real forget button</h3><p>One tap sends <code>/v1/forget</code>. The game Worker deletes the device's rows from every per-device table in one batch, takes its hearts back off ideas, and the game starts fresh with a new ID.</p></div>
     <div class="card"><span class="tag d">Separation</span><h3>Totals stay totals</h3><p>Anything that doesn't need to be tied to a device isn't. Session lengths even use a separate throwaway ID so they can't be joined back to a player.</p></div>
   </div>
-  <p class="callout"><b>Open source, no secrets in the design.</b> Everything on this page can be read in the game's code. What stays private is data: player records, and the keys a grown-up uses to run things. Good security doesn't depend on hiding how a system works.</p>
+  <p class="callout"><b>Open source, no secrets in the design.</b> Nothing on this page is a secret, and the game's code is public. What stays private is data: player records and the keys a grown-up uses to run things. Those live in the Workers' settings and the database, never in the game's code. Good security doesn't depend on hiding how a system works.</p>
 </section>
 
 <!-- 07 LIMITS -->
@@ -535,7 +576,7 @@ section[id]{scroll-margin-top:16px}
   </div>
   <div class="split">
     <div class="prose">
-      <p>A <b>rate limit</b> caps how many times something can happen in a window of time. The Worker keeps a tiny counter per device and action in the <code>limits</code> table. Each counter expires on its own, and the Worker says no once it's full.</p>
+      <p>A <b>rate limit</b> caps how many times something can happen in a window of time. The game Worker keeps a tiny counter per device and action in the <code>limits</code> table. Each counter expires on its own, and the Worker says no once it's full.</p>
       <div class="tblwrap">
       <table class="tbl">
         <thead><tr><th>Action</th><th>Limit per device</th></tr></thead>
@@ -581,7 +622,7 @@ section[id]{scroll-margin-top:16px}
   </div>
   <div class="split">
     <div class="prose">
-      <p>The Worker also counts its own work. Every request adds to a daily tally of requests, rows read and rows written, saved in the <code>usage</code> table and compared with the free plan's daily allowance.</p>
+      <p>The Workers also count their own work. Every request to the game Worker or the stats Worker adds to one shared daily tally of requests, rows read and rows written, saved in the <code>usage</code> table and compared with the free plan's daily allowance.</p>
       <p>Most of the care above exists to keep these numbers small: batching, skipping pings that carry nothing new, and reading only the rows a request needs.</p>
     </div>
     <div class="tblwrap">
@@ -603,7 +644,7 @@ section[id]{scroll-margin-top:16px}
   <div class="ch-head">
     <span class="num">08</span>
     <h2>Cleanup: data has an expiry date</h2>
-    <p>The safest data is data you no longer have. Once a day, the Worker runs a cleanup that deletes anything past its time.</p>
+    <p>The safest data is data you no longer have. Once a day, the game Worker runs a cleanup that deletes anything past its time.</p>
   </div>
   <div class="split">
     <ul class="tl">
@@ -630,7 +671,7 @@ section[id]{scroll-margin-top:16px}
   </div>
   <div class="split flip">
     <div class="prose">
-      <p>The Worker has a health check that answers three questions: is the Worker up, can it reach the database, and how close is today's usage to each free-plan limit, as a percentage. If the database can't be reached, it answers with error code 503 ("service unavailable") so anything watching knows right away.</p>
+      <p>The game Worker has a health check that answers three questions: is it up, can it reach the database, and how close is today's usage to each free-plan limit, as a percentage. If the database can't be reached, it answers with error code 503 ("service unavailable") so anything watching knows right away.</p>
       <p>A watcher calls the health check three times a day. If it fails, or any limit passes 70%, a grown-up gets an alert. Warning at 70% leaves time to react before anything actually stops.</p>
       <p>And if the backend does go down, the design already covers it: the game keeps playing, stats wait in the queue, and the back-off keeps retries gentle until it's back.</p>
     </div>
@@ -680,7 +721,7 @@ section[id]{scroll-margin-top:16px}
   <a href="#map"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2.5 6 2.5 6-2.5v14.5l-6 2.5-6-2.5-6 2.5z"/><path d="M9 3.5v14.5M15 6v14.5"/></svg><span>Map</span></a>
   <a href="#front"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M9 20h6M12 16v4"/></svg><span>Front</span></a>
   <a href="#trip"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="18.5" r="2"/><circle cx="18.5" cy="5.5" r="2"/><path d="M7.5 18.5h7a3.5 3.5 0 0 0 0-7h-5a3.5 3.5 0 0 1 0-7h7"/></svg><span>Trip</span></a>
-  <a href="#worker"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2.5L5 13.5h6l-1 8 8-11h-6z"/></svg><span>Worker</span></a>
+  <a href="#worker"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2.5L5 13.5h6l-1 8 8-11h-6z"/></svg><span>Workers</span></a>
   <a href="#data"><svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5.5" rx="7.5" ry="2.8"/><path d="M4.5 5.5v13c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8v-13M4.5 12c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8"/></svg><span>Data</span></a>
   <a href="#privacy"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10.5" rx="1.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/><path d="M12 14.5v2.5"/></svg><span>Privacy</span></a>
   <a href="#limits"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 17a8.5 8.5 0 1 1 17 0"/><path d="M12 17l4-5"/><path d="M3.5 17h17"/></svg><span>Limits</span></a>
