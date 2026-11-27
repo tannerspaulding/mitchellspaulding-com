@@ -198,6 +198,21 @@ td.r,th.r{text-align:right}
 .winbox.made{background:var(--okbg)}
 .runner{font-size:.86rem;color:var(--ink-soft);margin:10px 0 0}
 @media (max-width:440px){.ideas li{grid-template-columns:auto minmax(0,1fr)}.ideas .acts{grid-column:1/-1;justify-content:flex-end}}
+/* v5: real players vs bots */
+.show{display:flex;flex-direction:column;gap:6px}
+.show .tabs{gap:6px}
+.mix{display:flex;height:26px;border:2px solid var(--card-edge);background:var(--card)}
+.mix i{display:block;height:100%;min-width:2px}
+.mix i.k-player,.key i.k-player{background:var(--blue)}
+.mix i.k-bot,.key i.k-bot{background:var(--red)}
+.mix i.k-idle,.key i.k-idle{background:repeating-linear-gradient(135deg,var(--blue-soft) 0 4px,var(--card) 4px 8px);border:0}
+.key i.k-idle{border:1px solid var(--card-edge)}
+.mix i.k-old,.key i.k-old{background:var(--dash)}
+.chart .s-player{fill:var(--blue)} .chart .s-bot{fill:var(--red)} .chart .s-idle{fill:var(--blue-soft)} .chart .s-old{fill:var(--dash)}
+.devices.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:540px){.devices.four{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.dev small{font-size:.74rem;color:var(--ink-soft)}
+.wait-note{border:2px dashed var(--dash);padding:10px 12px;font-size:.9rem;color:var(--ink-soft)}
 /* v4: live refresh, views, limits */
 .topR{display:flex;gap:8px;align-items:center}
 .refresh{display:inline-flex;align-items:center;gap:6px}
@@ -213,7 +228,7 @@ td.r,th.r{text-align:right}
 .alert{font:inherit;font-weight:600;font-size:.9rem;text-align:left;border:2.5px solid var(--card-edge);background:var(--hi);color:#14233F;padding:10px 12px;box-shadow:3px 3px 0 var(--shadow);cursor:pointer}
 .alert.hot{background:var(--red);color:#fff}
 .alert:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--shadow)}
-.views{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;border:2.5px solid var(--card-edge);background:var(--card);box-shadow:4px 4px 0 var(--shadow);position:sticky;top:8px;z-index:5}
+.views{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:0;border:2.5px solid var(--card-edge);background:var(--card);box-shadow:4px 4px 0 var(--shadow);position:sticky;top:8px;z-index:5}
 .views button{position:relative;font:inherit;background:none;border:0;border-left:2px solid var(--rule);color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px 7px;cursor:pointer;min-width:0}
 .views button:first-child{border-left:0}
 .views svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -270,12 +285,17 @@ td.r,th.r{text-align:right}
         <span class="sample" id="sampleTag" hidden><i></i>SAMPLE NUMBERS</span>
       </div>
       <p class="updated" id="updated" aria-live="polite"></p>
+      <div class="show" id="showWrap" hidden>
+        <div class="tabs" role="group" aria-label="Who to count" id="showTabs"><button class="tab" type="button" data-kind="player" aria-pressed="true">Real players</button><button class="tab" type="button" data-kind="bot" aria-pressed="false">Bots</button><button class="tab" type="button" data-kind="idle" aria-pressed="false">Didn't play</button><button class="tab" type="button" data-kind="all" aria-pressed="false">Everyone</button></div>
+        <p class="small" id="showNote"></p>
+      </div>
       <div class="counts" id="counts"></div>
       <button type="button" class="alert" id="ideaAlert" hidden></button>
     </section>
 
     <nav class="views" id="views" role="tablist" aria-label="Stats views">
       <button type="button" role="tab" id="t-players" data-view="players" aria-controls="v-players"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6M15.5 5.2a3 3 0 0 1 0 5.6M18 14.4c2 .8 3 2.8 3 5.6"/></svg><span>Players</span></button>
+      <button type="button" role="tab" id="t-traffic" data-view="traffic" aria-controls="v-traffic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="8" width="14" height="11" rx="3"/><path d="M12 4.5V8M9.5 13h.01M14.5 13h.01M9.5 16h5"/><circle cx="12" cy="4" r="1"/></svg><span>Traffic</span></button>
       <button type="button" role="tab" id="t-progress" data-view="progress" aria-controls="v-progress"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg><span>Progress</span></button>
       <button type="button" role="tab" id="t-games" data-view="games" aria-controls="v-games"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="7" width="19" height="11" rx="4"/><path d="M7.5 10.5v4M5.5 12.5h4M15.5 11.5h.01M18 13.5h.01"/></svg><span>Games</span></button>
       <button type="button" role="tab" id="t-ideas" data-view="ideas" aria-controls="v-ideas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.3 1 2.1h5c0-.8.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg><span>Ideas</span><i class="badge" id="ideaBadge" hidden></i></button>
@@ -320,6 +340,44 @@ td.r,th.r{text-align:right}
         <div class="key"><span><i></i>Home-screen app</span><span><i class="b"></i>Web browser</span></div>
         <div class="split" id="modeSplit" role="img"></div>
         <p class="small" id="modeNote"></p>
+      </section>
+    </div>
+
+    <!-- TRAFFIC: real players vs bots, and how visitors found Quackers -->
+    <div class="view" id="v-traffic" role="tabpanel" aria-labelledby="t-traffic" hidden>
+      <p class="wait-note" id="trafficWait" hidden>This fills in once the database update is run and the new Worker code is deployed in Cloudflare.</p>
+      <section class="card" aria-labelledby="c20">
+        <div class="card-head"><h2 id="c20">Who's visiting</h2><p>Every device that ever opened Quackers, sorted by what it did there.</p></div>
+        <div class="mix" id="mix" role="img"></div>
+        <div class="key" id="mixKey"></div>
+        <div class="devices four" id="mixCounts"></div>
+        <p class="hand" id="mixNote"></p>
+        <h3 class="sub">Each day, last 14 days</h3>
+        <div class="chart" id="mixChart"></div>
+        <button class="toggle" type="button" data-for="sortHow">Show how they're sorted</button>
+        <div id="sortHow" hidden><ul class="small">
+          <li><b>Real player:</b> found a duck, tried a mini game, or tapped or pressed keys 5 or more times.</li>
+          <li><b>Bot:</b> says it's a bot or crawler, runs a remote-controlled browser, or comes from a data center (like Amazon or Hetzner) and never plays.</li>
+          <li><b>Didn't play:</b> a home or phone connection that opened the game and left without playing.</li>
+          <li><b>Before sorting:</b> devices from before Nov 27 that never found a duck. Most are probably bots, but there's no way to tell now.</li>
+        </ul></div>
+      </section>
+
+      <section class="card" aria-labelledby="c21">
+        <div class="card-head"><h2 id="c21">Bot traffic</h2><p>Devices sorted as bots, all time. City counts are from the last 30 days.</p></div>
+        <h3 class="sub">Why they count as bots</h3>
+        <ol class="rows" id="botWhy"></ol>
+        <h3 class="sub">Where they run</h3>
+        <ol class="rows" id="botNets"></ol>
+        <h3 class="sub">Bot cities</h3>
+        <ol class="rows" id="botCities"></ol>
+      </section>
+
+      <section class="card" aria-labelledby="c22">
+        <div class="card-head"><h2 id="c22">How they found Quackers</h2><p>How each device first arrived. Only the kind of place is kept, never the web address.</p></div>
+        <div class="tabs" role="group" aria-label="Whose arrivals" id="srcTabs"><button class="tab" type="button" data-src="player" aria-pressed="true">Real players</button><button class="tab" type="button" data-src="bot" aria-pressed="false">Bots</button><button class="tab" type="button" data-src="all" aria-pressed="false">Everyone</button></div>
+        <ol class="rows" id="sources"></ol>
+        <p class="small" id="srcNote"></p>
       </section>
     </div>
 
@@ -446,7 +504,15 @@ const PREVIEW=!!window.QS_SAMPLE, DAY=864e5, TK="qs-token";
 let S=null, now=Date.now(), mapView="us", lvGame="egg";
 // Live refresh: reload the numbers every minute while the page is open and on screen. It pauses after
 // 10 minutes without a tap or scroll, so a page left open doesn't keep using the free daily allowance.
-const AUTO=60000, IDLE=10*6e4, VIEWS=["players","progress","games","ideas","limits","board"];
+const AUTO=60000, IDLE=10*6e4, VIEWS=["players","traffic","progress","games","ideas","limits","board"];
+// Who the numbers count. Real players is the default; the choice is remembered on this device only.
+const KINDS={player:{label:"Real players",noun:"player",note:"Counting real players only: devices that found a duck, tried a mini game or tapped around. Bots and visitors who didn't play are left out."},
+  bot:{label:"Bots",noun:"bot",note:"Counting bots only. Game progress is mostly empty for these, which is the point."},
+  idle:{label:"Didn't play",noun:"visitor",note:"Counting people who opened Quackers but left without playing."},
+  all:{label:"Everyone",noun:"visitor",note:"Counting every device, real or bot, including ones from before sorting started."}};
+const KK="qs-kind"; let kind="player", srcKind="player", NOUN="player";
+try{ const k=localStorage.getItem(KK); if(KINDS[k]) kind=k; }catch(_){}
+const sampleFor=k=>{ const b=window.QS_SAMPLE||{}; return Object.assign({},b,(b.views||{})[k]||{},{kind:k}); };
 let busy=false, lastLoad=0, lastTry=0, lastAct=Date.now(), failed=false, view="players";
 const WORLD_IDS=["yard","manor","sea","snow","theater","city","mall"];
 const WORLDS=["The Backyard","Spooky Manor","Under the Sea","Snowy Peaks","The Theater","The City","The Mall"];
@@ -478,9 +544,9 @@ function loginMsg(t){ $("loginErr").hidden=!t; $("loginErr").textContent=t||""; 
 async function load(quiet){
   if(busy) return; busy=true; lastTry=Date.now(); setUpdated();
   try{
-    if(PREVIEW){ if(S&&quiet!=="first") nudge(); else S=window.QS_SAMPLE; now=S.at=Date.now(); await new Promise(r=>setTimeout(r,350)); }
+    if(PREVIEW){ if(S&&quiet!=="first"&&quiet!=="kind") nudge(); else S=sampleFor(kind); now=S.at=Date.now(); await new Promise(r=>setTimeout(r,350)); }
     else {
-      let j; try{ j=await api("/v1/admin/summary"); }catch(_){ j=null; }
+      let j; try{ j=await api("/v1/admin/summary?kind="+kind); }catch(_){ j=null; }
       // A refresh that fails keeps the numbers on screen; only the first load or a lapsed login goes back to the login.
       if(!j||(!j.ok&&j.status!==401&&live())){ if(live()){ failed=true; return; } show(false); loginMsg(j?(j.status===500?"The stats server hit an error. If the database update in Cloudflare hasn't been run yet, run it, then try again.":j.msg||"Something went wrong."):"Can't reach the stats server. Check your connection and try again."); return; }
       if(!j.ok){ try{ sessionStorage.removeItem(TK); }catch(_){} show(false); if(j.status===500) loginMsg("The stats server hit an error. If the database update in Cloudflare hasn't been run yet, run it, then try again."); else if(j.status!==401) loginMsg(j.msg||"Something went wrong."); else if(tok()) loginMsg("Please log in again."); return; }
@@ -520,6 +586,9 @@ $("loginForm").addEventListener("submit",async e=>{ e.preventDefault();
   if(!j.ok){ loginMsg(j.msg||"That password didn't work."); return; }
   try{ sessionStorage.setItem(TK,j.token); }catch(_){} $("pw").value=""; lastAct=Date.now(); load("first"); });
 $("logout").addEventListener("click",()=>{ try{ sessionStorage.removeItem(TK); }catch(_){} S=null; lastLoad=0; show(false); loginMsg(""); setUpdated(); });
+document.querySelectorAll("[data-kind]").forEach(b=>b.addEventListener("click",()=>{ if(b.dataset.kind===kind) return; kind=b.dataset.kind; try{ localStorage.setItem(KK,kind); }catch(_){} lastAct=Date.now(); setShow(); load("kind"); }));
+document.querySelectorAll("[data-src]").forEach(b=>b.addEventListener("click",()=>{ srcKind=b.dataset.src; document.querySelectorAll("[data-src]").forEach(x=>x.setAttribute("aria-pressed",x===b)); drawSources(); }));
+function setShow(){ document.querySelectorAll("[data-kind]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.kind===kind)); $("showNote").textContent=KINDS[kind].note; }
 if(PREVIEW){ $("sampleTag").hidden=false; $("loginNote").textContent="Preview: any password opens sample numbers. The real page checks the password on the server and locks after 10 wrong tries in an hour."; }
 if(tok()) load("first");
 
@@ -561,11 +630,12 @@ const wk=s=>new Date(s+"T12:00:00Z").toLocaleDateString("en-US",{weekday:"short"
 const mins=s=>s<60?`${Math.round(s)} sec`:`${Math.round(s/60)} min`;
 
 function draw(){
-  const P=Math.max(S.players,1), pct=n=>Math.round(n/P*100);
+  const P=Math.max(S.players,1), pct=n=>Math.round(n/P*100), sorted=!!S.kind;
+  NOUN=sorted?KINDS[kind].noun:"player"; $("showWrap").hidden=!sorted; if(sorted) setShow();
   const ss=S.sessions||{n:0,avgSecs:0,app:0,lengths:[],hours:[],dows:[]};
   const modes=Object.fromEntries((S.modes||[]).map(m=>[m.m,m.n])), known=(modes.app||0)+(modes.browser||0);
   $("counts").innerHTML=[
-    ["Players",fmtN(S.players),"all time"],["Today",S.today,"played today"],["This week",S.week,"last 7 days"],
+    [sorted?KINDS[kind].label:"Players",fmtN(S.players),"all time"],["Today",S.today,sorted&&kind!=="player"?"came today":"played today"],["This week",S.week,"last 7 days"],
     ["Came back",S.returning,`${pct(S.returning)}% played 2+ days`],["Avg visit",ss.n?mins(ss.avgSecs):"–","per play session"],
     ["App",known?`${Math.round((modes.app||0)/known*100)}%`:"–","play from home screen"]
   ].map(([l,v,s])=>`<div class="count"><span class="label">${l}</span><b>${v}</b><small>${s}</small></div>`).join("");
@@ -573,8 +643,11 @@ function draw(){
   // players per day
   $("dayChart").dataset.title="Players each day, last 14 days";
   bars($("dayChart"),S.daily,{value:d=>d.n,label:(d,i)=>i%2===1||i===13?fmtDay(d.day).replace(/^\w+ /,""):"",
-    tipText:d=>`${wk(d.day)} ${fmtDay(d.day)}: ${plural(d.n,"player")}`,highlight:(d,i)=>i===13});
-  $("dayTbl").innerHTML=`<table><thead><tr><th>Day</th><th class="r">Players</th></tr></thead><tbody>${S.daily.slice().reverse().map(d=>`<tr><td>${wk(d.day)} ${fmtDay(d.day)}</td><td class="r">${d.n}</td></tr>`).join("")}</tbody></table>`;
+    tipText:d=>`${wk(d.day)} ${fmtDay(d.day)}: ${plural(d.n,NOUN)}`,highlight:(d,i)=>i===13});
+  $("dayTbl").innerHTML=`<table><thead><tr><th>Day</th><th class="r">${NOUN==="player"?"Players":cap(NOUN)+"s"}</th></tr></thead><tbody>${S.daily.slice().reverse().map(d=>`<tr><td>${wk(d.day)} ${fmtDay(d.day)}</td><td class="r">${d.n}</td></tr>`).join("")}</tbody></table>`;
+
+  // real players vs bots
+  drawTraffic();
 
   // map + cities
   drawMap();
@@ -597,7 +670,7 @@ function draw(){
   const ORDER=["0","1-5","6-15","16-30","31-50","51+"], dm=Object.fromEntries(S.ducks.map(d=>[d.b,d.n]));
   const dk=ORDER.map(b=>({b,n:dm[b]||0}));
   $("duckChart").dataset.title="Players by ducks found";
-  bars($("duckChart"),dk,{value:d=>d.n,label:d=>d.b,tipText:d=>`${d.b} ducks: ${plural(d.n,"player")}`});
+  bars($("duckChart"),dk,{value:d=>d.n,label:d=>d.b,tipText:d=>`${d.b} ducks: ${plural(d.n,NOUN)}`});
   const big=dm["51+"]||0; $("duckNote").textContent=S.players?`Average player has found ${S.avgDucks} ducks.${big?` ${plural(big,"player")} found more than 50!`:""}`:"No ducks found yet.";
 
   // hardest ducks
@@ -653,6 +726,58 @@ function drawLevels(){
   $("lvTbl").innerHTML=`<table><thead><tr><th>Level</th><th class="r">Tries</th><th class="r">Lost</th></tr></thead><tbody>${lv.map(d=>`<tr><td>${d.l}</td><td class="r">${d.tries}</td><td class="r">${d.lost} · ${d.p}%</td></tr>`).join("")}</tbody></table>`;
 }
 
+// ---- traffic: real players vs bots, and how devices found Quackers ----
+const KORD=["player","idle","bot","old"], KNAME={player:"Real players",idle:"Didn't play",bot:"Bots",old:"Before sorting"}, KONE={player:"real player",idle:"didn't play",bot:"bot",old:"before sorting"};
+const WHY={automated:["Remote-controlled browser","a script drives a real browser"],crawler:["Says it's a bot","search engines, site checkers, scrapers"],datacenter:["From a data center","never tapped or played"]};
+const SEARCH={google:"Google",bing:"Bing",duckduckgo:"DuckDuckGo",yahoo:"Yahoo",ecosia:"Ecosia",brave:"Brave Search",yandex:"Yandex",baidu:"Baidu",kagi:"Kagi"};
+const SOCIAL={facebook:"Facebook",instagram:"Instagram",x:"X (Twitter)",reddit:"Reddit",youtube:"YouTube",tiktok:"TikTok",discord:"Discord",linkedin:"LinkedIn",pinterest:"Pinterest",threads:"Threads",bluesky:"Bluesky",nextdoor:"Nextdoor",whatsapp:"WhatsApp",snapchat:"Snapchat"};
+function srcName(s){ if(!s) return ["Not recorded yet","before Nov 27, or not sent yet"];
+  if(s==="friend") return ["Friend link","a player shared their link"]; if(s==="direct") return ["Typed, texted or bookmarked","no website sent them"];
+  if(s==="mitchell") return ["Mitchell's website",""]; if(s==="github") return ["GitHub","where the game's code lives"]; if(s==="other") return ["Another website",""];
+  const [k,v]=s.split(":"); if(k==="search") return [`${SEARCH[v]||cap(v)} search`,"search engine"]; if(k==="social") return [SOCIAL[v]||cap(v),"social or chat app"]; return [cap(s),""]; }
+function stack(host,days){
+  const W=560,H=190,L=30,R=6,T=14,B=26, iw=W-L-R, ih=H-T-B, tot=d=>KORD.reduce((a,k)=>a+(d[k]||0),0);
+  const max=Math.max(1,...days.map(tot)), nice=max<=5?5:max<=10?10:Math.ceil(max/5)*5, y=v=>T+ih-(v/nice)*ih, step=iw/days.length, bw=Math.min(36,step*.62);
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Devices each day by type, last 14 days"><g class="grid">`;
+  [0,nice/2,nice].forEach(t=>{ s+=`<line x1="${L}" x2="${W-R}" y1="${y(t)}" y2="${y(t)}"/><text x="${L-6}" y="${y(t)+3.5}" text-anchor="end">${t}</text>`; }); s+=`</g>`;
+  days.forEach((d,i)=>{ const x=L+i*step+(step-bw)/2; let base=0;
+    s+=`<rect class="hit" data-i="${i}" x="${L+i*step}" y="${T}" width="${step}" height="${ih}"/>`;
+    KORD.forEach(k=>{ const v=d[k]||0; if(!v) return; const h=v/nice*ih; s+=`<rect class="s-${k}" x="${x}" y="${y(base+v)}" width="${bw}" height="${Math.max(1,h)}"/>`; base+=v; });
+    if(i%2===1||i===13) s+=`<text x="${x+bw/2}" y="${H-8}" text-anchor="middle">${esc(fmtDay(d.day).replace(/^\w+ /,""))}</text>`; });
+  s+=`<line class="axis" x1="${L}" x2="${W-R}" y1="${T+ih}" y2="${T+ih}"/></svg><div class="tip" hidden></div>`;
+  host.innerHTML=s; const tip=host.querySelector(".tip"), svg=host.querySelector("svg");
+  host.querySelectorAll(".hit").forEach(h=>{ const i=+h.dataset.i, d=days[i];
+    const on=()=>{ const sr=svg.getBoundingClientRect(), k=sr.width/W, parts=KORD.filter(q=>d[q]).map(q=>`${d[q]} ${KONE[q]}`);
+      tip.textContent=`${wk(d.day)} ${fmtDay(d.day)}: ${parts.length?parts.join(", "):"nobody"}`; tip.hidden=false;
+      tip.style.left=Math.min(Math.max((L+i*step+step/2)*k,90),sr.width-90)+"px"; tip.style.top=y(tot(d))*k+"px"; };
+    h.addEventListener("pointerenter",on); h.addEventListener("pointerleave",()=>{ tip.hidden=true; }); h.addEventListener("click",on); });
+}
+function drawTraffic(){
+  const T=S.traffic, wait=!T;
+  $("trafficWait").hidden=!wait; document.querySelectorAll("#v-traffic section").forEach(x=>x.hidden=wait); if(wait) return;
+  const mix=Object.fromEntries((T.mix||[]).map(r=>[r.k,r.n])), tot=KORD.reduce((a,k)=>a+(mix[k]||0),0), pc=n=>tot?Math.round(n/tot*100):0;
+  $("mix").innerHTML=KORD.filter(k=>mix[k]).map(k=>`<i class="k-${k}" style="width:${mix[k]/tot*100}%"></i>`).join("");
+  $("mix").setAttribute("aria-label",KORD.map(k=>`${pc(mix[k]||0)}% ${KNAME[k].toLowerCase()}`).join(", "));
+  $("mixKey").innerHTML=KORD.map(k=>`<span><i class="k-${k}"></i>${KNAME[k]}</span>`).join("");
+  $("mixCounts").innerHTML=KORD.map(k=>`<div class="dev"><span class="label">${KNAME[k]}</span><b>${fmtN(mix[k]||0)}</b><small>${pc(mix[k]||0)}%</small></div>`).join("");
+  const bots=mix.bot||0, real=mix.player||0;
+  $("mixNote").textContent=!tot?"Nobody yet.":bots||real?`${bots>real?`Bots outnumber real players ${Math.max(1,Math.round(bots/Math.max(real,1)))} to 1.`:`Real players outnumber bots.`} ${pc(bots+(mix.old||0))}% of all devices are bots or probably bots.`:"";
+  stack($("mixChart"),T.days||[]);
+  const why=(T.why||[]).slice().sort((a,b)=>b.n-a.n);
+  rows($("botWhy"),why,{name:w=>(WHY[w.w]||[cap(w.w)])[0],sub:w=>(WHY[w.w]||["",""])[1],value:w=>w.n,warm:true,empty:"No bots yet."});
+  rows($("botNets"),T.nets||[],{name:n=>n.net,value:n=>n.n,warm:true,empty:"No bots yet."});
+  rows($("botCities"),T.cities||[],{name:c=>c.city,sub:c=>c.country==="US"?c.region:[c.region,COUNTRY[c.country]||c.country].filter(Boolean).join(", "),value:c=>c.n,warm:true,empty:"No bot cities in the last 30 days."});
+  drawSources();
+}
+function drawSources(){
+  const T=S&&S.traffic; if(!T) return;
+  const m={}; (T.sources||[]).forEach(r=>{ if(srcKind!=="all"&&r.k!==srcKind) return; m[r.s]=(m[r.s]||0)+r.n; });
+  const list=Object.entries(m).map(([s,n])=>({s,n})).sort((a,b)=>(a.s===""?1:0)-(b.s===""?1:0)||b.n-a.n);
+  rows($("sources"),list,{name:r=>srcName(r.s)[0],sub:r=>srcName(r.s)[1],value:r=>r.n,warm:srcKind==="bot",empty:"Nothing recorded yet."});
+  const known=list.filter(r=>r.s).reduce((a,r)=>a+r.n,0), all=list.reduce((a,r)=>a+r.n,0);
+  $("srcNote").textContent=all&&known<all?`${plural(all-known,"device")} arrived before this was tracked.`:"";
+}
+
 // ---- map: outlines are drawn ahead of time; city dots need d3-geo to place them ----
 function drawMap(){
   const host=$("map"); if(!S||!MAPS) return;
@@ -662,11 +787,11 @@ function drawMap(){
   if(g) proj=mapView==="us"?d3.geoAlbersUsa().scale(M.scale).translate(M.translate):d3.geoNaturalEarth1().scale(M.scale).translate(M.translate);
   const max=Math.max(1,...cities.map(c=>c.n));
   const dots=proj?cities.map((c,i)=>{ if(c.lat==null||c.lon==null) return null; const p=proj([c.lon,c.lat]); if(!p) return null;
-    const r=3+Math.sqrt(c.n/max)*9; return {r,svg:`<circle class="dot" data-i="${i}" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="${r.toFixed(1)}"><title>${esc(c.city)}: ${plural(c.n,"player")}</title></circle>`}; }).filter(Boolean).sort((a,b)=>b.r-a.r).map(d=>d.svg).join(""):"";
+    const r=3+Math.sqrt(c.n/max)*9; return {r,svg:`<circle class="dot" data-i="${i}" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="${r.toFixed(1)}"><title>${esc(c.city)}: ${plural(c.n,NOUN)}</title></circle>`}; }).filter(Boolean).sort((a,b)=>b.r-a.r).map(d=>d.svg).join(""):"";
   host.innerHTML=`<svg viewBox="0 0 ${W} ${M.H}" role="img" aria-label="${mapView==="us"?"Map of the USA":"World map"} with a dot for each city where people play"><path class="land" d="${M.land}"/>${dots}</svg><div class="tip" hidden></div>${proj||!cities.length?"":`<span class="wait">${window.QS_GEO_FAIL?"City dots couldn't load. The list below has every city.":"Loading dots…"}</span>`}`;
   const tip=host.querySelector(".tip"), svg=host.querySelector("svg");
   host.querySelectorAll(".dot").forEach(d=>{ const c=cities[+d.dataset.i];
-    const on=()=>{ const sr=svg.getBoundingClientRect(), k=sr.width/W; tip.textContent=`${c.city}, ${c.country==="US"?c.region:(COUNTRY[c.country]||c.country)}: ${plural(c.n,"player")}`; tip.hidden=false; d.classList.add("on");
+    const on=()=>{ const sr=svg.getBoundingClientRect(), k=sr.width/W; tip.textContent=`${c.city}, ${c.country==="US"?c.region:(COUNTRY[c.country]||c.country)}: ${plural(c.n,NOUN)}`; tip.hidden=false; d.classList.add("on");
       tip.style.left=Math.min(Math.max(+d.getAttribute("cx")*k,80),sr.width-80)+"px"; tip.style.top=(+d.getAttribute("cy")-+d.getAttribute("r"))*k+"px"; };
     const off=()=>{ tip.hidden=true; d.classList.remove("on"); };
     d.addEventListener("pointerenter",on); d.addEventListener("pointerleave",off); d.addEventListener("click",on); });
