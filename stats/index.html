@@ -343,7 +343,7 @@ function loginMsg(t){ $("loginErr").hidden=!t; $("loginErr").textContent=t||""; 
 async function load(){
   if(PREVIEW){ S=window.QS_SAMPLE; now=S.at; show(true); draw(); return; }
   let j; try{ j=await api("/v1/admin/summary"); }catch(_){ show(false); loginMsg("Can't reach the stats server. Check your connection and try again."); return; }
-  if(!j.ok){ try{ sessionStorage.removeItem(TK); }catch(_){} show(false); if(j.status!==401) loginMsg(j.msg||"Something went wrong."); else if(tok()) loginMsg("Please log in again."); return; }
+  if(!j.ok){ try{ sessionStorage.removeItem(TK); }catch(_){} show(false); if(j.status===500) loginMsg("The stats server hit an error. If the database update in Cloudflare hasn't been run yet, run it, then try again."); else if(j.status!==401) loginMsg(j.msg||"Something went wrong."); else if(tok()) loginMsg("Please log in again."); return; }
   S=j; now=j.at; show(true); draw();
 }
 $("loginForm").addEventListener("submit",async e=>{ e.preventDefault();
@@ -473,7 +473,8 @@ function draw(){
   $("modeNote").textContent=known?`${plural(modes.app||0,"player")} use the home-screen app and ${modes.browser||0} play in a browser.${modes.unknown?` ${modes.unknown} played before this was tracked.`:""}`:"Not tracked yet.";
 
   drawNames();
-  $("stamp").textContent=`Numbers as of ${new Date(now).toLocaleString("en-US",{weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})}. Reload to refresh.`;
+  if(!PREVIEW&&!S.sessions) $("stamp").textContent="The stats server is still running the older Worker code, so the newer sections stay empty until the new code is deployed. "; else $("stamp").textContent="";
+  $("stamp").textContent+=`Numbers as of ${new Date(now).toLocaleString("en-US",{weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})}. Reload to refresh.`;
 }
 
 function drawLevels(){
