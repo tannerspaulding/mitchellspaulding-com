@@ -188,6 +188,7 @@ select,input[type=text]{font:inherit;font-size:15px;padding:8px 10px;border-radi
 footer{margin-top:40px;color:var(--ink-2);font-size:14px;text-align:center}
 
 /* ---- course platform shell ---- */
+[hidden]{display:none!important}
 body{padding-left:0;padding-right:0}
 .gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .logo{width:34px;height:34px;flex:none}
@@ -244,7 +245,7 @@ aside.outline{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px);back
 .outline a[aria-current="page"]{background:var(--hi);font-weight:700}
 .outline a .ck{flex:none;width:20px;height:20px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:12px;color:#fff}
 .outline a.done .ck{background:var(--teal);border-color:var(--teal)}
-.outline a .dur{margin-left:auto;font-size:12px;color:var(--ink-2);font-family:var(--f-mono)}
+.outline a .dur{margin-left:auto;white-space:nowrap;font-size:12px;color:var(--ink-2);font-family:var(--f-mono)}
 #otoggle{display:none}
 @media (max-width:900px){#otoggle{display:inline-block} aside.outline.shut .mod{display:none}}
 .crumb{font-size:14px;color:var(--ink-2);display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
