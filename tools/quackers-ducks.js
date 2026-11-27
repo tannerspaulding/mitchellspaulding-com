@@ -4,12 +4,17 @@
 const fs=require("fs"),vm=require("vm"),p=require("path");
 const b=process.argv[2];
 const R=f=>fs.readFileSync(p.join(b,f),"utf8");
-const worlds=["yard","manor","sea","snow","theater","city","mall","space"].map(x=>R(x+".js").trimEnd().replace(/,$/,"")).join(",\n");
+/* Read the world files and art files in the same order as the game's own build.py, so new worlds show up by themselves. */
+const bp=R("build.py");
+const files=line=>[...((bp.split("\n").find(l=>l.startsWith(line+"="))||"").matchAll(/b\/"([\w-]+\.js)"/g))].map(m=>m[1]);
+const worldFiles=files("worlds"); if(!worldFiles.length) throw new Error("no world files found in build.py");
+const artFiles=files("js").filter(f=>!/^(name-check|quackers-stats)\.js$/.test(f));
+const worlds=worldFiles.map(x=>R(x).trimEnd().replace(/,$/,"")).join(",\n");
 const soon=R("soon.js").trimEnd().replace(/,$/,"");
 let game=R("game.js").replace("/*WORLDS*/",worlds).replace("/*SOON*/",soon);
 game=game.slice(0,game.indexOf("/* ---------- UI helpers"));
 let mini="const \$=id=>document.getElementById(id);\n"+R("mini.js");
-const code=R("art.js")+"\n"+R("accs.js")+"\n"+R("spaceart.js")+"\n"+game+"\n"+mini+
+const code=artFiles.map(R).join("\n")+"\n"+game+"\n"+mini+
  "\n;globalThis.__OUT={WORLDS,SOON,HOL,SHOP,MINI,GR,toyDuck,COLORS,YEL,buddyArt:(typeof errorDuck===\"function\"?errorDuck:null)};";
 const el=()=>({innerHTML:"",style:{},classList:{add(){},remove(){},toggle(){}},addEventListener(){},appendChild(){},querySelector(){return el()},querySelectorAll(){return []},setAttribute(){}});
 const ctx={console,location:{search:""},localStorage:{getItem(){return null},setItem(){}},
